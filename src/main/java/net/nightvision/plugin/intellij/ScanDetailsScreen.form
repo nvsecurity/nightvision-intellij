@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.nightvision.plugin.intellij.ScanDetailsScreen">
+  <grid id="27dc6" binding="scanDetailsPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="88523" binding="detailsPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <grid id="4aea5" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+        <constraints border-constraint="North"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="60686" class="javax.swing.JButton" binding="backButton">
+            <constraints/>
+            <properties>
+              <icon value="actions/back.png"/>
+              <label value=""/>
+              <preferredSize width="34" height="34"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="c0374" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Scan details"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

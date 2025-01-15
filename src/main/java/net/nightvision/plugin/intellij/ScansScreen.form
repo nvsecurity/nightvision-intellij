@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.nightvision.plugin.intellij.ScansScreen">
+  <grid id="27dc6" binding="scansPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="77364" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="1b83a" class="javax.swing.JTable" binding="scansTable">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <enabled value="true"/>
+            </properties>
+          </component>
+          <component id="8750f" class="javax.swing.JLabel" binding="tableName">
+            <constraints border-constraint="North"/>
+            <properties>
+              <text value="Scans table"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="15ac4" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+        <constraints border-constraint="North"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="daf77" class="javax.swing.JButton" binding="backButton">
+            <constraints/>
+            <properties>
+              <icon value="actions/back.png"/>
+              <label value=""/>
+              <preferredSize width="34" height="34"/>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

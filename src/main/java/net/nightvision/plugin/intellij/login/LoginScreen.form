@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.nightvision.plugin.intellij.login.LoginScreen">
+  <grid id="27dc6" binding="loginPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="ec3b2" class="javax.swing.JButton" binding="loginButton" default-binding="true">
+        <constraints/>
+        <properties>
+          <icon value="general/add.png"/>
+          <text value="Login"/>
+        </properties>
+      </component>
+      <component id="df014" class="javax.swing.JLabel" binding="temp">
+        <constraints/>
+        <properties>
+          <enabled value="true"/>
+          <text value=""/>
+          <verifyInputWhenFocusTarget value="true"/>
+          <visible value="false"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
