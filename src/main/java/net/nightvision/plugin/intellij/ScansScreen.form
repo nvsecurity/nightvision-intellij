@@ -38,13 +38,13 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="daf77" class="javax.swing.JButton" binding="backButton">
+          <component id="daf77" class="javax.swing.JButton" binding="logout">
             <constraints/>
             <properties>
-              <icon value="actions/back.png"/>
-              <label value=""/>
-              <preferredSize width="34" height="34"/>
-              <text value=""/>
+              <icon value="actions/close.png"/>
+              <label value="Log out"/>
+              <preferredSize width="90" height="34"/>
+              <text value="Log out"/>
             </properties>
           </component>
         </children>

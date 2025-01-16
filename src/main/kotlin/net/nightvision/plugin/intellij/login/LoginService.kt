@@ -14,9 +14,7 @@ import java.util.concurrent.TimeUnit
 object LoginService {
     private var token = ""
     private val httpClient = HttpClient.newBuilder().build()
-    private val gson = GsonBuilder()
-//        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        .create()
+    private val gson = GsonBuilder().create()
 
     fun createToken(): String {
         val process = ProcessBuilder("nightvision", "token", "create")
@@ -58,5 +56,16 @@ object LoginService {
         val responseData: PaginatedResult<Scan> = gson.fromJson(response.body(), type)
         println(responseData.results)
         return responseData.results
+    }
+
+    fun logout() {
+        val process = ProcessBuilder("nightvision", "logout")
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+
+        process.waitFor(30, TimeUnit.SECONDS)
+        println(process.inputStream.bufferedReader().readText())
+        token = ""
     }
 }

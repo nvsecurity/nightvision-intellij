@@ -4,8 +4,6 @@ import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.login.LoginService;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -13,7 +11,7 @@ public class ScansScreen {
     private JTable scansTable;
     private JPanel scansPanel;
     private JLabel tableName;
-    private JButton backButton;
+    private JButton logout;
 
     private final MainWindowFactory mainWindow;
     private final Project project;
@@ -44,7 +42,8 @@ public class ScansScreen {
         List<Scan> scans = LoginService.INSTANCE.getScans();
         ((ScansTableModel)scansTable.getModel()).setScans(scans);
 
-        backButton.addActionListener(e -> {
+        logout.addActionListener(e -> {
+            LoginService.INSTANCE.logout();
             mainWindow.openLoginPage();
         });
     }
