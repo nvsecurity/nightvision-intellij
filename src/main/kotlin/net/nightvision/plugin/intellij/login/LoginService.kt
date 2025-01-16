@@ -1,24 +1,24 @@
 package net.nightvision.plugin.intellij.login
 
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import net.nightvision.plugin.intellij.Scan
+import net.nightvision.plugin.intellij.PaginatedResult
 import java.net.URI
+import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
-import java.net.http.HttpClient
-import com.google.gson.Gson
-import net.nightvision.plugin.intellij.Scan
-import net.nightvision.plugin.intellij.ScansPage
+
 
 object LoginService {
     private var token = ""
     private val httpClient = HttpClient.newBuilder().build()
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+//        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        .create()
 
-    fun getToken(): String {
-        if (token != "") {
-            return token;
-        }
+    fun createToken(): String {
         val process = ProcessBuilder("nightvision", "token", "create")
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
@@ -32,6 +32,9 @@ object LoginService {
     }
 
     fun login(): Boolean {
+        if (token != "") {
+            return true;
+        }
         val process = ProcessBuilder("nightvision", "login")
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
@@ -40,11 +43,8 @@ object LoginService {
         process.waitFor(30, TimeUnit.SECONDS)
         println(process.inputStream.bufferedReader().readText())
 
-        token = getToken()
-        if (token != "") {
-            return true
-        }
-        return false;
+        token = createToken()
+        return token != "";
     }
 
     fun getScans(): List<Scan> {
