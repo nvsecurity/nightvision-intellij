@@ -1,8 +1,6 @@
 package net.nightvision.plugin.intellij;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import net.nightvision.plugin.intellij.login.LoginScreen;
 import net.nightvision.plugin.intellij.login.LoginService;
 
 import javax.swing.*;
@@ -87,10 +85,10 @@ public class ScansScreen {
         public Object getValueAt(int rowIndex, int columnIndex) {
             Scan scan = scans.get(rowIndex);
             return switch (columnIndex) {
-                case 0 -> scan.getTarget_name();
+                case 0 -> scan.getTargetName();
                 case 1 -> scan.getLocation();
                 case 2 -> scan.getCredentials() != null ? scan.getCredentials().getName() : "";
-                case 3 -> ZonedDateTime.parse(scan.getCreated_at())
+                case 3 -> ZonedDateTime.parse(scan.getCreatedAt())
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 default -> "";
             };

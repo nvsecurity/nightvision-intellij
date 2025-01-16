@@ -3,6 +3,8 @@ package net.nightvision.plugin.intellij;
 import com.intellij.openapi.project.Project;
 
 import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
 
 public class ScanDetailsScreen {
     private JPanel scanDetailsPanel;
@@ -27,18 +29,29 @@ public class ScanDetailsScreen {
         BoxLayout layout0 = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
         detailsPanel.setLayout(layout0);
 
-        JPanel targetNamePanel = new JPanel();
-        BoxLayout layout = new BoxLayout(targetNamePanel, BoxLayout.X_AXIS);
-        targetNamePanel.setLayout(layout);
-        targetNamePanel.add(new JLabel("Target Name:"));
-        targetNamePanel.add(new JLabel(scan.getTarget_name()));
-        detailsPanel.add(targetNamePanel);
+        HashMap<String, String> targetDetailsDictionary = new HashMap<String, String>();
+        targetDetailsDictionary.put("Project:", scan.getProject().getName());
+        targetDetailsDictionary.put("Target Name:", scan.getTargetName());
+        targetDetailsDictionary.put("Location:", scan.getLocation());
 
-        JPanel targetLocationPanel = new JPanel();
-        BoxLayout layout2 = new BoxLayout(targetLocationPanel, BoxLayout.X_AXIS);
-        targetLocationPanel.setLayout(layout2);
-        targetLocationPanel.add(new JLabel("Location:"));
-        targetLocationPanel.add(new JLabel(scan.getLocation()));
-        detailsPanel.add(targetLocationPanel);
+        for (String key : targetDetailsDictionary.keySet()) {
+            JPanel propertyPanel = new JPanel();
+            BoxLayout layout = new BoxLayout(propertyPanel, BoxLayout.X_AXIS);
+            propertyPanel.setLayout(layout);
+
+            JLabel label = new JLabel(key);
+            label.setFont(label.getFont().deriveFont(Font.BOLD));
+            label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+            propertyPanel.add(label);
+
+            propertyPanel.add(new JLabel(targetDetailsDictionary.get(key)));
+            detailsPanel.add(propertyPanel);
+        }
+
+        for (Component component : detailsPanel.getComponents()) {
+            if (component instanceof JComponent jComponent) {
+                jComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
+            }
+        }
     }
 }

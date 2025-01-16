@@ -54,8 +54,8 @@ object LoginService {
             .build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val type = object : TypeToken<ScansPage>() {}.type
-        val responseData: ScansPage = gson.fromJson(response.body(), type)
+        val type = object : TypeToken<PaginatedResult<Scan>>() {}.type
+        val responseData: PaginatedResult<Scan> = gson.fromJson(response.body(), type)
         println(responseData.results)
         return responseData.results
     }
