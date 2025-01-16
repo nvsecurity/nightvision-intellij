@@ -33,7 +33,7 @@ object LoginService {
 
     fun login(): Boolean {
         if (token != "") {
-            return true;
+            return true
         }
         val process = ProcessBuilder("nightvision", "login")
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
@@ -44,7 +44,7 @@ object LoginService {
         println(process.inputStream.bufferedReader().readText())
 
         token = createToken()
-        return token != "";
+        return token != ""
     }
 
     fun getScans(): List<Scan> {

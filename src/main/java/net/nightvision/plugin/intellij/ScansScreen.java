@@ -8,8 +8,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class ScansScreen {
     private JTable scansTable;
@@ -29,17 +27,16 @@ public class ScansScreen {
         this.project = project;
 
         scansTable.setModel(new ScansTableModel());
+        scansTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        scansTable.setRowHeight(40);
 
         ListSelectionModel selectionModel = scansTable.getSelectionModel();
-        selectionModel.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    int selectedRow = scansTable.getSelectedRow();
-                    if (selectedRow != -1) {
-                        Scan selectedScan = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
-                        mainWindow.openScansDetailsPage(selectedScan);
-                    }
+        selectionModel.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = scansTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    Scan selectedScan = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
+                    mainWindow.openScansDetailsPage(selectedScan);
                 }
             }
         });
@@ -54,7 +51,7 @@ public class ScansScreen {
 
 
     static class ScansTableModel extends AbstractTableModel {
-        private final List<String> columns = List.of("TARGET NAME", "LOCATION", "AUTH NAME", "CREATED AT");
+        private final List<String> columns = List.of("TARGET", "LOCATION", "PROJECT", "VULNERABILITIES");
         private List<Scan> scans = List.of();
 
         public void setScans(List<Scan> scans) {
@@ -84,12 +81,12 @@ public class ScansScreen {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             Scan scan = scans.get(rowIndex);
+            VulnerablePathStatistics scanStat = scan.getVulnPathStatistics();
             return switch (columnIndex) {
                 case 0 -> scan.getTargetName();
                 case 1 -> scan.getLocation();
-                case 2 -> scan.getCredentials() != null ? scan.getCredentials().getName() : "";
-                case 3 -> ZonedDateTime.parse(scan.getCreatedAt())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                case 2 -> scan.getProject().getName();
+                case 3 -> String.format("%d %d %d %d %d", scanStat.getCritical(), scanStat.getHigh(), scanStat.getMedium(), scanStat.getLow(), scanStat.getInformational());
                 default -> "";
             };
         }

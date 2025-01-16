@@ -9,15 +9,26 @@ data class PaginatedResult<T>(
 data class Scan(
     val id: String,
     val location: String,
-
-    @SerializedName("target_name")
-    val targetName: String,
-
     val credentials: Credentials?,
     val project: Project,
 
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+
+    @SerializedName("vulnerable_paths_statistics")
+    val vulnPathStatistics: VulnerablePathStatistics,
+
+    @SerializedName("internet_accessible")
+    val accessibility: String?,
+
+    @SerializedName("target_name")
+    val targetName: String,
+
+    @SerializedName("target_type")
+    val targetType: String,
+
+    @SerializedName("target_id")
+    val targetId: String?,
 )
 
 data class Credentials(
@@ -28,4 +39,12 @@ data class Credentials(
 data class Project(
     val id: String,
     val name: String,
+)
+
+data class VulnerablePathStatistics(
+    val Critical: Int,
+    val High: Int,
+    val Medium: Int,
+    val Low: Int,
+    val Informational: Int,
 )
