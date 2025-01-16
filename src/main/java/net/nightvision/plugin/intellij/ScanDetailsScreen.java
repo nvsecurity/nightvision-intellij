@@ -1,22 +1,27 @@
 package net.nightvision.plugin.intellij;
 
+import com.intellij.openapi.project.Project;
+
 import javax.swing.*;
 
 public class ScanDetailsScreen {
     private JPanel scanDetailsPanel;
     private JPanel detailsPanel;
     private JButton backButton;
-    private final MainWindowFactory factory;
+
+    private final MainWindowFactory mainWindow;
+    private final Project project;
 
     public JPanel getScanDetailsPanel() {
         return scanDetailsPanel;
     }
 
-    public ScanDetailsScreen (MainWindowFactory factory, Scan scan) {
-        this.factory = factory;
+    public ScanDetailsScreen (Project project, Scan scan) {
+        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
+        this.project = project;
 
         backButton.addActionListener(e -> {
-            factory.openScansPage();
+            mainWindow.openScansPage();
         });
 
         BoxLayout layout0 = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);

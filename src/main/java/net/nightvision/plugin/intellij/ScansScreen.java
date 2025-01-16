@@ -1,5 +1,8 @@
 package net.nightvision.plugin.intellij;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
+import net.nightvision.plugin.intellij.login.LoginScreen;
 import net.nightvision.plugin.intellij.login.LoginService;
 
 import javax.swing.*;
@@ -15,14 +18,17 @@ public class ScansScreen {
     private JPanel scansPanel;
     private JLabel tableName;
     private JButton backButton;
-    private final MainWindowFactory factory;
+
+    private final MainWindowFactory mainWindow;
+    private final Project project;
 
     public JPanel getScansPanel() {
         return scansPanel;
     }
 
-    ScansScreen(MainWindowFactory factory) {
-        this.factory = factory;
+    ScansScreen(Project project) {
+        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
+        this.project = project;
 
         scansTable.setModel(new ScansTableModel());
 
@@ -34,7 +40,7 @@ public class ScansScreen {
                     int selectedRow = scansTable.getSelectedRow();
                     if (selectedRow != -1) {
                         Scan selectedScan = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
-                        factory.openScansDetailsPage(selectedScan);
+                        mainWindow.openScansDetailsPage(selectedScan);
                     }
                 }
             }
@@ -44,7 +50,7 @@ public class ScansScreen {
         ((ScansTableModel)scansTable.getModel()).setScans(scans);
 
         backButton.addActionListener(e -> {
-            factory.openLoginPage();
+            mainWindow.openLoginPage();
         });
     }
 

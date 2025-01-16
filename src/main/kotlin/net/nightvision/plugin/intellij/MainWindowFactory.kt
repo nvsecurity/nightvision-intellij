@@ -7,16 +7,26 @@ import net.nightvision.plugin.intellij.login.LoginScreen
 
 class MainWindowFactory : ToolWindowFactory {
     private var toolWindow: ToolWindow? = null
+    private var project: Project? = null
+
+    override fun init(toolWindow: ToolWindow) {
+        this.toolWindow = toolWindow
+        this.project = toolWindow.project
+
+        val service = toolWindow.project.getService(MainWindowService::class.java)
+        service.windowFactory = this
+
+        super.init(toolWindow)
+    }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        this.toolWindow = toolWindow;
         openLoginPage();
     }
 
     fun openLoginPage() {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(LoginScreen(this).loginPanel)
+            window.component.add(LoginScreen(project).loginPanel)
             window.component.revalidate()
         }
     }
@@ -24,7 +34,7 @@ class MainWindowFactory : ToolWindowFactory {
     fun openScansPage() {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(ScansScreen(this).scansPanel)
+            window.component.add(ScansScreen(project).scansPanel)
             window.component.revalidate()
         }
     }
@@ -32,7 +42,7 @@ class MainWindowFactory : ToolWindowFactory {
     fun openScansDetailsPage(scan: Scan) {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(ScanDetailsScreen(this, scan).scanDetailsPanel)
+            window.component.add(ScanDetailsScreen(project, scan).scanDetailsPanel)
             window.component.revalidate()
         }
     }

@@ -1,30 +1,32 @@
 package net.nightvision.plugin.intellij.login;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
 import net.nightvision.plugin.intellij.MainWindowFactory;
+import net.nightvision.plugin.intellij.MainWindowService;
 
 import javax.swing.*;
 
 public class LoginScreen {
     private JButton loginButton;
     private JPanel loginPanel;
-    private JLabel temp;
-    private final MainWindowFactory factory;
+
+    private final MainWindowFactory mainWindow;
+    private final Project project;
 
     public JPanel getLoginPanel() {
         return loginPanel;
     }
 
-    public JButton getLoginButton() {
-        return loginButton;
-    }
+    public LoginScreen(Project project) {
+        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
+        this.project = project;
 
-    public LoginScreen(MainWindowFactory factory) {
-        this.factory = factory;
         this.loginButton.addActionListener(e -> {
-            LoginService.INSTANCE.login();
-            temp.setVisible(true);
-            temp.setText(LoginService.INSTANCE.getToken());
-            factory.openScansPage();
+            boolean success = LoginService.INSTANCE.login();
+            if (success) {
+                mainWindow.openScansPage();
+            }
         });
     }
 }
