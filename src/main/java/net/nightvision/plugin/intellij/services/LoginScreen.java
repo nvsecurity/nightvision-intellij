@@ -1,7 +1,6 @@
-package net.nightvision.plugin.intellij.login;
+package net.nightvision.plugin.intellij.services;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
 import net.nightvision.plugin.intellij.MainWindowFactory;
 import net.nightvision.plugin.intellij.MainWindowService;
 

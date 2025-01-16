@@ -1,7 +1,8 @@
 package net.nightvision.plugin.intellij;
 
 import com.intellij.openapi.project.Project;
-import net.nightvision.plugin.intellij.login.LoginService;
+import net.nightvision.plugin.intellij.services.LoginService;
+import net.nightvision.plugin.intellij.services.ScanService;
 
 import javax.swing.*;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ScansScreen {
             }
         });
 
-        List<Scan> scans = LoginService.INSTANCE.getScans();
+        List<Scan> scans = ScanService.INSTANCE.getScans();
         ((ScansTableModel)scansTable.getModel()).setScans(scans);
 
         logout.addActionListener(e -> {
