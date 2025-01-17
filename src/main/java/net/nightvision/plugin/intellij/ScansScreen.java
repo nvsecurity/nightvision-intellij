@@ -8,22 +8,18 @@ import javax.swing.*;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
-public class ScansScreen {
+public class ScansScreen extends Screen {
     private JTable scansTable;
     private JPanel scansPanel;
     private JLabel tableName;
     private JButton logout;
-
-    private final MainWindowFactory mainWindow;
-    private final Project project;
 
     public JPanel getScansPanel() {
         return scansPanel;
     }
 
     ScansScreen(Project project) {
-        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
-        this.project = project;
+        super(project.getService(MainWindowService.class).getWindowFactory(), project);
 
         scansTable.setModel(new ScansTableModel());
         scansTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

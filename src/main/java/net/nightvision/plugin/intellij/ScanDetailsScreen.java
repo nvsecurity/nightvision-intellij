@@ -10,21 +10,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class ScanDetailsScreen {
+public class ScanDetailsScreen extends Screen {
     private JPanel scanDetailsPanel;
     private JPanel detailsPanel;
     private JButton backButton;
-
-    private final MainWindowFactory mainWindow;
-    private final Project project;
 
     public JPanel getScanDetailsPanel() {
         return scanDetailsPanel;
     }
 
     public ScanDetailsScreen (Project project, Scan scan) {
-        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
-        this.project = project;
+        super(project.getService(MainWindowService.class).getWindowFactory(), project);
 
         backButton.addActionListener(e -> {
             mainWindow.openScansPage();

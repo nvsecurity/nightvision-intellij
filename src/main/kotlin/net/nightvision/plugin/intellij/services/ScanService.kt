@@ -9,7 +9,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-
 object ScanService {
     private val httpClient = HttpClient.newBuilder().build()
     private val gson = GsonBuilder().create()
