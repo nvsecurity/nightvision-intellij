@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.nightvision.plugin.intellij.ApiDiscovery">
+  <grid id="27dc6" binding="apiDiscoveryPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="550" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="6ae7b" binding="pathPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="North"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="2a918" binding="pathInputPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="West"/>
+            <properties>
+              <minimumSize width="250" height="34"/>
+              <preferredSize width="250" height="34"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="8840b" class="javax.swing.JTextField" binding="pathToDirectory">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <name value="Path"/>
+                  <preferredSize width="200" height="34"/>
+                </properties>
+              </component>
+              <component id="870d1" class="javax.swing.JLabel">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <text value="Path to the root directory of your API"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="912ee" binding="pathUploadPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="2">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <maximumSize width="300" height="30"/>
+              <minimumSize width="300" height="44"/>
+              <preferredSize width="300" height="44"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="429aa" class="javax.swing.JButton" binding="uploadButton">
+                <constraints/>
+                <properties>
+                  <horizontalTextPosition value="0"/>
+                  <icon value="actions/upload.png"/>
+                  <text value=""/>
+                  <verticalTextPosition value="0"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="b34f2" binding="languagePanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="e574c" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="North"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="41cb0" class="javax.swing.JComboBox" binding="apiLangCombobox">
+                <constraints border-constraint="South"/>
+                <properties/>
+              </component>
+              <component id="9fbea" class="javax.swing.JLabel">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <text value="API Language"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="f9bd2" binding="submitPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="South"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="52d35" class="javax.swing.JButton" binding="submitButton">
+            <constraints border-constraint="North"/>
+            <properties>
+              <text value="Generate OpenAPI Spec"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="b96f1" binding="resultsPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="West"/>
+        <properties>
+          <visible value="false"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="d3de5" class="javax.swing.JLabel" binding="resultLabel">
+            <constraints border-constraint="North"/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

@@ -39,7 +39,11 @@ class MainWindowFactory : ToolWindowFactory {
     }
 
     fun openApiDiscoveryPage() {
-       // TODO
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ApiDiscovery(project).apiDiscoveryPanel)
+            window.component.revalidate()
+        }
     }
 
     fun openApiAndWebTestingPage() {

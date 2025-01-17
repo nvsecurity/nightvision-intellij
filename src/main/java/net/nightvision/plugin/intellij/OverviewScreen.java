@@ -12,7 +12,7 @@ public class OverviewScreen extends Screen {
     }
 
     public OverviewScreen(Project project) {
-        super(project.getService(MainWindowService.class).getWindowFactory(), project);
+        super(project);
     }
 
     private void createUIComponents() {

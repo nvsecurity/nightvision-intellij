@@ -19,7 +19,7 @@ public class ScansScreen extends Screen {
     }
 
     ScansScreen(Project project) {
-        super(project.getService(MainWindowService.class).getWindowFactory(), project);
+        super(project);
 
         scansTable.setModel(new ScansTableModel());
         scansTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

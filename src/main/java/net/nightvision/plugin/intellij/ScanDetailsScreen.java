@@ -20,7 +20,7 @@ public class ScanDetailsScreen extends Screen {
     }
 
     public ScanDetailsScreen (Project project, Scan scan) {
-        super(project.getService(MainWindowService.class).getWindowFactory(), project);
+        super(project);
 
         backButton.addActionListener(e -> {
             mainWindow.openScansPage();

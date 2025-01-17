@@ -15,7 +15,7 @@ public class LoginScreen extends Screen {
     }
 
     public LoginScreen(Project project) {
-        super(project.getService(MainWindowService.class).getWindowFactory(), project);
+        super(project);
 
         loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
         loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, loginButton.getPreferredSize().height));

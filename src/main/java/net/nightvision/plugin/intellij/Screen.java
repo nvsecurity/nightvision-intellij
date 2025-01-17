@@ -6,8 +6,8 @@ public abstract class Screen {
     protected final MainWindowFactory mainWindow;
     protected final Project project;
 
-    public Screen (MainWindowFactory mainWindow, Project project) {
-        this.mainWindow = mainWindow;
+    public Screen (Project project) {
         this.project = project;
+        this.mainWindow = project.getService(MainWindowService.class).getWindowFactory();
     }
 }

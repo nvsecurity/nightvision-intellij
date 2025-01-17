@@ -13,7 +13,7 @@ public class ApiAndWebTestingScreen extends Screen {
     }
 
     public ApiAndWebTestingScreen(Project project) {
-        super(project.getService(MainWindowService.class).getWindowFactory(), project);
+        super(project);
     }
 
     private void createUIComponents() {
@@ -22,11 +22,6 @@ public class ApiAndWebTestingScreen extends Screen {
 
         apiAndWebTestingPanel = new JPanel();
         apiAndWebTestingPanel.setLayout(new BoxLayout(apiAndWebTestingPanel, BoxLayout.Y_AXIS));
-
-        apiAndWebTestingPanel.add(titleLabel);
-        JPanel panel1 = new JPanel();
-        panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
-        panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JButton button1 = new JButton("Scans");
         JButton button2 = new JButton("Targets");
