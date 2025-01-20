@@ -23,6 +23,9 @@ public class ApiDiscovery extends Screen {
     private JPanel submitPanel;
     private JPanel resultsPanel;
     private JLabel resultLabel;
+    private JButton backButton;
+    private JPanel backButtonPanel;
+    private JPanel loadingPanel;
 
     private final String[] LANGUAGES = new String[] {
         "Java",
@@ -39,17 +42,12 @@ public class ApiDiscovery extends Screen {
     public ApiDiscovery(Project project) {
         super(project);
         apiDiscoveryPanel.setLayout(new BoxLayout(apiDiscoveryPanel, BoxLayout.Y_AXIS));
+        backButton.addActionListener(e -> mainWindow.openOverviewPage());
         uploadButton.addActionListener(e -> openFileDialog());
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
-
-            var result = ApiDiscoveryService.INSTANCE.extract(dirPath, lang);
-            System.out.println(result);
-            resultLabel.setText("Paths: " + result.getPath() + "Classes: " + result.getClasses());
-            resultsPanel.setVisible(true);
-            apiDiscoveryPanel.add(resultsPanel);
-            apiDiscoveryPanel.revalidate();
+            new ExtractWorker(dirPath, lang).execute();
         });
 
         initCombobox();
@@ -62,9 +60,14 @@ public class ApiDiscovery extends Screen {
         languagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, languagePanel.getPreferredSize().height));
         submitPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, submitPanel.getPreferredSize().height));
 
+        backButtonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, pathPanel.getPreferredSize().height));
+        loadingPanel = new Loading().getLoadingPanel();
+
+        apiDiscoveryPanel.add(backButtonPanel);
         apiDiscoveryPanel.add(pathPanel);
         apiDiscoveryPanel.add(languagePanel);
         apiDiscoveryPanel.add(submitPanel);
+        apiDiscoveryPanel.add(loadingPanel);
     }
 
     private void openFileDialog() {
@@ -85,6 +88,36 @@ public class ApiDiscovery extends Screen {
     private void initCombobox() {
         for (String lang : LANGUAGES) {
             apiLangCombobox.addItem(lang);
+        }
+    }
+
+    private class ExtractWorker extends SwingWorker<ApiDiscoveryService.ApiDiscoveryResults, Void> {
+        private final String dirPath;
+        private final String lang;
+
+        public ExtractWorker(String dirPath, String lang) {
+            this.dirPath = dirPath;
+            this.lang = lang;
+        }
+        @Override
+        protected ApiDiscoveryService.ApiDiscoveryResults doInBackground() throws Exception {
+            return ApiDiscoveryService.INSTANCE.extract(dirPath, lang);
+        }
+
+        @Override
+        protected void done() {
+            try {
+                ApiDiscoveryService.ApiDiscoveryResults result = get();
+
+                System.out.println(result);
+                resultLabel.setText("Paths: " + result.getPath() + "Classes: " + result.getClasses());
+                resultsPanel.setVisible(true);
+                apiDiscoveryPanel.remove(loadingPanel);
+                apiDiscoveryPanel.add(resultsPanel);
+                apiDiscoveryPanel.revalidate();
+
+            } catch (Exception ignore) {
+            }
         }
     }
 }

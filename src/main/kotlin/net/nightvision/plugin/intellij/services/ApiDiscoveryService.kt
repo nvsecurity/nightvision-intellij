@@ -1,38 +1,20 @@
 package net.nightvision.plugin.intellij.services
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 
 object ApiDiscoveryService {
     data class ApiDiscoveryResults(val path: Int, val classes: Int)
 
     fun extract(dirPath: String, lang: String): ApiDiscoveryResults {
-        val fileName = "nv-swagger-extraction-results.yml";
+        val fileName = "nv-swagger-extraction-results.yml"
 
         val process = ProcessBuilder("nightvision", "swagger", "extract", dirPath, "--lang", lang, "--no-upload", "--output",  fileName)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
 
-        var res = ""
-        val outputReader = BufferedReader(InputStreamReader(process.inputStream))
-        var line: String?
-        while (outputReader.readLine().also { line = it } != null) {
-            println("Output: $line")
-            res += line  + "\n"
-        }
-
-        val errorReader = BufferedReader(InputStreamReader(process.errorStream))
-        var errorLine: String?
-        while (errorReader.readLine().also { errorLine = it } != null) {
-            println("Error: $errorLine")
-            res += errorLine + "\n"
-        }
-
         process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.errorStream.bufferedReader().readText()
-        return parseResults(res)
+        return parseResults(process.errorStream.bufferedReader().readText())
     }
 
     fun parseResults(message: String): ApiDiscoveryResults {

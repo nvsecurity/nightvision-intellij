@@ -24,7 +24,7 @@
                 <constraints border-constraint="Center"/>
                 <properties>
                   <name value="Path"/>
-                  <preferredSize width="200" height="34"/>
+                  <preferredSize width="92" height="54"/>
                 </properties>
               </component>
               <component id="870d1" class="javax.swing.JLabel">
@@ -58,7 +58,7 @@
         </children>
       </grid>
       <grid id="b34f2" binding="languagePanel" layout-manager="BorderLayout" hgap="0" vgap="0">
-        <constraints border-constraint="Center"/>
+        <constraints border-constraint="After"/>
         <properties/>
         <border type="none"/>
         <children>
@@ -75,6 +75,21 @@
                 <constraints border-constraint="Center"/>
                 <properties>
                   <text value="API Language"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="99431" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="56a31" class="javax.swing.JLabel">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <text value=""/>
                 </properties>
               </component>
             </children>
@@ -104,6 +119,22 @@
           <component id="d3de5" class="javax.swing.JLabel" binding="resultLabel">
             <constraints border-constraint="North"/>
             <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="ca67c" binding="backButtonPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="8c58e" class="javax.swing.JButton" binding="backButton">
+            <constraints/>
+            <properties>
+              <icon value="actions/back.png"/>
+              <label value=""/>
+              <preferredSize width="34" height="34"/>
               <text value=""/>
             </properties>
           </component>
