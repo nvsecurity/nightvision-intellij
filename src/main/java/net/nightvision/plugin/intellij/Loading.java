@@ -13,11 +13,12 @@ public class Loading {
     public Loading() {
         loadingPanel = new JPanel();
         loadingPanel.setLayout(new BoxLayout(loadingPanel, BoxLayout.Y_AXIS));
+        loadingPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         Icon icon = Utils.getIcon("/icons/nightvision.svg", 3f);
         JLabel loadingLabel = new JLabel("Loading...", icon, JLabel.LEFT);
 
-        loadingPanel.add(loadingLabel);
         loadingPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        loadingPanel.add(loadingLabel);
     }
 }

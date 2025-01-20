@@ -47,6 +47,9 @@ public class ApiDiscovery extends Screen {
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
+            apiDiscoveryPanel.add(loadingPanel);
+            apiDiscoveryPanel.revalidate();
+
             new ExtractWorker(dirPath, lang).execute();
         });
 
@@ -67,7 +70,6 @@ public class ApiDiscovery extends Screen {
         apiDiscoveryPanel.add(pathPanel);
         apiDiscoveryPanel.add(languagePanel);
         apiDiscoveryPanel.add(submitPanel);
-        apiDiscoveryPanel.add(loadingPanel);
     }
 
     private void openFileDialog() {
