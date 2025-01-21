@@ -28,7 +28,9 @@ object ApiDiscoveryService {
     }
 
     private fun makeFilePathAbsolute(filePath: String, project: Project): String {
-        val virtualFile: VirtualFile? = project.basePath?.let { VfsUtil.findFile(Paths.get(it), true) }
+        val virtualFile: VirtualFile? = ApplicationManager.getApplication().runReadAction<VirtualFile?> {
+            project.basePath?.let { VfsUtil.findFile(Paths.get(it), true) }
+        }
 
         return if (Paths.get(filePath).isAbsolute) {
             filePath
@@ -41,6 +43,7 @@ object ApiDiscoveryService {
         this.project = project
 
         val directory = makeFilePathAbsolute(dirPath, project)
+
         try {
             val process = withContext(Dispatchers.IO) {
                 ProcessBuilder(
@@ -57,10 +60,20 @@ object ApiDiscoveryService {
                     waitFor(30, TimeUnit.SECONDS)
                 }
 
-            val results: ApiDiscoveryResults = parseResults(process.errorStream.bufferedReader().readText())
+            val errorOutput = process.errorStream.bufferedReader().readText()
+            val normalOutput = process.inputStream.bufferedReader().readText()
+            val logMessage = errorOutput.ifEmpty { normalOutput }
+            println("Process output: $normalOutput")
+            println("Process errors: $errorOutput")
+
+            val results: ApiDiscoveryResults = parseResults(logMessage)
             val filePath = Paths.get(directory, fileName).toString()
+
             val data = readFile(filePath)
-            val document = createDocument(data)
+            val document = ApplicationManager.getApplication().runReadAction<Document> {
+                    createDocument(data)
+                }
+
             openDocument(document)
             deleteFile(filePath)
             return results
@@ -109,8 +122,12 @@ object ApiDiscoveryService {
         val fileEditorManager = com.intellij.openapi.fileEditor.FileEditorManager.getInstance(project)
 
         ApplicationManager.getApplication().invokeLater {
+            val virtualFile = ApplicationManager.getApplication().runWriteAction<VirtualFile> {
+                createVirtualFile(document)
+            }
+
             fileEditorManager.openTextEditor(
-                com.intellij.openapi.fileEditor.OpenFileDescriptor(project, createVirtualFile(document)),
+                com.intellij.openapi.fileEditor.OpenFileDescriptor(project, virtualFile),
                 true
             )
         }
