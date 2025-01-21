@@ -7,6 +7,9 @@ import java.awt.*;
 
 public class ApiAndWebTestingScreen extends Screen {
     private JPanel apiAndWebTestingPanel;
+    private JPanel titlePanel;
+    private JButton backButton;
+    private JLabel title;
 
     public JPanel getApiAndWebTestingPanel() {
         return apiAndWebTestingPanel;
@@ -14,14 +17,19 @@ public class ApiAndWebTestingScreen extends Screen {
 
     public ApiAndWebTestingScreen(Project project) {
         super(project);
-    }
 
-    private void createUIComponents() {
-        JLabel titleLabel = new JLabel("API And Web Security Testing");
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        apiAndWebTestingPanel = new JPanel();
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(backButton);
+        panel.add(titlePanel);
+        titlePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, titlePanel.getPreferredSize().height));
+//        apiAndWebTestingPanel = new JPanel();
+        apiAndWebTestingPanel.removeAll();
+        apiAndWebTestingPanel.revalidate();
         apiAndWebTestingPanel.setLayout(new BoxLayout(apiAndWebTestingPanel, BoxLayout.Y_AXIS));
+
+        backButton.addActionListener(e -> mainWindow.openOverviewPage());
 
         JButton button1 = new JButton("Scans");
         JButton button2 = new JButton("Targets");
@@ -35,10 +43,15 @@ public class ApiAndWebTestingScreen extends Screen {
 //        button4.addActionListener(e ->  mainWindow.openScansPage());
         JPanel secondRowPanel = createPanelWithHorizontalButtons(new JButton[]{ button3, button4 });
 
-        apiAndWebTestingPanel.add(titleLabel);
+        apiAndWebTestingPanel.add(panel);
         apiAndWebTestingPanel.add(firstRowPanel);
         apiAndWebTestingPanel.add(secondRowPanel);
+        apiAndWebTestingPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, apiAndWebTestingPanel.getPreferredSize().height));
     }
+
+//    private void createUIComponents() {
+//
+//    }
 
     private JPanel createPanelWithHorizontalButtons(JButton[] buttons) {
         JPanel panel = new JPanel();
@@ -49,6 +62,7 @@ public class ApiAndWebTestingScreen extends Screen {
             button.setMaximumSize(new Dimension(Integer.MAX_VALUE, button.getPreferredSize().height));
             panel.add(button);
         }
+        panel.setPreferredSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
         return panel;
     }

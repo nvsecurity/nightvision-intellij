@@ -101,9 +101,10 @@ public class ApiDiscovery extends Screen {
             this.dirPath = dirPath;
             this.lang = lang;
         }
+
         @Override
         protected ApiDiscoveryService.ApiDiscoveryResults doInBackground() throws Exception {
-            return ApiDiscoveryService.INSTANCE.extract(dirPath, lang);
+            return ApiDiscoveryService.INSTANCE.extract(dirPath, lang, project);
         }
 
         @Override
