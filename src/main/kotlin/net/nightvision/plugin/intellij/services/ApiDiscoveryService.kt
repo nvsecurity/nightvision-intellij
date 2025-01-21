@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -26,23 +27,38 @@ object ApiDiscoveryService {
         }
     }
 
+    private fun makeFilePathAbsolute(filePath: String, project: Project): String {
+        val virtualFile: VirtualFile? = project.basePath?.let { VfsUtil.findFile(Paths.get(it), true) }
+
+        return if (Paths.get(filePath).isAbsolute) {
+            filePath
+        } else {
+            virtualFile?.path?.let { Paths.get(it, filePath).toString() } ?: Paths.get(filePath).toAbsolutePath().toString()
+        }
+    }
+
     private suspend fun extractBlocking(dirPath: String, lang: String, project: Project): ApiDiscoveryResults {
         this.project = project
+
+        val directory = makeFilePathAbsolute(dirPath, project)
         try {
-            val process = ProcessBuilder("nightvision", "swagger", "extract", dirPath,
+            val process = withContext(Dispatchers.IO) {
+                ProcessBuilder(
+                    "nightvision", "swagger", "extract", directory,
                     "--lang", lang,
                     "--no-upload",
                     "--output", fileName
                 )
-                .directory(File(dirPath))
+                    .directory(File(directory))
                     .redirectOutput(ProcessBuilder.Redirect.PIPE)
                     .redirectError(ProcessBuilder.Redirect.PIPE)
                     .start()
-
-            process.waitFor(30, TimeUnit.SECONDS)
+            }.apply {
+                    waitFor(30, TimeUnit.SECONDS)
+                }
 
             val results: ApiDiscoveryResults = parseResults(process.errorStream.bufferedReader().readText())
-            val filePath = Paths.get(dirPath, fileName).toString()
+            val filePath = Paths.get(directory, fileName).toString()
             val data = readFile(filePath)
             val document = createDocument(data)
             openDocument(document)
