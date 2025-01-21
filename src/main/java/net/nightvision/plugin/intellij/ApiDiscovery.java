@@ -22,7 +22,6 @@ public class ApiDiscovery extends Screen {
     private JPanel languagePanel;
     private JPanel submitPanel;
     private JPanel resultsPanel;
-    private JLabel resultLabel;
     private JButton backButton;
     private JPanel backButtonPanel;
     private JPanel loadingPanel;
@@ -42,12 +41,17 @@ public class ApiDiscovery extends Screen {
     public ApiDiscovery(Project project) {
         super(project);
         apiDiscoveryPanel.setLayout(new BoxLayout(apiDiscoveryPanel, BoxLayout.Y_AXIS));
+
+        resultsPanel.setLayout(new FlowLayout(FlowLayout. LEFT));
+
         backButton.addActionListener(e -> mainWindow.openOverviewPage());
         uploadButton.addActionListener(e -> openFileDialog());
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
             apiDiscoveryPanel.add(loadingPanel);
+            resultsPanel.setVisible(false);
+            resultsPanel.removeAll();
             apiDiscoveryPanel.revalidate();
 
             new ExtractWorker(dirPath, lang).execute();
@@ -70,6 +74,7 @@ public class ApiDiscovery extends Screen {
         apiDiscoveryPanel.add(pathPanel);
         apiDiscoveryPanel.add(languagePanel);
         apiDiscoveryPanel.add(submitPanel);
+        apiDiscoveryPanel.add(resultsPanel);
     }
 
     private void openFileDialog() {
@@ -113,10 +118,18 @@ public class ApiDiscovery extends Screen {
                 ApiDiscoveryService.ApiDiscoveryResults result = get();
 
                 System.out.println(result);
-                resultLabel.setText("Paths: " + result.getPath() + "Classes: " + result.getClasses());
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+                JLabel pathResults = new JLabel("Paths: " + result.getPath());
+                JLabel classResults = new JLabel("Classes: " + result.getClasses());
+
+                panel.add(pathResults);
+                panel.add(classResults);
+
                 resultsPanel.setVisible(true);
+                resultsPanel.add(panel);
                 apiDiscoveryPanel.remove(loadingPanel);
-                apiDiscoveryPanel.add(resultsPanel);
                 apiDiscoveryPanel.revalidate();
 
             } catch (Exception ignore) {
