@@ -44,47 +44,46 @@ object ApiDiscoveryService {
 
         val directory = makeFilePathAbsolute(dirPath, project)
 
-        try {
-            val process = withContext(Dispatchers.IO) {
-                ProcessBuilder(
-                    "nightvision", "swagger", "extract", directory,
-                    "--lang", lang,
-                    "--no-upload",
-                    "--output", fileName
-                )
-                    .directory(File(directory))
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE)
-                    .start()
-            }.apply {
-                    waitFor(30, TimeUnit.SECONDS)
-                }
+        val process = withContext(Dispatchers.IO) {
+            ProcessBuilder(
+                "nightvision", "swagger", "extract", directory,
+                "--lang", lang,
+                "--no-upload",
+                "--output", fileName
+            )
+                .directory(File(directory))
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+        }.apply {
+                waitFor(30, TimeUnit.SECONDS)
+            }
 
-            val errorOutput = process.errorStream.bufferedReader().readText()
-            val normalOutput = process.inputStream.bufferedReader().readText()
-            val logMessage = errorOutput.ifEmpty { normalOutput }
-            println("Process output: $normalOutput")
-            println("Process errors: $errorOutput")
+        val errorOutput = process.errorStream.bufferedReader().readText()
+        val normalOutput = process.inputStream.bufferedReader().readText()
+        val logMessage = errorOutput.ifEmpty { normalOutput }
+        println("Process output: $normalOutput")
+        println("Process errors: $errorOutput")
 
-            val results: ApiDiscoveryResults = parseResults(logMessage)
-            val filePath = Paths.get(directory, fileName).toString()
+        val results: ApiDiscoveryResults = parseResults(logMessage)
+        val filePath = Paths.get(directory, fileName).toString()
 
-            val data = readFile(filePath)
-            val document = ApplicationManager.getApplication().runReadAction<Document> {
-                    createDocument(data)
-                }
+        val data = readFile(filePath)
+        val document = ApplicationManager.getApplication().runReadAction<Document> {
+                createDocument(data)
+            }
 
-            openDocument(document)
-            deleteFile(filePath)
-            return results
-        }
-        catch (_: Exception) {
-            // TODO
-            return ApiDiscoveryResults(0, 0)
-        }
+        openDocument(document)
+        deleteFile(filePath)
+        return results
     }
 
     private fun parseResults(message: String): ApiDiscoveryResults {
+        val hasErrors = Regex(".*ERROR error.*").containsMatchIn(message);
+        if (hasErrors) {
+            throw Exception()
+        }
+
         val matchedPaths = Regex("Number of discovered paths:\\s*(.*)").find(message)
         val extractedPaths = matchedPaths?.groups?.get(1)?.value?.toInt() ?: 0
 
@@ -102,10 +101,8 @@ object ApiDiscoveryService {
     }
 
     private fun createDocument(content: String): Document {
-        return ApplicationManager.getApplication().runReadAction<Document> {
-            val editorFactory = EditorFactory.getInstance()
-            editorFactory.createDocument(content)
-        }
+        val editorFactory = EditorFactory.getInstance()
+        return editorFactory.createDocument(content)
     }
 
     private suspend fun deleteFile(filePath: String) {

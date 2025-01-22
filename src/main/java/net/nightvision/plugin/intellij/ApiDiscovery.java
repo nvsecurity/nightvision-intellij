@@ -6,9 +6,14 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.services.ApiDiscoveryService;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
 
 public class ApiDiscovery extends Screen {
     private JPanel apiDiscoveryPanel;
@@ -25,6 +30,8 @@ public class ApiDiscovery extends Screen {
     private JButton backButton;
     private JPanel backButtonPanel;
     private JPanel loadingPanel;
+
+    private static final String CONTACT_EMAIL = "support@nightvision.net";
 
     private final String[] LANGUAGES = new String[] {
         "Java",
@@ -49,9 +56,15 @@ public class ApiDiscovery extends Screen {
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
+
+            loadingPanel.setVisible(true);
             apiDiscoveryPanel.add(loadingPanel);
+
             resultsPanel.setVisible(false);
             resultsPanel.removeAll();
+
+            enableEditing(false);
+
             apiDiscoveryPanel.revalidate();
 
             new ExtractWorker(dirPath, lang).execute();
@@ -69,11 +82,13 @@ public class ApiDiscovery extends Screen {
 
         backButtonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, pathPanel.getPreferredSize().height));
         loadingPanel = new Loading().getLoadingPanel();
+        loadingPanel.setVisible(false);
 
         apiDiscoveryPanel.add(backButtonPanel);
         apiDiscoveryPanel.add(pathPanel);
         apiDiscoveryPanel.add(languagePanel);
         apiDiscoveryPanel.add(submitPanel);
+        apiDiscoveryPanel.add(loadingPanel);
         apiDiscoveryPanel.add(resultsPanel);
     }
 
@@ -98,6 +113,13 @@ public class ApiDiscovery extends Screen {
         }
     }
 
+    private void enableEditing(Boolean enabled) {
+        uploadButton.setEnabled(enabled);
+        submitButton.setEnabled(enabled);
+        pathToDirectory.setEnabled(enabled);
+        apiLangCombobox.setEnabled(enabled);
+    }
+
     private class ExtractWorker extends SwingWorker<ApiDiscoveryService.ApiDiscoveryResults, Void> {
         private final String dirPath;
         private final String lang;
@@ -114,6 +136,7 @@ public class ApiDiscovery extends Screen {
 
         @Override
         protected void done() {
+            resultsPanel.setVisible(true);
             try {
                 ApiDiscoveryService.ApiDiscoveryResults result = get();
 
@@ -121,19 +144,83 @@ public class ApiDiscovery extends Screen {
                 JPanel panel = new JPanel();
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-                JLabel pathResults = new JLabel("Paths: " + result.getPath());
-                JLabel classResults = new JLabel("Classes: " + result.getClasses());
+                JLabel pathResults = new JLabel("Number of discovered paths: " + result.getPath());
+                JLabel classResults = new JLabel("Number of discovered classes: " + result.getClasses());
 
                 panel.add(pathResults);
                 panel.add(classResults);
 
-                resultsPanel.setVisible(true);
                 resultsPanel.add(panel);
-                apiDiscoveryPanel.remove(loadingPanel);
-                apiDiscoveryPanel.revalidate();
 
             } catch (Exception ignore) {
+                JPanel site = getErrorPanel();
+                resultsPanel.add(site);
             }
+
+            enableEditing(true);
+
+            apiDiscoveryPanel.remove(loadingPanel);
+            apiDiscoveryPanel.revalidate();
+        }
+
+        @NotNull
+        private static JPanel getErrorPanel() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JPanel emailLabel = getEmailPanel();
+            JPanel errorLabel = getErrorLabelPanel();
+            emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            panel.add(errorLabel);
+            panel.add(emailLabel);
+
+            return panel;
+        }
+
+        @NotNull
+        private static JPanel getEmailPanel() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+            JLabel label = new JLabel("If the problem persists, contact us at ");
+            label.setForeground(JBColor.red);
+
+            JLabel emailLabel = new JLabel(String.format("<html><a href=''>%s</a></html>", CONTACT_EMAIL));
+            emailLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            emailLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        Desktop desktop = Desktop.getDesktop();
+                        if (desktop.isSupported(Desktop.Action.MAIL)) {
+                            URI mailto = new URI("mailto:example@example.com?subject=Hello&body=This is a test email.");
+                            desktop.mail(mailto);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            panel.add(label);
+            panel.add(emailLabel);
+            return panel;
+        }
+
+        @NotNull
+        private static JPanel getErrorLabelPanel() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JLabel label = new JLabel("Error extracting API info. Please recheck the entered Path to the Root Directory and selected Language, then try again.");
+            label.setForeground(JBColor.red);
+
+            panel.add(label);
+            return panel;
         }
     }
 }
