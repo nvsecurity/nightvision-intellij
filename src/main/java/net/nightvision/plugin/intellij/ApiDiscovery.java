@@ -1,6 +1,8 @@
 package net.nightvision.plugin.intellij;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -14,6 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.Objects;
 
 public class ApiDiscovery extends Screen {
     private JPanel apiDiscoveryPanel;
@@ -48,7 +51,7 @@ public class ApiDiscovery extends Screen {
     public ApiDiscovery(Project project) {
         super(project);
         apiDiscoveryPanel.setLayout(new BoxLayout(apiDiscoveryPanel, BoxLayout.Y_AXIS));
-
+        apiDiscoveryPanel.removeAll();
         resultsPanel.setLayout(new FlowLayout(FlowLayout. LEFT));
 
         backButton.addActionListener(e -> mainWindow.openOverviewPage());
@@ -70,6 +73,29 @@ public class ApiDiscovery extends Screen {
             new ExtractWorker(dirPath, lang).execute();
         });
 
+
+        pathToDirectory.getDocument().addDocumentListener(new DocumentListener() {
+            private void updateButtonState() {
+                submitButton.setEnabled(!pathToDirectory.getText().trim().isEmpty());
+                submitPanel.revalidate();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateButtonState();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateButtonState();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateButtonState();
+            }
+        });
+
         initCombobox();
 
         pathPanel.add(pathInputPanel, BorderLayout.CENTER);
@@ -80,7 +106,7 @@ public class ApiDiscovery extends Screen {
         languagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, languagePanel.getPreferredSize().height));
         submitPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, submitPanel.getPreferredSize().height));
 
-        backButtonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, pathPanel.getPreferredSize().height));
+        backButtonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, backButtonPanel.getPreferredSize().height));
         loadingPanel = new Loading().getLoadingPanel();
         loadingPanel.setVisible(false);
 
