@@ -56,8 +56,8 @@ object ApiDiscoveryService {
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
         }.apply {
-                waitFor(30, TimeUnit.SECONDS)
-            }
+            waitFor(30, TimeUnit.SECONDS)
+        }
 
         val errorOutput = process.errorStream.bufferedReader().readText()
         val normalOutput = process.inputStream.bufferedReader().readText()
@@ -70,8 +70,8 @@ object ApiDiscoveryService {
 
         val data = readFile(filePath)
         val document = ApplicationManager.getApplication().runReadAction<Document> {
-                createDocument(data)
-            }
+            createDocument(data)
+        }
 
         openDocument(document)
         deleteFile(filePath)

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="32"
+     height="32"
+     viewBox="0 0 256 256"
+     fill="none">
+    <path d="M128 21 L43 64 V117 C43 176 82 221 128 235 C174 221 213 176 213 117 V64 L128 21 Z"
+          stroke="currentColor"
+          stroke-width="15"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+    <circle cx="165" cy="165" r="48"
+            stroke="currentColor"
+            stroke-width="15"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+    <line x1="199" y1="199" x2="229" y2="229"
+          stroke="currentColor"
+          stroke-width="15"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>

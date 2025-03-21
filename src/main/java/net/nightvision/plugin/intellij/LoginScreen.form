@@ -10,7 +10,6 @@
       <component id="ec3b2" class="javax.swing.JButton" binding="loginButton" default-binding="true">
         <constraints/>
         <properties>
-          <icon value="general/add.png"/>
           <text value="Login"/>
         </properties>
       </component>

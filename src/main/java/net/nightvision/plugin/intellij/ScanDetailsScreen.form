@@ -21,7 +21,6 @@
           <component id="60686" class="javax.swing.JButton" binding="backButton">
             <constraints/>
             <properties>
-              <icon value="actions/back.png"/>
               <label value=""/>
               <preferredSize width="34" height="34"/>
               <text value=""/>

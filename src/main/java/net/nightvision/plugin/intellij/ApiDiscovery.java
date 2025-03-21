@@ -54,6 +54,10 @@ public class ApiDiscovery extends Screen {
         apiDiscoveryPanel.removeAll();
         resultsPanel.setLayout(new FlowLayout(FlowLayout. LEFT));
 
+        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setBorder(null);
+        uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
+        uploadButton.setBorder(null);
         backButton.addActionListener(e -> mainWindow.openOverviewPage());
         uploadButton.addActionListener(e -> openFileDialog());
         submitButton.addActionListener(e -> {

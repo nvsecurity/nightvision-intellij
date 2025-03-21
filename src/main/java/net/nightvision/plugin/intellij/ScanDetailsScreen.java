@@ -25,6 +25,8 @@ public class ScanDetailsScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindow.openScansPage();
         });
+        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setBorder(null);
 
         BoxLayout layout0 = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
         detailsPanel.setLayout(layout0);

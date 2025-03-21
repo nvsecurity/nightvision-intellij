@@ -3,6 +3,7 @@ package net.nightvision.plugin.intellij
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import net.nightvision.plugin.intellij.services.LoginService
 
 class MainWindowFactory : ToolWindowFactory {
     private var toolWindow: ToolWindow? = null
@@ -19,7 +20,11 @@ class MainWindowFactory : ToolWindowFactory {
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        openLoginPage();
+        if (LoginService.bypassLoginStepIfAuthenticatedAlready()) {
+            openOverviewPage()
+            return
+        }
+        openLoginPage()
     }
 
     fun openLoginPage() {
@@ -42,14 +47,6 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(ApiDiscovery(project).apiDiscoveryPanel)
-            window.component.revalidate()
-        }
-    }
-
-    fun openApiAndWebTestingPage() {
-        toolWindow?.let { window ->
-            window.component.removeAll()
-            window.component.add(ApiAndWebTestingScreen(project).apiAndWebTestingPanel)
             window.component.revalidate()
         }
     }

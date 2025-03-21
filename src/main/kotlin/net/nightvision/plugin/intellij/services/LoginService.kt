@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 
 object LoginService {
-     var token = ""
+    var token = ""
         private set
 
     fun createToken(): String {
@@ -16,8 +16,17 @@ object LoginService {
         process.waitFor(30, TimeUnit.SECONDS)
         val t = process.inputStream.bufferedReader().readText()
         val token = t.trim().takeIf { it.matches(Regex("^\\S{64}$")) } ?: ""
-        println(token)
+        //println(token)
         return token
+    }
+
+    fun bypassLoginStepIfAuthenticatedAlready(): Boolean {
+        try {
+            token = createToken()
+            return token != ""
+        } catch(e: Exception) {
+            return false
+        }
     }
 
     fun login(): Boolean {

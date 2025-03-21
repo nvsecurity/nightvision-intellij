@@ -44,8 +44,10 @@ public class ScansScreen extends Screen {
         new LoadScansWorker().execute();
 
         backButton.addActionListener(e -> {
-            mainWindow.openApiAndWebTestingPage();
+            mainWindow.openOverviewPage();
         });
+        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setBorder(null);
 
         scansTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
