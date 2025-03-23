@@ -35,6 +35,9 @@ object TargetService {
     }
 
     fun createApiTarget(targetName: String, targetURL: String, swaggerPath: String, isSwaggerURL: Boolean) {
+        if (swaggerPath.isBlank()) {
+            throw IllegalArgumentException("URL or filepath for a valid specification must be provided.");
+        }
         commonCreateTarget(targetName, targetURL, listOf("-t", "API", if(isSwaggerURL) "-s" else "-f", swaggerPath))
     }
 

@@ -90,7 +90,7 @@ public class TargetsCreateScreen extends Screen {
             String targetName = apiTargetNameTextField.getText();
             String targetURL = apiTargetUrlTextField.getText();
 
-            var isSwaggerURL = apiTargetSpecTypeTabbedPane.getSelectedIndex() == 0;
+            var isSwaggerURL = apiTargetSpecTypeTabbedPane.getSelectedComponent().equals(specURLPane);
             String swaggerPath = isSwaggerURL ? apiTargetSpecUrlTextField.getText() : swaggerFilePath;
 
             try {
