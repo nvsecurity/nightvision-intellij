@@ -128,10 +128,6 @@ public class ApiDiscovery extends Screen {
 
         VirtualFile selectedDir = FileChooser.chooseFile(descriptor, project, null);
         if (selectedDir != null) {
-            System.out.println(selectedDir.getPath());
-            System.out.println(pathToDirectory.getText());
-            System.out.println(apiLangCombobox.getSelectedItem());
-
             pathToDirectory.setText(selectedDir.getPath());
         }
     }

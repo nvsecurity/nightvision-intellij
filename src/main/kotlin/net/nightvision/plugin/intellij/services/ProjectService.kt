@@ -26,7 +26,7 @@ object ProjectService {
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         val type = object : TypeToken<PaginatedResult<ProjectInfo>>() {}.type
         val responseData: PaginatedResult<ProjectInfo> = gson.fromJson(response.body(), type)
-        return responseData.results
+        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun createProject(projectName: String) {

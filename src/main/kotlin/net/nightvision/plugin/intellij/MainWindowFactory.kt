@@ -12,6 +12,8 @@ import net.nightvision.plugin.intellij.project.ProjectsScreen
 import net.nightvision.plugin.intellij.scans.ScanDetailsScreen
 import net.nightvision.plugin.intellij.scans.ScansScreen
 import net.nightvision.plugin.intellij.services.LoginService
+import net.nightvision.plugin.intellij.target.TargetsCreateScreen
+import net.nightvision.plugin.intellij.target.TargetsScreen
 
 class MainWindowFactory : ToolWindowFactory {
     private var toolWindow: ToolWindow? = null
@@ -122,6 +124,22 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(ProjectsCreateScreen(project).projectsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetsScreen(project).targetsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetsCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetsCreateScreen(project).targetsCreatePanel)
             window.component.revalidate()
         }
     }

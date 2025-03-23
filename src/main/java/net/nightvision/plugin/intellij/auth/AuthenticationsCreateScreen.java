@@ -58,10 +58,10 @@ public class AuthenticationsCreateScreen extends Screen {
             try {
                 AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
                 mainWindowFactory.openAuthenticationsPage();
-                createButton.setEnabled(true);
             } catch(Exception exception) {
                 errorMessage.setText(exception.getMessage());
                 errorMessage.setVisible(true);
+                createButton.setEnabled(true);
             }
 
         });

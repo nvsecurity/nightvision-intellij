@@ -61,6 +61,7 @@ public class OverviewScreen extends Screen {
         targetsButton.setIcon(Utils.getIcon("/icons/targets.svg", 1f));
         targetsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         targetsButton.setHorizontalTextPosition(CENTER);
+        targetsButton.addActionListener(e -> mainWindowFactory.openTargetsPage());
 
         authenticationsButton.setIcon(Utils.getIcon("/icons/authentications.svg", 1f));
         authenticationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);

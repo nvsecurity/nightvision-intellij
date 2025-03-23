@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.Utils;
-import net.nightvision.plugin.intellij.auth.AuthenticationsScreen;
 import net.nightvision.plugin.intellij.models.ProjectInfo;
 import net.nightvision.plugin.intellij.services.ProjectService;
 
@@ -46,8 +45,8 @@ public class ProjectsScreen extends Screen {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = projectsTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    ProjectInfo selectedAuthInfo = ((ProjectsTableModel) projectsTable.getModel()).getProjectInfoAt(selectedRow);
-//                    mainWindowFactory.openAuthInfoDetailsPage(selectedAuthInfo);
+                    ProjectInfo selectedProjectInfo = ((ProjectsTableModel) projectsTable.getModel()).getProjectInfoAt(selectedRow);
+//                    mainWindowFactory.openProjectInfoDetailsPage(selectedProjectInfo);
                     // TODO
                 }
             }
@@ -76,7 +75,6 @@ public class ProjectsScreen extends Screen {
                 loadingPanelParent.revalidate();
                 projectsTable.setVisible(true);
             } catch (Exception ignore) {
-                System.out.println(ignore);
                 // TODO: Show error message + stop loading panel
             }
         }

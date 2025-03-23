@@ -25,6 +25,6 @@ object ScanService {
         val type = object : TypeToken<PaginatedResult<Scan>>() {}.type
         val responseData: PaginatedResult<Scan> = gson.fromJson(response.body(), type)
         //println(responseData.results)
-        return responseData.results
+        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 }
