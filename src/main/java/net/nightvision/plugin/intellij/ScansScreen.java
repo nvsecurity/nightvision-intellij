@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class ScansScreen extends Screen {
     private JTable scansTable;
     private JPanel scansPanel;
-    private JLabel tableName;
     private JButton backButton;
     private JPanel loadingPanel;
 

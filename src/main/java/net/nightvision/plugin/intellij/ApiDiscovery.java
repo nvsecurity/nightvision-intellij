@@ -18,6 +18,8 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.util.Objects;
 
+import static net.nightvision.plugin.intellij.Constants.CONTACT_EMAIL;
+
 public class ApiDiscovery extends Screen {
     private JPanel apiDiscoveryPanel;
     private JTextField pathToDirectory;
@@ -33,8 +35,6 @@ public class ApiDiscovery extends Screen {
     private JButton backButton;
     private JPanel backButtonPanel;
     private JPanel loadingPanel;
-
-    private static final String CONTACT_EMAIL = "support@nightvision.net";
 
     private final String[] LANGUAGES = new String[] {
         "Java",

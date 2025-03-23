@@ -3,6 +3,7 @@ package net.nightvision.plugin.intellij
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import net.nightvision.plugin.intellij.models.AuthInfo
 import net.nightvision.plugin.intellij.services.LoginService
 
 class MainWindowFactory : ToolWindowFactory {
@@ -63,6 +64,30 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(ScanDetailsScreen(project, scan).scanDetailsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthenticationsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(AuthenticationsScreen(project).authenticationsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthInfoDetailsPage(authInfo: AuthInfo) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(AuthenticationDetailsScreen(project, authInfo).authenticationDetailsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(AuthenticationsCreateScreen(project).authenticationsCreatePanel)
             window.component.revalidate()
         }
     }

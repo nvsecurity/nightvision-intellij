@@ -20,6 +20,12 @@
               <text value=""/>
             </properties>
           </component>
+          <component id="4f6cc" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Scans"/>
+            </properties>
+          </component>
         </children>
       </grid>
       <grid id="77364" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -27,12 +33,6 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="8750f" class="javax.swing.JLabel" binding="tableName">
-            <constraints border-constraint="North"/>
-            <properties>
-              <text value="Scans table"/>
-            </properties>
-          </component>
           <scrollpane id="3d737">
             <constraints border-constraint="Center"/>
             <properties/>
