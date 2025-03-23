@@ -1,6 +1,9 @@
-package net.nightvision.plugin.intellij;
+package net.nightvision.plugin.intellij.auth;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.intellij.Loading;
+import net.nightvision.plugin.intellij.Screen;
+import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.models.AuthInfo;
 import net.nightvision.plugin.intellij.services.AuthenticationService;
 
@@ -27,13 +30,13 @@ public class AuthenticationsScreen extends Screen {
         super(project);
 
         backButton.addActionListener(e -> {
-            mainWindow.openOverviewPage();
+            mainWindowFactory.openOverviewPage();
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
 
         createAuthenticationButton.addActionListener(e -> {
-            mainWindow.openAuthCreatePage();
+            mainWindowFactory.openAuthCreatePage();
         });
 
         authsTable.setModel(new AuthsTableModel());
@@ -49,8 +52,7 @@ public class AuthenticationsScreen extends Screen {
                 int selectedRow = authsTable.getSelectedRow();
                 if (selectedRow != -1) {
                     AuthInfo selectedAuthInfo = ((AuthsTableModel) authsTable.getModel()).getAuthInfoAt(selectedRow);
-                    // TODO
-                    mainWindow.openAuthInfoDetailsPage(selectedAuthInfo);
+                    mainWindowFactory.openAuthInfoDetailsPage(selectedAuthInfo);
                 }
             }
         });
@@ -78,6 +80,7 @@ public class AuthenticationsScreen extends Screen {
                 loadingPanelParent.revalidate();
                 authsTable.setVisible(true);
             } catch (Exception ignore) {
+                // TODO: Show error message + stop loading panel
             }
         }
     }

@@ -5,56 +5,47 @@ import com.google.gson.reflect.TypeToken
 import net.nightvision.plugin.intellij.Constants
 import net.nightvision.plugin.intellij.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.intellij.PaginatedResult
-import net.nightvision.plugin.intellij.Scan
-import net.nightvision.plugin.intellij.models.AuthInfo
+import net.nightvision.plugin.intellij.models.ProjectInfo
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
-object AuthenticationService {
+object ProjectService {
     val httpClient = HttpClient.newBuilder().build()
     val gson = GsonBuilder().create()
 
-    fun getAuthInfos(): List<AuthInfo> {
+    fun getProjectInfos(): List<ProjectInfo> {
         // TODO: Cache responses
         val token = LoginService.token
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor("credentials"))
+            .uri(Constants.getUrlFor("projects"))
             .header("Authorization", "Token $token")
             .build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val type = object : TypeToken<PaginatedResult<AuthInfo>>() {}.type
-        val responseData: PaginatedResult<AuthInfo> = gson.fromJson(response.body(), type)
-        //println(responseData.results)
+        val type = object : TypeToken<PaginatedResult<ProjectInfo>>() {}.type
+        val responseData: PaginatedResult<ProjectInfo> = gson.fromJson(response.body(), type)
         return responseData.results
     }
 
-    fun createPlaywrightAuth(authName: String, authURL: String, description: String?) {
-        if (authName.isBlank()) {
-            throw IllegalArgumentException("Authentication name can't be empty.");
-        }
-        if (authURL.isBlank()) {
-            throw IllegalArgumentException("Authentication URL can't be empty.");
+    fun createProject(projectName: String) {
+        if (projectName.isBlank()) {
+            throw IllegalArgumentException("Project name can't be empty.");
         }
 
-        var cmd = ArrayList<String>(listOf(NIGHTVISION, "auth", "playwright", "create", authName, authURL))
-        if (!description.isNullOrBlank()) {
-            cmd.add("--description")
-            cmd.add(description)
-        }
+        var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "create", projectName))
         val process = ProcessBuilder(cmd)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
 
-        process.waitFor(200, TimeUnit.SECONDS)
+        process.waitFor(30, TimeUnit.SECONDS)
         val t = process.inputStream.bufferedReader().readText()
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details
-            throw RuntimeException("Some error happened when creating your authentication.")
+            throw RuntimeException("Some error happened when creating your project.")
         }
     }
 }

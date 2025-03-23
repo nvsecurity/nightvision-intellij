@@ -16,7 +16,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.Objects;
 
 import static net.nightvision.plugin.intellij.Constants.CONTACT_EMAIL;
 
@@ -58,7 +57,7 @@ public class ApiDiscovery extends Screen {
         backButton.setBorder(null);
         uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
         uploadButton.setBorder(null);
-        backButton.addActionListener(e -> mainWindow.openOverviewPage());
+        backButton.addActionListener(e -> mainWindowFactory.openOverviewPage());
         uploadButton.addActionListener(e -> openFileDialog());
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();

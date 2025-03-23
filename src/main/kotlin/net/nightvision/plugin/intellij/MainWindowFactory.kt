@@ -3,7 +3,14 @@ package net.nightvision.plugin.intellij
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import net.nightvision.plugin.intellij.auth.AuthenticationDetailsScreen
+import net.nightvision.plugin.intellij.auth.AuthenticationsCreateScreen
+import net.nightvision.plugin.intellij.auth.AuthenticationsScreen
 import net.nightvision.plugin.intellij.models.AuthInfo
+import net.nightvision.plugin.intellij.project.ProjectsCreateScreen
+import net.nightvision.plugin.intellij.project.ProjectsScreen
+import net.nightvision.plugin.intellij.scans.ScanDetailsScreen
+import net.nightvision.plugin.intellij.scans.ScansScreen
 import net.nightvision.plugin.intellij.services.LoginService
 
 class MainWindowFactory : ToolWindowFactory {
@@ -63,7 +70,11 @@ class MainWindowFactory : ToolWindowFactory {
     fun openScansDetailsPage(scan: Scan) {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(ScanDetailsScreen(project, scan).scanDetailsPanel)
+            window.component.add(
+                ScanDetailsScreen(
+                    project,
+                    scan
+                ).scanDetailsPanel)
             window.component.revalidate()
         }
     }
@@ -79,7 +90,11 @@ class MainWindowFactory : ToolWindowFactory {
     fun openAuthInfoDetailsPage(authInfo: AuthInfo) {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(AuthenticationDetailsScreen(project, authInfo).authenticationDetailsPanel)
+            window.component.add(
+                AuthenticationDetailsScreen(
+                    project,
+                    authInfo
+                ).authenticationDetailsPanel)
             window.component.revalidate()
         }
     }
@@ -87,7 +102,26 @@ class MainWindowFactory : ToolWindowFactory {
     fun openAuthCreatePage() {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(AuthenticationsCreateScreen(project).authenticationsCreatePanel)
+            window.component.add(
+                AuthenticationsCreateScreen(
+                    project
+                ).authenticationsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openProjectsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ProjectsScreen(project).projectsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openProjectCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ProjectsCreateScreen(project).projectsCreatePanel)
             window.component.revalidate()
         }
     }

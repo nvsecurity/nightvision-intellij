@@ -1,6 +1,9 @@
-package net.nightvision.plugin.intellij;
+package net.nightvision.plugin.intellij.scans;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.intellij.Scan;
+import net.nightvision.plugin.intellij.Screen;
+import net.nightvision.plugin.intellij.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -23,7 +26,7 @@ public class ScanDetailsScreen extends Screen {
         super(project);
 
         backButton.addActionListener(e -> {
-            mainWindow.openScansPage();
+            mainWindowFactory.openScansPage();
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);

@@ -1,17 +1,14 @@
-package net.nightvision.plugin.intellij;
+package net.nightvision.plugin.intellij.auth;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.intellij.Screen;
+import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.services.AuthenticationService;
 
 import javax.swing.*;
 
 public class AuthenticationsCreateScreen extends Screen {
     private JButton backButton;
-
-    public JPanel getAuthenticationsCreatePanel() {
-        return authenticationsCreatePanel;
-    }
-
     private JPanel authenticationsCreatePanel;
     private JTabbedPane tabbedPane1;
     private JTextField authenticationNameTextField;
@@ -22,18 +19,22 @@ public class AuthenticationsCreateScreen extends Screen {
     private JButton createButton;
     private JLabel errorMessage;
 
+    public JPanel getAuthenticationsCreatePanel() {
+        return authenticationsCreatePanel;
+    }
+
     public AuthenticationsCreateScreen(Project project) {
         super(project);
 
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {
-            mainWindow.openAuthenticationsPage();
+            mainWindowFactory.openAuthenticationsPage();
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
 
         cancelButton.addActionListener(e -> {
-            mainWindow.openAuthenticationsPage();
+            mainWindowFactory.openAuthenticationsPage();
         });
 
         helpMessageLabel.setText("""
@@ -49,13 +50,15 @@ public class AuthenticationsCreateScreen extends Screen {
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
             errorMessage.setText("");
+            createButton.setEnabled(false);
             String authName = authenticationNameTextField.getText();
             String authUrl = authenticationURLTextField.getText();
             String description = authenticationDescriptionTextField.getText();
 
             try {
                 AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
-                mainWindow.openAuthenticationsPage();
+                mainWindowFactory.openAuthenticationsPage();
+                createButton.setEnabled(true);
             } catch(Exception exception) {
                 errorMessage.setText(exception.getMessage());
                 errorMessage.setVisible(true);

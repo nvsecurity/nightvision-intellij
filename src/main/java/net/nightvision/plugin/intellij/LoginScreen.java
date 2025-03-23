@@ -22,7 +22,7 @@ public class LoginScreen extends Screen {
         loginButton.addActionListener(e -> {
             boolean success = LoginService.INSTANCE.login();
             if (success) {
-                mainWindow.openOverviewPage();
+                mainWindowFactory.openOverviewPage();
             }
         });
     }

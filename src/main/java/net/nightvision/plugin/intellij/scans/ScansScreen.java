@@ -1,6 +1,7 @@
-package net.nightvision.plugin.intellij;
+package net.nightvision.plugin.intellij.scans;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.intellij.*;
 import net.nightvision.plugin.intellij.services.ScanService;
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class ScansScreen extends Screen {
         return scansPanel;
     }
 
-    ScansScreen(Project project) {
+    public ScansScreen(Project project) {
         super(project);
 
         scansPanel.setLayout(new BoxLayout(scansPanel, BoxLayout.Y_AXIS));
@@ -34,7 +35,7 @@ public class ScansScreen extends Screen {
                 int selectedRow = scansTable.getSelectedRow();
                 if (selectedRow != -1) {
                     Scan selectedScan = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
-                    mainWindow.openScansDetailsPage(selectedScan);
+                    mainWindowFactory.openScansDetailsPage(selectedScan);
                 }
             }
         });
@@ -43,7 +44,7 @@ public class ScansScreen extends Screen {
         new LoadScansWorker().execute();
 
         backButton.addActionListener(e -> {
-            mainWindow.openOverviewPage();
+            mainWindowFactory.openOverviewPage();
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
@@ -118,6 +119,7 @@ public class ScansScreen extends Screen {
                 scansPanel.remove(loadingPanel);
                 scansPanel.revalidate();
             } catch (Exception ignore) {
+                // TODO: Show error message + stop loading panel
             }
         }
     }
