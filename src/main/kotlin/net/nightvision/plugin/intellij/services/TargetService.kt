@@ -16,11 +16,15 @@ object TargetService {
     val httpClient = HttpClient.newBuilder().build()
     val gson = GsonBuilder().create()
 
-    fun getTargetInfos(): List<TargetInfo> {
+    fun getTargetInfos(targetType: String = ""): List<TargetInfo> {
         // TODO: Cache responses
         val token = LoginService.token
+        var suffix = "targets"
+        if (targetType.isNotBlank()) {
+            suffix += "/" + targetType.lowercase()
+        }
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor("targets"))
+            .uri(Constants.getUrlFor(suffix, mapOf("project" to ProjectService.getCurrentProjectId())))
             .header("Authorization", "Token $token")
             .build()
 

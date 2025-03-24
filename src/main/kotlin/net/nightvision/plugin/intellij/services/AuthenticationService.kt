@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken
 import net.nightvision.plugin.intellij.Constants
 import net.nightvision.plugin.intellij.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.intellij.PaginatedResult
-import net.nightvision.plugin.intellij.Scan
 import net.nightvision.plugin.intellij.models.AuthInfo
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -20,7 +19,7 @@ object AuthenticationService {
         // TODO: Cache responses
         val token = LoginService.token
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor("credentials"))
+            .uri(Constants.getUrlFor("credentials", mapOf("project" to ProjectService.getCurrentProjectId())))
             .header("Authorization", "Token $token")
             .build()
 

@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -47,6 +50,28 @@ public class ScanDetailsScreen extends Screen {
 
             JLabel value = new JLabel(targetDetailsDictionary.get(key));
             value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+
+            // Check if this row is the "Check in Browser:" row.
+            if ("Check in Browser:".equals(key)) {
+                // Set the cursor to hand so the user knows it's clickable.
+                value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                // Remove any default tooltip if needed.
+                value.setToolTipText("Click to open in browser");
+                // Add a mouse listener to open the browser when clicked.
+                value.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        try {
+                            // Create the URI for the link. Here, we construct it using the scan's id.
+                            URI uri = new URI("https://app.nightvision.net/scans/" + scan.getId() + "/findings");
+                            Desktop.getDesktop().browse(uri);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+            }
+
             propertyPanel.add(value);
             detailsPanel.add(propertyPanel);
         }
@@ -69,6 +94,7 @@ public class ScanDetailsScreen extends Screen {
         targetDetailsDictionary.put("Date Created:", ZonedDateTime.parse(scan.getCreatedAt())
                 .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm:ss a")));
         targetDetailsDictionary.put("Base URL:", scan.getLocation());
+        targetDetailsDictionary.put("Check in Browser:", "➡\uFE0F View Findings Online");
         return targetDetailsDictionary;
     }
 }

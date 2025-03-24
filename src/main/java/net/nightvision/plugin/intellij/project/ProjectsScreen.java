@@ -18,6 +18,7 @@ public class ProjectsScreen extends Screen {
     private JTable projectsTable;
     private JPanel loadingPanelParent;
     private JButton createProjectButton;
+    private JPanel currentProjectWrapperPanel;
 
     public JPanel getProjectsPanel() {
         return projectsPanel;
@@ -31,6 +32,10 @@ public class ProjectsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+            loadTable();
+        }));
 
         projectsTable.setModel(new ProjectsTableModel());
         projectsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -52,6 +57,10 @@ public class ProjectsScreen extends Screen {
             }
         });
 
+        loadTable();
+    }
+
+    private void loadTable() {
         new LoadProjectsWorker().execute();
 
         loadingPanel = new Loading().getLoadingPanel();
@@ -85,8 +94,10 @@ public class ProjectsScreen extends Screen {
         private List<ProjectInfo> projectInfos = List.of();
 
         public void setProjectInfos(List<ProjectInfo> projectInfos) {
-            this.projectInfos = projectInfos;
-            fireTableDataChanged();
+            if (projectInfos != null) {
+                this.projectInfos = projectInfos;
+                fireTableDataChanged();
+            }
         }
 
         public ProjectInfo getProjectInfoAt(int row) {

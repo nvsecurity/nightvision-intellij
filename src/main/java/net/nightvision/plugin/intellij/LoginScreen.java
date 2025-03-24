@@ -2,6 +2,7 @@ package net.nightvision.plugin.intellij;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.services.LoginService;
+import net.nightvision.plugin.intellij.services.ProjectService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,7 @@ public class LoginScreen extends Screen {
         loginButton.addActionListener(e -> {
             boolean success = LoginService.INSTANCE.login();
             if (success) {
+                ProjectService.INSTANCE.fetchCurrentProjectName();
                 mainWindowFactory.openOverviewPage();
             }
         });

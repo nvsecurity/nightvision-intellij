@@ -2,6 +2,7 @@ package net.nightvision.plugin.intellij.scans;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.*;
+import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.ScanService;
 
 import javax.swing.*;
@@ -10,10 +11,16 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import static javax.swing.SwingConstants.CENTER;
+
 public class ScansScreen extends Screen {
     private JTable scansTable;
     private JPanel scansPanel;
     private JButton backButton;
+    private JPanel currentProjectWrapperPanel;
+    private JPanel loadingPanelParent;
+    private JButton scanWebApplicationsButton;
+    private JButton scanAPIsButton;
     private JPanel loadingPanel;
 
     public JPanel getScansPanel() {
@@ -22,8 +29,6 @@ public class ScansScreen extends Screen {
 
     public ScansScreen(Project project) {
         super(project);
-
-        scansPanel.setLayout(new BoxLayout(scansPanel, BoxLayout.Y_AXIS));
 
         scansTable.setModel(new ScansTableModel());
         scansTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -40,14 +45,15 @@ public class ScansScreen extends Screen {
             }
         });
 
-
-        new LoadScansWorker().execute();
-
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+            loadTable();
+        }));
 
         scansTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -71,7 +77,7 @@ public class ScansScreen extends Screen {
             }
         });
 
-        scansTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+        scansTable.getColumnModel().getColumn(scansTable.getColumnCount()-1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus,
@@ -80,12 +86,19 @@ public class ScansScreen extends Screen {
                 if (value instanceof int[] val) {
                     JPanel panel = new JPanel();
                     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-                    for (int vulnerability : val) {
-                        Icon i = Utils.getIcon("/icons/dot.svg", .8f);
-                        JLabel label = new JLabel(String.valueOf(vulnerability), i, JLabel.LEFT);
+                    if (val.length == 0) {
+                        JLabel label = new JLabel("Running...", JLabel.LEFT);
                         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
                         panel.add(label);
+                    } else {
+                        for (int vulnerability : val) {
+                            Icon i = Utils.getIcon("/icons/dot.svg", .8f);
+                            JLabel label = new JLabel(String.valueOf(vulnerability), i, JLabel.LEFT);
+                            label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+                            panel.add(label);
+                        }
                     }
+
 
                     if (isSelected || hasFocus) {
                         panel.setBackground(table.getSelectionBackground());
@@ -100,8 +113,31 @@ public class ScansScreen extends Screen {
             }
         });
 
+        Icon openApiIcon = Utils.getIcon("/icons/openapi-scan.svg", 0.7f);
+        Icon webScanIcon = Utils.getIcon("/icons/web-scan.svg", 0.7f);
+        scanWebApplicationsButton.setIcon(webScanIcon);
+        scanWebApplicationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        scanWebApplicationsButton.setHorizontalTextPosition(CENTER);
+        scanWebApplicationsButton.addActionListener(e -> {
+            mainWindowFactory.openScanCreatePage("URL");
+        });
+        scanAPIsButton.setIcon(openApiIcon);
+        scanAPIsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        scanAPIsButton.setHorizontalTextPosition(CENTER);
+        scanAPIsButton.addActionListener(e -> {
+            mainWindowFactory.openScanCreatePage("OPENAPI");
+        });
+
+
+        loadTable();
+    }
+
+    private void loadTable() {
+        new LoadScansWorker().execute();
+
         loadingPanel = new Loading().getLoadingPanel();
-        scansPanel.add(loadingPanel);
+        loadingPanelParent.add(loadingPanel);
+        scansTable.setVisible(false);
     }
 
     private class LoadScansWorker extends SwingWorker<List<Scan>, Void> {
@@ -116,8 +152,9 @@ public class ScansScreen extends Screen {
                 List<Scan> scans = get();
                 ((ScansTableModel) scansTable.getModel()).setScans(scans);
 
-                scansPanel.remove(loadingPanel);
-                scansPanel.revalidate();
+                loadingPanelParent.remove(loadingPanel);
+                loadingPanelParent.revalidate();
+                scansTable.setVisible(true);
             } catch (Exception ignore) {
                 // TODO: Show error message + stop loading panel
             }
@@ -125,12 +162,14 @@ public class ScansScreen extends Screen {
     }
 
     static class ScansTableModel extends AbstractTableModel {
-        private final List<String> columns = List.of("TARGET", "LOCATION", "PROJECT", "VULNERABILITIES");
+        private final List<String> columns = List.of("TARGET", "LOCATION", /*"PROJECT",*/ "VULNERABILITIES");
         private List<Scan> scans = List.of();
 
         public void setScans(List<Scan> scans) {
-            this.scans = scans;
-            fireTableDataChanged();
+            if (scans != null) {
+                this.scans = scans;
+                fireTableDataChanged();
+            }
         }
 
         public Scan getScanAt(int row) {
@@ -162,8 +201,8 @@ public class ScansScreen extends Screen {
             return switch (columnIndex) {
                 case 0 -> new JLabel(scan.getTargetName(), icon, JLabel.LEFT);
                 case 1 -> scan.getLocation();
-                case 2 -> scan.getProject().getName();
-                case 3 -> new int[] {scanStat.getCritical(), scanStat.getHigh(), scanStat.getMedium(), scanStat.getLow(), scanStat.getInformational()};
+//                case 2 -> scan.getProject().getName();
+                case 2 -> scan.getStatusValue().equalsIgnoreCase("RUNNING") ? new int[]{} : new int[] {scanStat.getCritical(), scanStat.getHigh(), scanStat.getMedium(), scanStat.getLow(), scanStat.getInformational()};
                 default -> "";
             };
         }
@@ -173,8 +212,8 @@ public class ScansScreen extends Screen {
             return switch (columnIndex) {
                 case 0 -> JLabel.class;
                 case 1 -> String.class;
-                case 2 -> String.class;
-                case 3 -> JPanel.class;
+//                case 2 -> String.class;
+                case 2 -> JPanel.class;
                 default -> Object.class;
             };
         }

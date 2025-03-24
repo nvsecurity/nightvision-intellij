@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit
 object ProjectService {
     val httpClient = HttpClient.newBuilder().build()
     val gson = GsonBuilder().create()
+    private var currentProjectName = ""
+    private var currentProjectId = ""
 
     fun getProjectInfos(): List<ProjectInfo> {
         // TODO: Cache responses
@@ -25,6 +27,9 @@ object ProjectService {
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         val type = object : TypeToken<PaginatedResult<ProjectInfo>>() {}.type
+        if (response.body() == null) {
+            return listOf()
+        }
         val responseData: PaginatedResult<ProjectInfo> = gson.fromJson(response.body(), type)
         return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
     }
@@ -48,4 +53,53 @@ object ProjectService {
             throw RuntimeException("Some error happened when creating your project.")
         }
     }
+
+    fun getCurrentProjectName(): String {
+        return currentProjectName
+    }
+
+    fun getCurrentProjectId(): String {
+        return currentProjectId
+    }
+
+    fun fetchCurrentProjectName() : String {
+        val cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "show"))
+        val process = ProcessBuilder(cmd)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+
+        process.waitFor(30, TimeUnit.SECONDS)
+        val t = process.inputStream.bufferedReader().readText()
+        val regexProjName = Regex("""(?m)^Name:\s*(.+)$""")
+        val matchProjName = regexProjName.find(t)
+        currentProjectName = matchProjName?.groupValues?.get(1) ?: ""
+
+        val regexProjId = Regex("""(?m)^Id:\s*(.+)$""")
+        val matchProjId = regexProjId.find(t)
+        currentProjectId = matchProjId?.groupValues?.get(1) ?: ""
+
+        return currentProjectName
+    }
+
+    fun setCurrentProjectName(projectName: String) {
+        if (projectName.isBlank()) {
+            return
+        }
+        var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "set", projectName))
+        val process = ProcessBuilder(cmd)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+
+        process.waitFor(30, TimeUnit.SECONDS)
+        val t = process.inputStream.bufferedReader().readText()
+        val success = Regex("Current project changed").containsMatchIn(t.trim())
+        if (success) {
+            fetchCurrentProjectName()
+            return
+        }
+        throw RuntimeException("Unable to set project to '${projectName}'")
+    }
+
 }

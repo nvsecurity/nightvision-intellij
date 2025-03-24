@@ -6,6 +6,7 @@ import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.models.ProjectInfo;
 import net.nightvision.plugin.intellij.models.TargetInfo;
+import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.TargetService;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class TargetsScreen extends Screen {
     private JPanel loadingPanelParent;
     private JButton createTargetButton;
     private JPanel targetsPanel;
+    private JPanel currentProjectWrapperPanel;
 
     public JPanel getTargetsPanel() {
         return targetsPanel;
@@ -33,6 +35,10 @@ public class TargetsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+            loadTable();
+        }));
 
         targetsTable.setModel(new TargetsTableModel());
         targetsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -58,6 +64,10 @@ public class TargetsScreen extends Screen {
             }
         });
 
+        loadTable();
+    }
+
+    private void loadTable() {
         new LoadTargetsWorker().execute();
 
         loadingPanel = new Loading().getLoadingPanel();
@@ -68,7 +78,7 @@ public class TargetsScreen extends Screen {
     private class LoadTargetsWorker extends SwingWorker<List<TargetInfo>, Void> {
         @Override
         protected List<TargetInfo> doInBackground() throws Exception {
-            return TargetService.INSTANCE.getTargetInfos();
+            return TargetService.INSTANCE.getTargetInfos("");
         }
 
         @Override
@@ -91,8 +101,10 @@ public class TargetsScreen extends Screen {
         private List<TargetInfo> targetInfos = List.of();
 
         public void setTargetInfos(List<TargetInfo> targetInfos) {
-            this.targetInfos = targetInfos;
-            fireTableDataChanged();
+            if (targetInfos != null) {
+                this.targetInfos = targetInfos;
+                fireTableDataChanged();
+            }
         }
 
         public TargetInfo getTargetInfoAt(int row) {

@@ -5,6 +5,7 @@ import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.models.AuthInfo;
+import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.AuthenticationService;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ public class AuthenticationsScreen extends Screen {
     private JPanel authenticationsPanel;
     private JButton createAuthenticationButton;
     private JTable authsTable;
+    private JPanel currentProjectWrapperPanel;
 
     public AuthenticationsScreen(Project project) {
         super(project);
@@ -34,6 +36,10 @@ public class AuthenticationsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+            loadTable();
+        }));
 
         createAuthenticationButton.addActionListener(e -> {
             mainWindowFactory.openAuthCreatePage();
@@ -57,6 +63,10 @@ public class AuthenticationsScreen extends Screen {
             }
         });
 
+        loadTable();
+    }
+
+    private void loadTable() {
         new LoadAuthInfosWorker().execute();
 
         loadingPanel = new Loading().getLoadingPanel();
@@ -90,8 +100,10 @@ public class AuthenticationsScreen extends Screen {
         private List<AuthInfo> authInfos = List.of();
 
         public void setAuthInfos(List<AuthInfo> authInfos) {
-            this.authInfos = authInfos;
-            fireTableDataChanged();
+            if (authInfos != null) {
+                this.authInfos = authInfos;
+                fireTableDataChanged();
+            }
         }
 
         public AuthInfo getAuthInfoAt(int row) {
