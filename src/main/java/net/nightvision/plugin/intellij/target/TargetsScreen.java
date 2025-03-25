@@ -58,8 +58,7 @@ public class TargetsScreen extends Screen {
                 int selectedRow = targetsTable.getSelectedRow();
                 if (selectedRow != -1) {
                     TargetInfo selectedTargetInfo = ((TargetsTableModel) targetsTable.getModel()).getTargetInfoAt(selectedRow);
-//                    mainWindowFactory.openTargetInfoDetailsPage(selectedTargetInfo);
-                    // TODO
+                    mainWindowFactory.openTargetInfoDetailsPage(selectedTargetInfo);
                 }
             }
         });

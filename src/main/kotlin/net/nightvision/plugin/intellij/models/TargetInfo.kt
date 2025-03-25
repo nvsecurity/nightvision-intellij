@@ -34,6 +34,13 @@ data class TargetInfo(
     @SerializedName("is_ready_to_scan")
     val isReadyToScan: Boolean,
     val configuration: ConfigurationInfo?,
+
+    @SerializedName("has_spec_uploaded")
+    val hasSpecUploaded: Boolean,
+)
+
+data class TargetURL(
+    val url: String,
 )
 
 data class ConfigurationInfo(

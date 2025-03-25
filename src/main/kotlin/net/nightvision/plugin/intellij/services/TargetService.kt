@@ -7,6 +7,7 @@ import net.nightvision.plugin.intellij.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.intellij.PaginatedResult
 import net.nightvision.plugin.intellij.models.ProjectInfo
 import net.nightvision.plugin.intellij.models.TargetInfo
+import net.nightvision.plugin.intellij.models.TargetURL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -32,6 +33,42 @@ object TargetService {
         val type = object : TypeToken<PaginatedResult<TargetInfo>>() {}.type
         val responseData: PaginatedResult<TargetInfo> = gson.fromJson(response.body(), type)
         return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+    }
+
+    fun getTargetSpecificInfo(targetType: String, targetId: String): TargetInfo? {
+        if (targetType.isBlank() || targetId.isBlank()) {
+            return null;
+        }
+        val token = LoginService.token
+        val suffix = "targets/${targetType.lowercase()}/${targetId}"
+
+        val request = HttpRequest.newBuilder()
+            .uri(Constants.getUrlFor(suffix))
+            .header("Authorization", "Token $token")
+            .build()
+
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        val type = object : TypeToken<TargetInfo>() {}.type
+        val responseData: TargetInfo = gson.fromJson(response.body(), type)
+        return responseData
+    }
+
+    fun getSpecURL(targetId: String) : String {
+        if (targetId.isBlank()) {
+            return "";
+        }
+        val token = LoginService.token
+        val suffix = "targets/openapi/${targetId}/get-spec-url"
+
+        val request = HttpRequest.newBuilder()
+            .uri(Constants.getUrlFor(suffix))
+            .header("Authorization", "Token $token")
+            .build()
+
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        val type = object : TypeToken<TargetURL>() {}.type
+        val responseData: TargetURL = gson.fromJson(response.body(), type)
+        return responseData.url
     }
 
     fun createWebTarget(targetName: String, targetURL: String) {

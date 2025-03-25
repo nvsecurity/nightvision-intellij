@@ -94,7 +94,7 @@ public class ScanDetailsScreen extends Screen {
         targetDetailsDictionary.put("Date Created:", ZonedDateTime.parse(scan.getCreatedAt())
                 .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm:ss a")));
         targetDetailsDictionary.put("Base URL:", scan.getLocation());
-        targetDetailsDictionary.put("Check in Browser:", "➡\uFE0F View Findings Online");
+        targetDetailsDictionary.put("Check in Browser:", "➡\uFE0F View Findings");
         return targetDetailsDictionary;
     }
 }

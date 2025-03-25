@@ -7,6 +7,7 @@ import net.nightvision.plugin.intellij.auth.AuthenticationDetailsScreen
 import net.nightvision.plugin.intellij.auth.AuthenticationsCreateScreen
 import net.nightvision.plugin.intellij.auth.AuthenticationsScreen
 import net.nightvision.plugin.intellij.models.AuthInfo
+import net.nightvision.plugin.intellij.models.TargetInfo
 import net.nightvision.plugin.intellij.project.ProjectsCreateScreen
 import net.nightvision.plugin.intellij.project.ProjectsScreen
 import net.nightvision.plugin.intellij.scans.ScanDetailsScreen
@@ -14,6 +15,7 @@ import net.nightvision.plugin.intellij.scans.ScansCreateScreen
 import net.nightvision.plugin.intellij.scans.ScansScreen
 import net.nightvision.plugin.intellij.services.LoginService
 import net.nightvision.plugin.intellij.services.ProjectService
+import net.nightvision.plugin.intellij.target.TargetDetailsScreen
 import net.nightvision.plugin.intellij.target.TargetsCreateScreen
 import net.nightvision.plugin.intellij.target.TargetsScreen
 
@@ -155,6 +157,14 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(TargetsCreateScreen(project).targetsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetInfoDetailsPage(selectedTargetInfo: TargetInfo) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetDetailsScreen(project, selectedTargetInfo).targetDetailsPanel)
             window.component.revalidate()
         }
     }
