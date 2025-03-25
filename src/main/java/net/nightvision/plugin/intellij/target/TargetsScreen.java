@@ -49,10 +49,6 @@ public class TargetsScreen extends Screen {
         targetsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         targetsTable.setRowHeight(40);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        targetsTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
-
         createTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsCreatePage();
         });

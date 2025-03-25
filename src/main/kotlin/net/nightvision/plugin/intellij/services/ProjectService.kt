@@ -21,7 +21,7 @@ object ProjectService {
         // TODO: Cache responses
         val token = LoginService.token
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor("projects"))
+            .uri(Constants.getApiUrlFor("projects"))
             .header("Authorization", "Token $token")
             .build()
 

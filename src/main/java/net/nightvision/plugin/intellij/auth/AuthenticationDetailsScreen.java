@@ -2,6 +2,7 @@ package net.nightvision.plugin.intellij.auth;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBTextArea;
+import net.nightvision.plugin.intellij.Constants;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.AuthInfo;
@@ -9,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -38,7 +42,7 @@ public class AuthenticationDetailsScreen extends Screen {
 
 
         String[] keysList = { "Authentication Name:", "Project:", "Authentication Type:", "Authentication ID:", "Target URL:",
-                "Date Created:", "Latest Updated:", "Description:", "Authentication Script:"};
+                "Date Created:", "Latest Updated:", "Description:", "Check in Browser:", "Authentication Script:"};
 
         HashMap<Integer, String> authDetailsDictionary = getAuthDetailsHashMap(authInfo);
 
@@ -54,7 +58,7 @@ public class AuthenticationDetailsScreen extends Screen {
             propertyPanel.add(label);
 
 
-            if (i == 8) {
+            if (i == 9) {
                 detailsPanel.add(propertyPanel);
                 propertyPanel = new JPanel();
                 layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
@@ -64,8 +68,26 @@ public class AuthenticationDetailsScreen extends Screen {
                 detailsPanel.add(propertyPanel);
                 continue;
             }
+
             JLabel value = new JLabel(content);
             value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+
+            if ("Check in Browser:".equals(key)) {
+                value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                value.setToolTipText("Click to open in browser");
+                value.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        try {
+                            URI uri = Constants.Companion.getAppUrlFor("authentications/" + authInfo.getId());
+                            Desktop.getDesktop().browse(uri);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+            }
+
             propertyPanel.add(value);
             detailsPanel.add(propertyPanel);
         }
@@ -102,8 +124,10 @@ public class AuthenticationDetailsScreen extends Screen {
 
         authDetailsDictionary.put(7, Objects.requireNonNullElse(authInfo.getDescription(), "N/A"));
 
+        authDetailsDictionary.put(8, "➡\uFE0F View Authentication");
+
         if (authInfo.getScriptContent() != null) {
-            authDetailsDictionary.put(8, authInfo.getScriptContent());
+            authDetailsDictionary.put(9, authInfo.getScriptContent());
         }
 
         return authDetailsDictionary;

@@ -41,7 +41,7 @@
                   <component id="6027d" class="javax.swing.JLabel">
                     <constraints/>
                     <properties>
-                      <text value="Target"/>
+                      <text value="Target Details"/>
                     </properties>
                   </component>
                 </children>

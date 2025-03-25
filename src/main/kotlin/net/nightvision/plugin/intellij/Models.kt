@@ -6,7 +6,7 @@ data class PaginatedResult<T>(
     val results: List<T>
 )
 
-data class Scan(
+data class ScanInfo(
     val id: String,
     val location: String,
     val credentials: Credentials?,

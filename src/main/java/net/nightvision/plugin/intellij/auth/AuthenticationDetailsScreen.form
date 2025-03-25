@@ -23,7 +23,7 @@
             <children>
               <grid id="d5984" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
                     <preferred-size width="348" height="52"/>
                   </grid>
                 </constraints>
@@ -41,7 +41,7 @@
                   <component id="ccc45" class="javax.swing.JLabel">
                     <constraints/>
                     <properties>
-                      <text value="Authentication"/>
+                      <text value="Authentication Details"/>
                     </properties>
                   </component>
                 </children>

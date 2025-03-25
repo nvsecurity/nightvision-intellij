@@ -35,6 +35,10 @@ public class AuthenticationsCreateScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        // TODO: Implement for Cookie and Header tabs!
+        tabbedPane1.remove(0); // Removing Cookie
+        tabbedPane1.remove(0); // Removing Header
+
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });

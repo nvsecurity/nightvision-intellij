@@ -29,7 +29,7 @@
           <component id="c0374" class="javax.swing.JLabel">
             <constraints/>
             <properties>
-              <text value="Scan details"/>
+              <text value="Scan Details"/>
             </properties>
           </component>
         </children>

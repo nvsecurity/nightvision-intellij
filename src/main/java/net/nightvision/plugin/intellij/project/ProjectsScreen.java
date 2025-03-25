@@ -58,8 +58,7 @@ public class ProjectsScreen extends Screen {
                 int selectedRow = projectsTable.getSelectedRow();
                 if (selectedRow != -1) {
                     ProjectInfo selectedProjectInfo = ((ProjectsTableModel) projectsTable.getModel()).getProjectInfoAt(selectedRow);
-//                    mainWindowFactory.openProjectInfoDetailsPage(selectedProjectInfo);
-                    // TODO
+                    mainWindowFactory.openProjectInfoDetailsPage(selectedProjectInfo);
                 }
             }
         });

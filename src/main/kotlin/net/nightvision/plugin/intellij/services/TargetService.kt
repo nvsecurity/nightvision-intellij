@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken
 import net.nightvision.plugin.intellij.Constants
 import net.nightvision.plugin.intellij.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.intellij.PaginatedResult
-import net.nightvision.plugin.intellij.models.ProjectInfo
 import net.nightvision.plugin.intellij.models.TargetInfo
 import net.nightvision.plugin.intellij.models.TargetURL
 import java.net.http.HttpClient
@@ -25,7 +24,7 @@ object TargetService {
             suffix += "/" + targetType.lowercase()
         }
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor(suffix, mapOf("project" to ProjectService.getCurrentProjectId())))
+            .uri(Constants.getApiUrlFor(suffix, mapOf("project" to ProjectService.getCurrentProjectId())))
             .header("Authorization", "Token $token")
             .build()
 
@@ -43,7 +42,7 @@ object TargetService {
         val suffix = "targets/${targetType.lowercase()}/${targetId}"
 
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor(suffix))
+            .uri(Constants.getApiUrlFor(suffix))
             .header("Authorization", "Token $token")
             .build()
 
@@ -61,7 +60,7 @@ object TargetService {
         val suffix = "targets/openapi/${targetId}/get-spec-url"
 
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getUrlFor(suffix))
+            .uri(Constants.getApiUrlFor(suffix))
             .header("Authorization", "Token $token")
             .build()
 

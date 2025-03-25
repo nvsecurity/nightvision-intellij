@@ -7,7 +7,9 @@ import net.nightvision.plugin.intellij.auth.AuthenticationDetailsScreen
 import net.nightvision.plugin.intellij.auth.AuthenticationsCreateScreen
 import net.nightvision.plugin.intellij.auth.AuthenticationsScreen
 import net.nightvision.plugin.intellij.models.AuthInfo
+import net.nightvision.plugin.intellij.models.ProjectInfo
 import net.nightvision.plugin.intellij.models.TargetInfo
+import net.nightvision.plugin.intellij.project.ProjectDetailsScreen
 import net.nightvision.plugin.intellij.project.ProjectsCreateScreen
 import net.nightvision.plugin.intellij.project.ProjectsScreen
 import net.nightvision.plugin.intellij.scans.ScanDetailsScreen
@@ -74,13 +76,13 @@ class MainWindowFactory : ToolWindowFactory {
         }
     }
 
-    fun openScansDetailsPage(scan: Scan) {
+    fun openScansDetailsPage(scanInfo: ScanInfo) {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(
                 ScanDetailsScreen(
                     project,
-                    scan
+                    scanInfo
                 ).scanDetailsPanel)
             window.component.revalidate()
         }
@@ -136,6 +138,19 @@ class MainWindowFactory : ToolWindowFactory {
             window.component.revalidate()
         }
     }
+
+    fun openProjectInfoDetailsPage(projectInfo: ProjectInfo) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(
+                ProjectDetailsScreen(
+                    project,
+                    projectInfo
+                ).projectDetailsPanel)
+            window.component.revalidate()
+        }
+    }
+
 
     fun openProjectCreatePage() {
         toolWindow?.let { window ->

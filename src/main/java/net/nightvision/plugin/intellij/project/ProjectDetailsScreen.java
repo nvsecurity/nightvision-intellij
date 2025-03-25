@@ -1,9 +1,9 @@
-package net.nightvision.plugin.intellij.scans;
+package net.nightvision.plugin.intellij.project;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.Constants;
-import net.nightvision.plugin.intellij.ScanInfo;
 import net.nightvision.plugin.intellij.Screen;
+import net.nightvision.plugin.intellij.models.ProjectInfo;
 import net.nightvision.plugin.intellij.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,34 +15,32 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Objects;
 
-public class ScanDetailsScreen extends Screen {
-    private JPanel scanDetailsPanel;
-    private JPanel detailsPanel;
+public class ProjectDetailsScreen extends Screen {
+    private JPanel projectDetailsPanel;
     private JButton backButton;
+    private JPanel detailsPanel;
 
-    public JPanel getScanDetailsPanel() {
-        return scanDetailsPanel;
+    public JPanel getProjectDetailsPanel() {
+        return projectDetailsPanel;
     }
 
-    public ScanDetailsScreen (Project project, ScanInfo scanInfo) {
+    public ProjectDetailsScreen(Project project, ProjectInfo projectInfo) {
         super(project);
 
         backButton.addActionListener(e -> {
-            mainWindowFactory.openScansPage();
+            mainWindowFactory.openProjectsPage();
         });
         backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        BoxLayout layout0 = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
-        detailsPanel.setLayout(layout0);
+        BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
+        detailsPanel.setLayout(boxLayout);
 
-        String[] keysList = { "Project Name:", "Target Name:", "Target Type:", "Date Created:",
-                "Authentication Name:", "Check in Browser:" };
+        String[] keysList = { "Project Name:", "Date Created:", "Last Updated:", "Check in Browser:" };
 
-        HashMap<Integer, String> detailsDictionary = getScanDetailsHashMap(scanInfo);
+        HashMap<Integer, String> detailsDictionary = getProjectDetailsHashMap(projectInfo);
 
         for (Integer i : detailsDictionary.keySet()) {
             String key = keysList[i];
@@ -68,7 +66,7 @@ public class ScanDetailsScreen extends Screen {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         try {
-                            URI uri = Constants.Companion.getAppUrlFor("scans/" + scanInfo.getId() + "/findings");
+                            URI uri = Constants.Companion.getAppUrlFor("projects/" + projectInfo.getId());
                             Desktop.getDesktop().browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -89,16 +87,12 @@ public class ScanDetailsScreen extends Screen {
     }
 
     @NotNull
-    private HashMap<Integer, String> getScanDetailsHashMap(ScanInfo scanInfo) {
+    private HashMap<Integer, String> getProjectDetailsHashMap(ProjectInfo projectInfo) {
         HashMap<Integer, String> detailsDictionary = new HashMap<>();
-        detailsDictionary.put(0, scanInfo.getProject().getName());
-        detailsDictionary.put(1, scanInfo.getTargetName());
-        detailsDictionary.put(2, scanInfo.getTargetType());
-        detailsDictionary.put(3, ZonedDateTime.parse(scanInfo.getCreatedAt()).format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm:ss a")));
-        if (scanInfo.getCredentials() != null) {
-            detailsDictionary.put(4, scanInfo.getCredentials().getName());
-        }
-        detailsDictionary.put(5, "➡\uFE0F View Scan");
+        detailsDictionary.put(0, projectInfo.getName());
+        detailsDictionary.put(1, ZonedDateTime.parse(projectInfo.getCreatedAt()).format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm:ss a")));
+        detailsDictionary.put(2, ZonedDateTime.parse(projectInfo.getLastUpdatedAt()).format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm:ss a")));
+        detailsDictionary.put(3, "➡\uFE0F View Project");
 
         return detailsDictionary;
     }

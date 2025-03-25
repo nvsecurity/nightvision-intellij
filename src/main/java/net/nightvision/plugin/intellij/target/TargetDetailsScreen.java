@@ -1,6 +1,7 @@
 package net.nightvision.plugin.intellij.target;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.intellij.Constants;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.TargetInfo;
@@ -80,17 +81,13 @@ public class TargetDetailsScreen extends Screen {
             }
 
             if ("Check in Browser:".equals(key)) {
-                // Set the cursor to hand so the user knows it's clickable.
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                // Remove any default tooltip if needed.
                 value.setToolTipText("Click to open in browser");
-                // Add a mouse listener to open the browser when clicked.
                 value.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         try {
-                            // Create the URI for the link. Here, we construct it using the scan's id.
-                            URI uri = new URI("https://app.nightvision.net/targets/" + targetInfo.getId());
+                            URI uri = Constants.Companion.getAppUrlFor("targets/" + targetInfo.getId());
                             Desktop.getDesktop().browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();

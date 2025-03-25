@@ -43,8 +43,8 @@ public class ScansScreen extends Screen {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = scansTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    Scan selectedScan = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
-                    mainWindowFactory.openScansDetailsPage(selectedScan);
+                    ScanInfo selectedScanInfo = ((ScansTableModel)scansTable.getModel()).getScanAt(selectedRow);
+                    mainWindowFactory.openScansDetailsPage(selectedScanInfo);
                 }
             }
         });
@@ -147,17 +147,17 @@ public class ScansScreen extends Screen {
         scansTable.setVisible(false);
     }
 
-    private class LoadScansWorker extends SwingWorker<List<Scan>, Void> {
+    private class LoadScansWorker extends SwingWorker<List<ScanInfo>, Void> {
         @Override
-        protected List<Scan> doInBackground() throws Exception {
+        protected List<ScanInfo> doInBackground() throws Exception {
             return ScanService.INSTANCE.getScans();
         }
 
         @Override
         protected void done() {
             try {
-                List<Scan> scans = get();
-                ((ScansTableModel) scansTable.getModel()).setScans(scans);
+                List<ScanInfo> scanInfos = get();
+                ((ScansTableModel) scansTable.getModel()).setScans(scanInfos);
 
                 loadingPanelParent.remove(loadingPanel);
                 loadingPanelParent.revalidate();
@@ -170,22 +170,22 @@ public class ScansScreen extends Screen {
 
     static class ScansTableModel extends AbstractTableModel {
         private final List<String> columns = List.of("TARGET", "LOCATION", /*"PROJECT",*/ "VULNERABILITIES");
-        private List<Scan> scans = List.of();
+        private List<ScanInfo> scanInfos = List.of();
 
-        public void setScans(List<Scan> scans) {
-            if (scans != null) {
-                this.scans = scans;
+        public void setScans(List<ScanInfo> scanInfos) {
+            if (scanInfos != null) {
+                this.scanInfos = scanInfos;
                 fireTableDataChanged();
             }
         }
 
-        public Scan getScanAt(int row) {
-            return scans.get(row);
+        public ScanInfo getScanAt(int row) {
+            return scanInfos.get(row);
         }
 
         @Override
         public int getRowCount() {
-            return scans.size();
+            return scanInfos.size();
         }
 
         @Override
@@ -200,16 +200,16 @@ public class ScansScreen extends Screen {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            Scan scan = scans.get(rowIndex);
-            VulnerablePathStatistics scanStat = scan.getVulnPathStatistics();
-            boolean isOpenapi = scan.getTargetType().equals("OpenAPI");
+            ScanInfo scanInfo = scanInfos.get(rowIndex);
+            VulnerablePathStatistics scanStat = scanInfo.getVulnPathStatistics();
+            boolean isOpenapi = scanInfo.getTargetType().equals("OpenAPI");
 
             Icon icon = IconUtils.getIcon(isOpenapi ? "/icons/openapi-scan.svg" : "/icons/web-scan.svg", 0.7f);
             return switch (columnIndex) {
-                case 0 -> new JLabel(scan.getTargetName(), icon, JLabel.LEFT);
-                case 1 -> scan.getLocation();
+                case 0 -> new JLabel(scanInfo.getTargetName(), icon, JLabel.LEFT);
+                case 1 -> scanInfo.getLocation();
 //                case 2 -> scan.getProject().getName();
-                case 2 -> scan.getStatusValue().equalsIgnoreCase("RUNNING") ? new int[]{} : new int[] {scanStat.getCritical(), scanStat.getHigh(), scanStat.getMedium(), scanStat.getLow(), scanStat.getInformational()};
+                case 2 -> scanInfo.getStatusValue().equalsIgnoreCase("RUNNING") ? new int[]{} : new int[] {scanStat.getCritical(), scanStat.getHigh(), scanStat.getMedium(), scanStat.getLow(), scanStat.getInformational()};
                 default -> "";
             };
         }
