@@ -14,7 +14,7 @@
        Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    NightVision plugin for IntelliJ IDEA.
+    NightVision plugin for IntelliJ IDEA - Document APIs, run DAST scans, and uncover vulnerabilities in both known and unknown endpoints!
   ]]></description>
 
   <!-- Product and plugin compatibility requirements.
@@ -25,7 +25,7 @@
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="NightVision" secondary="true" icon="AllIcons.General.Modified" anchor="right"
-                factoryClass="net.nightvision.plugin.intellij.MainWindowFactory" />
+                factoryClass="net.nightvision.plugin.MainWindowFactory" />
   </extensions>
 
   <!-- It is an interesting feature, maybe we can consider using these actions, so leaving it here for reference... -->
