@@ -17,6 +17,7 @@ public class Loading {
 
         Icon icon = Utils.getIcon("/icons/nightvision.svg", 5f);
         JLabel loadingLabel = new JLabel("Loading...", icon, JLabel.LEFT);
+        loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         loadingPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         loadingPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

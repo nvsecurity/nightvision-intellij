@@ -16,7 +16,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.Objects;
+
+import static net.nightvision.plugin.intellij.Constants.CONTACT_EMAIL;
 
 public class ApiDiscovery extends Screen {
     private JPanel apiDiscoveryPanel;
@@ -33,8 +34,6 @@ public class ApiDiscovery extends Screen {
     private JButton backButton;
     private JPanel backButtonPanel;
     private JPanel loadingPanel;
-
-    private static final String CONTACT_EMAIL = "support@nightvision.net";
 
     private final String[] LANGUAGES = new String[] {
         "Java",
@@ -54,8 +53,14 @@ public class ApiDiscovery extends Screen {
         apiDiscoveryPanel.removeAll();
         resultsPanel.setLayout(new FlowLayout(FlowLayout. LEFT));
 
-        backButton.addActionListener(e -> mainWindow.openOverviewPage());
+        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backButton.addActionListener(e -> mainWindowFactory.openOverviewPage());
+        uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
+        uploadButton.setBorder(null);
         uploadButton.addActionListener(e -> openFileDialog());
+        uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
@@ -72,7 +77,7 @@ public class ApiDiscovery extends Screen {
 
             new ExtractWorker(dirPath, lang).execute();
         });
-
+        submitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         pathToDirectory.getDocument().addDocumentListener(new DocumentListener() {
             private void updateButtonState() {
@@ -125,10 +130,6 @@ public class ApiDiscovery extends Screen {
 
         VirtualFile selectedDir = FileChooser.chooseFile(descriptor, project, null);
         if (selectedDir != null) {
-            System.out.println(selectedDir.getPath());
-            System.out.println(pathToDirectory.getText());
-            System.out.println(apiLangCombobox.getSelectedItem());
-
             pathToDirectory.setText(selectedDir.getPath());
         }
     }

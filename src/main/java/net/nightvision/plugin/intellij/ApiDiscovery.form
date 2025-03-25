@@ -57,7 +57,6 @@
                   <alignmentY value="0.5"/>
                   <horizontalAlignment value="0"/>
                   <horizontalTextPosition value="0"/>
-                  <icon value="actions/upload.png"/>
                   <maximumSize width="34" height="34"/>
                   <minimumSize width="34" height="34"/>
                   <preferredSize width="34" height="34"/>
@@ -140,7 +139,6 @@
           <component id="8c58e" class="javax.swing.JButton" binding="backButton">
             <constraints/>
             <properties>
-              <icon value="actions/back.png"/>
               <label value=""/>
               <maximumSize width="34" height="34"/>
               <minimumSize width="34" height="34"/>

@@ -15,6 +15,15 @@ data class Scan(
     @SerializedName("created_at")
     val createdAt: String,
 
+    @SerializedName("started_at")
+    val startedAt: String,
+
+    @SerializedName("ended_at")
+    val endedAt: String,
+
+    @SerializedName("status_value")
+    val statusValue: String,
+
     @SerializedName("vulnerable_paths_statistics")
     val vulnPathStatistics: VulnerablePathStatistics,
 

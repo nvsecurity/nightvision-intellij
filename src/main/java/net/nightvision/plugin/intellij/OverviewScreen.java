@@ -1,41 +1,84 @@
 package net.nightvision.plugin.intellij;
 
 import javax.swing.*;
-import java.awt.*;
+
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
+
+import java.awt.*;
+
+import static javax.swing.SwingConstants.CENTER;
 
 public class OverviewScreen extends Screen {
+    private static boolean isExtraOptionsVisible = false;
     private JPanel overviewPanel;
+//    private JPanel extraButtonsPanel;
+    private JButton apiDiscoveryButton;
+    private JButton apiAndWebSecurityButton;
+    private JPanel extraOptionsPanel;
+    private JButton scansButton;
+    private JButton targetsButton;
+    private JButton authenticationsButton;
+    private JButton projectsButton;
 
     public JPanel getOverviewPanel() {
         return overviewPanel;
     }
 
+    private void setExtraOptionsActivatedTheme() {
+        if (extraOptionsPanel.isVisible()) {
+            apiAndWebSecurityButton.setBackground(JBColor.CYAN);
+        } else {
+            apiAndWebSecurityButton.setBackground(JBColor.WHITE);
+        }
+
+    }
+
     public OverviewScreen(Project project) {
         super(project);
+
+        extraOptionsPanel.setVisible(isExtraOptionsVisible);
+        setExtraOptionsActivatedTheme();
+
+        apiDiscoveryButton.setIcon(Utils.getIcon("/icons/api-discovery.svg", 1f));
+        apiDiscoveryButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        apiDiscoveryButton.setHorizontalTextPosition(CENTER);
+        apiDiscoveryButton.addActionListener(e ->  mainWindowFactory.openApiDiscoveryPage());
+        apiDiscoveryButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        apiAndWebSecurityButton.setIcon(Utils.getIcon("/icons/dast.svg", 1f));
+        apiAndWebSecurityButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        apiAndWebSecurityButton.setHorizontalTextPosition(CENTER);
+        apiAndWebSecurityButton.addActionListener(e -> {
+            isExtraOptionsVisible = !isExtraOptionsVisible;
+            extraOptionsPanel.setVisible(isExtraOptionsVisible);
+            setExtraOptionsActivatedTheme();
+        });
+        apiAndWebSecurityButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        scansButton.setIcon(Utils.getIcon("/icons/scans.svg", 1f));
+        scansButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        scansButton.setHorizontalTextPosition(CENTER);
+        scansButton.addActionListener(e ->  mainWindowFactory.openScansPage());
+        scansButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        targetsButton.setIcon(Utils.getIcon("/icons/targets.svg", 1f));
+        targetsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        targetsButton.setHorizontalTextPosition(CENTER);
+        targetsButton.addActionListener(e -> mainWindowFactory.openTargetsPage());
+        targetsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        authenticationsButton.setIcon(Utils.getIcon("/icons/authentications.svg", 1f));
+        authenticationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        authenticationsButton.setHorizontalTextPosition(CENTER);
+        authenticationsButton.addActionListener(e -> mainWindowFactory.openAuthenticationsPage());
+        authenticationsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        projectsButton.setIcon(Utils.getIcon("/icons/projects.svg", 1f));
+        projectsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+        projectsButton.setHorizontalTextPosition(CENTER);
+        projectsButton.addActionListener(e -> mainWindowFactory.openProjectsPage());
+        projectsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
-    private void createUIComponents() {
-        JPanel panel1 = new JPanel();
-        panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
-        panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JButton button1 = new JButton("API Discovery");
-        JButton button2 = new JButton("API and Web Security Testing");
-        button1.addActionListener(e ->  mainWindow.openApiDiscoveryPage());
-        button2.addActionListener(e ->  mainWindow.openApiAndWebTestingPage());
-        button1.setMaximumSize(new Dimension(Integer.MAX_VALUE, button1.getPreferredSize().height));
-        button2.setMaximumSize(new Dimension(Integer.MAX_VALUE, button2.getPreferredSize().height));
-
-        panel1.add(button1);
-        panel1.add(button2);
-
-        JLabel titleLabel = new JLabel("Overview");
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        overviewPanel = new JPanel();
-        overviewPanel.setLayout(new BoxLayout(overviewPanel, BoxLayout.Y_AXIS));
-        overviewPanel.add(titleLabel);
-        overviewPanel.add(panel1);
-    }
 }

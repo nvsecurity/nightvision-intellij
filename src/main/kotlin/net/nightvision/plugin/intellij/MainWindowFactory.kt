@@ -3,6 +3,21 @@ package net.nightvision.plugin.intellij
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import net.nightvision.plugin.intellij.auth.AuthenticationDetailsScreen
+import net.nightvision.plugin.intellij.auth.AuthenticationsCreateScreen
+import net.nightvision.plugin.intellij.auth.AuthenticationsScreen
+import net.nightvision.plugin.intellij.models.AuthInfo
+import net.nightvision.plugin.intellij.models.TargetInfo
+import net.nightvision.plugin.intellij.project.ProjectsCreateScreen
+import net.nightvision.plugin.intellij.project.ProjectsScreen
+import net.nightvision.plugin.intellij.scans.ScanDetailsScreen
+import net.nightvision.plugin.intellij.scans.ScansCreateScreen
+import net.nightvision.plugin.intellij.scans.ScansScreen
+import net.nightvision.plugin.intellij.services.LoginService
+import net.nightvision.plugin.intellij.services.ProjectService
+import net.nightvision.plugin.intellij.target.TargetDetailsScreen
+import net.nightvision.plugin.intellij.target.TargetsCreateScreen
+import net.nightvision.plugin.intellij.target.TargetsScreen
 
 class MainWindowFactory : ToolWindowFactory {
     private var toolWindow: ToolWindow? = null
@@ -19,7 +34,12 @@ class MainWindowFactory : ToolWindowFactory {
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        openLoginPage();
+        if (LoginService.bypassLoginStepIfAuthenticatedAlready()) {
+            ProjectService.fetchCurrentProjectName()
+            openOverviewPage()
+            return
+        }
+        openLoginPage()
     }
 
     fun openLoginPage() {
@@ -46,14 +66,6 @@ class MainWindowFactory : ToolWindowFactory {
         }
     }
 
-    fun openApiAndWebTestingPage() {
-        toolWindow?.let { window ->
-            window.component.removeAll()
-            window.component.add(ApiAndWebTestingScreen(project).apiAndWebTestingPanel)
-            window.component.revalidate()
-        }
-    }
-
     fun openScansPage() {
         toolWindow?.let { window ->
             window.component.removeAll()
@@ -65,7 +77,94 @@ class MainWindowFactory : ToolWindowFactory {
     fun openScansDetailsPage(scan: Scan) {
         toolWindow?.let { window ->
             window.component.removeAll()
-            window.component.add(ScanDetailsScreen(project, scan).scanDetailsPanel)
+            window.component.add(
+                ScanDetailsScreen(
+                    project,
+                    scan
+                ).scanDetailsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openScanCreatePage(scanType: String) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(
+                ScansCreateScreen(
+                    project,
+                    scanType
+                ).scansCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthenticationsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(AuthenticationsScreen(project).authenticationsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthInfoDetailsPage(authInfo: AuthInfo) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(
+                AuthenticationDetailsScreen(
+                    project,
+                    authInfo
+                ).authenticationDetailsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openAuthCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(
+                AuthenticationsCreateScreen(
+                    project
+                ).authenticationsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openProjectsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ProjectsScreen(project).projectsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openProjectCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ProjectsCreateScreen(project).projectsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetsPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetsScreen(project).targetsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetsCreatePage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetsCreateScreen(project).targetsCreatePanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openTargetInfoDetailsPage(selectedTargetInfo: TargetInfo) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(TargetDetailsScreen(project, selectedTargetInfo).targetDetailsPanel)
             window.component.revalidate()
         }
     }
