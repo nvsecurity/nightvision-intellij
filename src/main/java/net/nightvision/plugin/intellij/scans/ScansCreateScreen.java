@@ -14,6 +14,7 @@ import net.nightvision.plugin.intellij.services.ScanService;
 import net.nightvision.plugin.intellij.services.TargetService;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class ScansCreateScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
             loadTargetComboBox();
@@ -68,8 +70,8 @@ public class ScansCreateScreen extends Screen {
                 errorMessageLabel.setVisible(true);
                 startScanButton.setEnabled(true);
             }
-
         });
+        startScanButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         targetComboBox.setRenderer(getCommonRendererForCombobox());
         authenticationComboBox.setRenderer(getCommonRendererForCombobox());

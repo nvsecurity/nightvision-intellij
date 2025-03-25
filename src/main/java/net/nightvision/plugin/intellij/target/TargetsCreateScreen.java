@@ -9,6 +9,7 @@ import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.services.TargetService;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class TargetsCreateScreen extends Screen {
     private JPanel targetsCreatePanel;
@@ -49,18 +50,22 @@ public class TargetsCreateScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
         uploadButton.setBorder(null);
         uploadButton.addActionListener(e -> openFileDialog());
+        uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         cancelApiTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
+        cancelApiTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         cancelWebTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
+        cancelWebTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         apiTargetSpecUrlTextField.setToolTipText("Enter URL here...");
 
@@ -82,6 +87,7 @@ public class TargetsCreateScreen extends Screen {
             }
 
         });
+        createWebTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         createApiTargetButton.addActionListener(e -> {
             errorMessageApiTarget.setVisible(false);
@@ -103,6 +109,7 @@ public class TargetsCreateScreen extends Screen {
             }
 
         });
+        createApiTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
     }
 

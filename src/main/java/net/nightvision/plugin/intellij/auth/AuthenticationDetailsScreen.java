@@ -31,6 +31,7 @@ public class AuthenticationDetailsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
         detailsPanel.setLayout(boxLayout);

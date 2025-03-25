@@ -1,6 +1,7 @@
 package net.nightvision.plugin.intellij.target;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.Utils;
@@ -12,7 +13,12 @@ import net.nightvision.plugin.intellij.services.TargetService;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 import java.util.List;
+
+import static net.nightvision.plugin.intellij.utils.TableUtils.addColumnDecorator;
+import static net.nightvision.plugin.intellij.utils.TableUtils.addHoverEffects;
+import static net.nightvision.plugin.intellij.utils.TableUtils.addHoverSupport;
 
 public class TargetsScreen extends Screen {
     private JButton backButton;
@@ -35,12 +41,14 @@ public class TargetsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
             loadTable();
         }));
 
         targetsTable.setModel(new TargetsTableModel());
+        addHoverEffects(targetsTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
         targetsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         targetsTable.setRowHeight(40);
 
@@ -51,6 +59,7 @@ public class TargetsScreen extends Screen {
         createTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsCreatePage();
         });
+        createTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         ListSelectionModel selectionModel = targetsTable.getSelectionModel();
         selectionModel.addListSelectionListener(e -> {
@@ -140,7 +149,7 @@ public class TargetsScreen extends Screen {
         @Override
         public Class<?> getColumnClass(int columnIndex) {
             return switch (columnIndex) {
-                case 0 -> String.class;
+                case 0, 1, 2 -> String.class;
                 default -> Object.class;
             };
         }

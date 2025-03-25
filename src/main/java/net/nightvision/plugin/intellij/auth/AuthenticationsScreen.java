@@ -1,6 +1,7 @@
 package net.nightvision.plugin.intellij.auth;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
 import net.nightvision.plugin.intellij.Utils;
@@ -11,7 +12,10 @@ import net.nightvision.plugin.intellij.services.AuthenticationService;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 import java.util.List;
+
+import static net.nightvision.plugin.intellij.utils.TableUtils.addHoverEffects;
 
 public class AuthenticationsScreen extends Screen {
 
@@ -36,6 +40,7 @@ public class AuthenticationsScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
             loadTable();
@@ -44,11 +49,10 @@ public class AuthenticationsScreen extends Screen {
         createAuthenticationButton.addActionListener(e -> {
             mainWindowFactory.openAuthCreatePage();
         });
+        createAuthenticationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         authsTable.setModel(new AuthsTableModel());
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        authsTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        addHoverEffects(authsTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
         authsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         authsTable.setRowHeight(40);
 

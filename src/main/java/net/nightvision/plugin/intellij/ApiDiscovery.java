@@ -55,10 +55,12 @@ public class ApiDiscovery extends Screen {
 
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backButton.addActionListener(e -> mainWindowFactory.openOverviewPage());
         uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
         uploadButton.setBorder(null);
-        backButton.addActionListener(e -> mainWindowFactory.openOverviewPage());
         uploadButton.addActionListener(e -> openFileDialog());
+        uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         submitButton.addActionListener(e -> {
             String lang = apiLangCombobox.getSelectedItem().toString();
             String dirPath = pathToDirectory.getText();
@@ -75,7 +77,7 @@ public class ApiDiscovery extends Screen {
 
             new ExtractWorker(dirPath, lang).execute();
         });
-
+        submitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         pathToDirectory.getDocument().addDocumentListener(new DocumentListener() {
             private void updateButtonState() {

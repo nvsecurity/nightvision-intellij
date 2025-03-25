@@ -6,6 +6,7 @@ import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.services.ProjectService;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ProjectsCreateScreen extends Screen {
     private JButton backButton;
@@ -28,10 +29,12 @@ public class ProjectsCreateScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
         });
+        cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
@@ -48,5 +51,6 @@ public class ProjectsCreateScreen extends Screen {
                 createButton.setEnabled(true);
             }
         });
+        createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }

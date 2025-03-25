@@ -27,5 +27,6 @@ public class LoginScreen extends Screen {
                 mainWindowFactory.openOverviewPage();
             }
         });
+        loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }

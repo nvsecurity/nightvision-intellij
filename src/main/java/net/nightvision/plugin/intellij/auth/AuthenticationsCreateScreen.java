@@ -6,6 +6,7 @@ import net.nightvision.plugin.intellij.Utils;
 import net.nightvision.plugin.intellij.services.AuthenticationService;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class AuthenticationsCreateScreen extends Screen {
     private JButton backButton;
@@ -32,10 +33,12 @@ public class AuthenticationsCreateScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });
+        cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         helpMessageLabel.setText("""
                <html><body>
@@ -63,7 +66,7 @@ public class AuthenticationsCreateScreen extends Screen {
                 errorMessage.setVisible(true);
                 createButton.setEnabled(true);
             }
-
         });
+        createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }

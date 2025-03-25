@@ -1,6 +1,7 @@
 package net.nightvision.plugin.intellij.scans;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.*;
 import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.ScanService;
@@ -12,6 +13,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import static javax.swing.SwingConstants.CENTER;
+import static net.nightvision.plugin.intellij.utils.TableUtils.addHoverEffects;
 
 public class ScansScreen extends Screen {
     private JTable scansTable;
@@ -31,6 +33,7 @@ public class ScansScreen extends Screen {
         super(project);
 
         scansTable.setModel(new ScansTableModel());
+        addHoverEffects(scansTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
         scansTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scansTable.setRowHeight(40);
 
@@ -50,6 +53,7 @@ public class ScansScreen extends Screen {
         });
         backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
             loadTable();
@@ -121,12 +125,14 @@ public class ScansScreen extends Screen {
         scanWebApplicationsButton.addActionListener(e -> {
             mainWindowFactory.openScanCreatePage("URL");
         });
+        scanWebApplicationsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         scanAPIsButton.setIcon(openApiIcon);
         scanAPIsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scanAPIsButton.setHorizontalTextPosition(CENTER);
         scanAPIsButton.addActionListener(e -> {
             mainWindowFactory.openScanCreatePage("OPENAPI");
         });
+        scanAPIsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 
         loadTable();
