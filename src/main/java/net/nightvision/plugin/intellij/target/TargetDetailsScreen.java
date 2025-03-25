@@ -26,7 +26,7 @@ public class TargetDetailsScreen extends Screen {
         return targetDetailsPanel;
     }
 
-    public TargetDetailsScreen(Project project, TargetInfo targetInfo) {
+    public TargetDetailsScreen(Project project, TargetInfo rawTargetInfo) {
         super(project);
 
         backButton.addActionListener(e -> {
@@ -44,6 +44,11 @@ public class TargetDetailsScreen extends Screen {
             "Check in Browser:"
             /*Excluded URL patterns*/ };
 
+        var targetInfo = TargetService.INSTANCE.getTargetSpecificInfo(rawTargetInfo.getType(), rawTargetInfo.getId());
+        if (targetInfo == null) {
+            targetInfo = rawTargetInfo;
+        }
+        final var finalTargetInfo = targetInfo;
         HashMap<Integer, String> targetDetailsDictionary = getTargetDetailsHashMap(targetInfo);
 
         for (Integer i : targetDetailsDictionary.keySet()) {
@@ -66,12 +71,30 @@ public class TargetDetailsScreen extends Screen {
             if ("API Spec:".equals(key)) {
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 value.setToolTipText("Click to download");
+                var specUrl = targetInfo.getSwaggerFileURL();
+                if (specUrl == null || specUrl.isBlank()) {
+                    specUrl = TargetService.INSTANCE.getSpecURL(targetInfo.getId());
+                }
+                final String finalSpecUrl = specUrl;
+                if (!specUrl.isBlank()) {
+                    var swaggerFileUrlName = specUrl.substring(specUrl.lastIndexOf('/') + 1);
+                    var swaggerFileName = value.getText();
+                    if (swaggerFileName.isBlank()) {
+                        swaggerFileName = swaggerFileUrlName;
+                        if (swaggerFileName.isBlank()) {
+                            swaggerFileName = "spec";
+                        }
+                    }
+                    value.setText(swaggerFileName);
+                }
+                value.setText("➡\uFE0F " + value.getText());
+
+
                 value.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         try {
-                            var specUrl = TargetService.INSTANCE.getSpecURL(targetInfo.getId());
-                            URI uri = new URI(specUrl);
+                            URI uri = new URI(finalSpecUrl);
                             Desktop.getDesktop().browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -87,7 +110,7 @@ public class TargetDetailsScreen extends Screen {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         try {
-                            URI uri = Constants.Companion.getAppUrlFor("targets/" + targetInfo.getId());
+                            URI uri = Constants.Companion.getAppUrlFor("targets/" + finalTargetInfo.getId());
                             Desktop.getDesktop().browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -108,11 +131,7 @@ public class TargetDetailsScreen extends Screen {
     }
 
     @NotNull
-    private HashMap<Integer, String> getTargetDetailsHashMap(TargetInfo rawTargetInfo) {
-        var targetInfo = TargetService.INSTANCE.getTargetSpecificInfo(rawTargetInfo.getType(), rawTargetInfo.getId());
-        if (targetInfo == null) {
-            targetInfo = rawTargetInfo;
-        }
+    private HashMap<Integer, String> getTargetDetailsHashMap(TargetInfo targetInfo) {
         HashMap<Integer, String> detailsDictionary = new HashMap<>();
         detailsDictionary.put(0, targetInfo.getName());
         detailsDictionary.put(1, targetInfo.getProjectName());
@@ -133,7 +152,11 @@ public class TargetDetailsScreen extends Screen {
         }
         detailsDictionary.put(7, targetInfo.getLocation());
         if (targetInfo.getHasSpecUploaded()) {
-            detailsDictionary.put(8, "➡\uFE0F " + targetInfo.getSwaggerFileName());
+            var swaggerFileName = targetInfo.getSwaggerFileName();
+            if (swaggerFileName == null) {
+                swaggerFileName = "";
+            }
+            detailsDictionary.put(8, swaggerFileName);
             var status = targetInfo.getSpecStatus();
             detailsDictionary.put(9, switch(status) {
                 case "NO_SPEC" -> "Spec/collection is not specified";
