@@ -4,14 +4,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
-import net.nightvision.plugin.intellij.Utils;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.AuthInfo;
 import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.AuthenticationService;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class AuthenticationsScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 

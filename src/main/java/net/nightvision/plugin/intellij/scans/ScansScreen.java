@@ -5,6 +5,7 @@ import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.*;
 import net.nightvision.plugin.intellij.project.ProjectSelectionPanel;
 import net.nightvision.plugin.intellij.services.ScanService;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +52,7 @@ public class ScansScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -96,7 +97,7 @@ public class ScansScreen extends Screen {
                         panel.add(label);
                     } else {
                         for (int vulnerability : val) {
-                            Icon i = Utils.getIcon("/icons/dot.svg", .8f);
+                            Icon i = IconUtils.getIcon("/icons/dot.svg", .8f);
                             JLabel label = new JLabel(String.valueOf(vulnerability), i, JLabel.LEFT);
                             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
                             panel.add(label);
@@ -117,8 +118,8 @@ public class ScansScreen extends Screen {
             }
         });
 
-        Icon openApiIcon = Utils.getIcon("/icons/openapi-scan.svg", 0.7f);
-        Icon webScanIcon = Utils.getIcon("/icons/web-scan.svg", 0.7f);
+        Icon openApiIcon = IconUtils.getIcon("/icons/openapi-scan.svg", 0.7f);
+        Icon webScanIcon = IconUtils.getIcon("/icons/web-scan.svg", 0.7f);
         scanWebApplicationsButton.setIcon(webScanIcon);
         scanWebApplicationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scanWebApplicationsButton.setHorizontalTextPosition(CENTER);
@@ -203,7 +204,7 @@ public class ScansScreen extends Screen {
             VulnerablePathStatistics scanStat = scan.getVulnPathStatistics();
             boolean isOpenapi = scan.getTargetType().equals("OpenAPI");
 
-            Icon icon = Utils.getIcon(isOpenapi ? "/icons/openapi-scan.svg" : "/icons/web-scan.svg", 0.7f);
+            Icon icon = IconUtils.getIcon(isOpenapi ? "/icons/openapi-scan.svg" : "/icons/web-scan.svg", 0.7f);
             return switch (columnIndex) {
                 case 0 -> new JLabel(scan.getTargetName(), icon, JLabel.LEFT);
                 case 1 -> scan.getLocation();

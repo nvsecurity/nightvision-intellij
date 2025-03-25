@@ -45,7 +45,7 @@ data class TargetURL(
 
 data class ConfigurationInfo(
     @SerializedName("excluded_url_patterns")
-    val excludedUrlPatterns: List<String>,
+    val excludedUrlPatterns: List<String>?,
     @SerializedName("excluded_x_paths")
-    val excludedXPaths: List<String>,
+    val excludedXPaths: List<String>?,
 )

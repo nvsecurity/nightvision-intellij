@@ -3,7 +3,7 @@ package net.nightvision.plugin.intellij.auth;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBTextArea;
 import net.nightvision.plugin.intellij.Screen;
-import net.nightvision.plugin.intellij.Utils;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.AuthInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +29,7 @@ public class AuthenticationDetailsScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 

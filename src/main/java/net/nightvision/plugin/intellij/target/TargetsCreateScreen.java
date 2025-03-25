@@ -5,7 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.nightvision.plugin.intellij.Screen;
-import net.nightvision.plugin.intellij.Utils;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.services.TargetService;
 
 import javax.swing.*;
@@ -48,11 +48,11 @@ public class TargetsCreateScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        uploadButton.setIcon(Utils.getIcon("/icons/custom-file-select.svg", 1f));
+        uploadButton.setIcon(IconUtils.getIcon("/icons/custom-file-select.svg", 1f));
         uploadButton.setBorder(null);
         uploadButton.addActionListener(e -> openFileDialog());
         uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

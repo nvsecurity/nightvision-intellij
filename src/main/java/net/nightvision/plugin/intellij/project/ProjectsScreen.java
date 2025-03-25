@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.intellij.Loading;
 import net.nightvision.plugin.intellij.Screen;
-import net.nightvision.plugin.intellij.Utils;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.ProjectInfo;
 import net.nightvision.plugin.intellij.services.ProjectService;
 
@@ -34,7 +34,7 @@ public class ProjectsScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 

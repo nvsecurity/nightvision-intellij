@@ -1,5 +1,7 @@
 package net.nightvision.plugin.intellij;
 
+import net.nightvision.plugin.intellij.utils.IconUtils;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,7 +17,7 @@ public class Loading {
         loadingPanel.setLayout(new BoxLayout(loadingPanel, BoxLayout.Y_AXIS));
         loadingPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        Icon icon = Utils.getIcon("/icons/nightvision.svg", 5f);
+        Icon icon = IconUtils.getIcon("/icons/nightvision.svg", 5f);
         JLabel loadingLabel = new JLabel("Loading...", icon, JLabel.LEFT);
         loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 

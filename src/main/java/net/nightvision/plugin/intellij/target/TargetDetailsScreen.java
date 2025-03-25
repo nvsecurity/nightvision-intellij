@@ -2,8 +2,7 @@ package net.nightvision.plugin.intellij.target;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.intellij.Screen;
-import net.nightvision.plugin.intellij.Utils;
-import net.nightvision.plugin.intellij.models.AuthInfo;
+import net.nightvision.plugin.intellij.utils.IconUtils;
 import net.nightvision.plugin.intellij.models.TargetInfo;
 import net.nightvision.plugin.intellij.services.TargetService;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,6 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class TargetDetailsScreen extends Screen {
     private JButton backButton;
@@ -33,7 +31,7 @@ public class TargetDetailsScreen extends Screen {
         backButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
-        backButton.setIcon(Utils.getIcon("/icons/back.svg", 1f));
+        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -157,12 +155,12 @@ public class TargetDetailsScreen extends Screen {
         var config = targetInfo.getConfiguration();
         if (config != null) {
             var excludedUrlPatterns = config.getExcludedUrlPatterns();
-            if (!excludedUrlPatterns.isEmpty()) {
+            if (excludedUrlPatterns != null && !excludedUrlPatterns.isEmpty()) {
                 // TODO
             }
 
             var excludedXPaths = config.getExcludedXPaths();
-            if (!excludedXPaths.isEmpty()) {
+            if (excludedXPaths != null && !excludedXPaths.isEmpty()) {
                 // TODO
             }
         }
