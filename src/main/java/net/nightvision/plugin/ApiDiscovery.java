@@ -9,6 +9,8 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.services.ApiDiscoveryService;
 import net.nightvision.plugin.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +19,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
 
 import static net.nightvision.plugin.Constants.CONTACT_EMAIL;
 
@@ -180,9 +183,21 @@ public class ApiDiscovery extends Screen {
 
                 resultsPanel.add(panel);
 
-            } catch (Exception ignore) {
-                JPanel site = getErrorPanel();
-                resultsPanel.add(site);
+            } catch (ExecutionException ex) {
+                var cause = ex.getCause();
+                if (cause instanceof CommandNotFoundException) {
+                    mainWindowFactory.openInstallCLIPage();
+                    return;
+                } else if (cause instanceof PermissionDeniedException) {
+                    JPanel errorPanel = getErrorPanel(ex.getMessage());
+                    resultsPanel.add(errorPanel);
+                } else {
+                    JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again. Details: " + cause.getClass().getName() + " - " + cause.getMessage() + "</html>");
+                    resultsPanel.add(errorPanel);
+                }
+            } catch (Exception ex) {
+                JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again. Details: " + ex.getClass().getName() + " - " + ex.getMessage() + "</html>");
+                resultsPanel.add(errorPanel);
             }
 
             enableEditing(true);
@@ -192,13 +207,13 @@ public class ApiDiscovery extends Screen {
         }
 
         @NotNull
-        private static JPanel getErrorPanel() {
+        private static JPanel getErrorPanel(String errorMessage) {
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             JPanel emailLabel = getEmailPanel();
-            JPanel errorLabel = getErrorLabelPanel();
+            JPanel errorLabel = getErrorLabelPanel(errorMessage);
             emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -224,7 +239,7 @@ public class ApiDiscovery extends Screen {
                     try {
                         Desktop desktop = Desktop.getDesktop();
                         if (desktop.isSupported(Desktop.Action.MAIL)) {
-                            URI mailto = new URI("mailto:example@example.com?subject=Hello&body=This is a test email.");
+                            URI mailto = new URI("mailto:support@nightvision.net?subject=Subject&body=Write your email...");
                             desktop.mail(mailto);
                         }
                     } catch (Exception ex) {
@@ -239,12 +254,12 @@ public class ApiDiscovery extends Screen {
         }
 
         @NotNull
-        private static JPanel getErrorLabelPanel() {
+        private static JPanel getErrorLabelPanel(String errorMessage) {
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            JLabel label = new JLabel("Error extracting API info. Please recheck the entered Path to the Root Directory and selected Language, then try again.");
+            JLabel label = new JLabel(errorMessage);
             label.setForeground(JBColor.red);
 
             panel.add(label);

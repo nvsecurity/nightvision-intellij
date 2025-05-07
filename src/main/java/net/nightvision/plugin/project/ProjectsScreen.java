@@ -3,6 +3,7 @@ package net.nightvision.plugin.project;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.Loading;
+import net.nightvision.plugin.MainWindowFactory;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.ProjectInfo;
@@ -38,7 +39,7 @@ public class ProjectsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             loadTable();
         }));
 

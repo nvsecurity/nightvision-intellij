@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import net.nightvision.plugin.auth.AuthenticationDetailsScreen
 import net.nightvision.plugin.auth.AuthenticationsCreateScreen
 import net.nightvision.plugin.auth.AuthenticationsScreen
+import net.nightvision.plugin.exceptions.CommandNotFoundException
 import net.nightvision.plugin.models.AuthInfo
 import net.nightvision.plugin.models.ProjectInfo
 import net.nightvision.plugin.models.TargetInfo
@@ -36,11 +37,17 @@ class MainWindowFactory : ToolWindowFactory {
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        if (LoginService.bypassLoginStepIfAuthenticatedAlready()) {
-            ProjectService.fetchCurrentProjectName()
-            openOverviewPage()
+        try {
+            if (LoginService.bypassLoginStepIfAuthenticatedAlready(project)) {
+                ProjectService.fetchCurrentProjectName()
+                openOverviewPage()
+                return
+            }
+        } catch (ex: CommandNotFoundException) {
+            openInstallCLIPage()
             return
         }
+
         openLoginPage()
     }
 
@@ -48,6 +55,14 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(LoginScreen(project).loginPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openInstallCLIPage() {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(InstallCLIScreen(project).loginPanel)
             window.component.revalidate()
         }
     }

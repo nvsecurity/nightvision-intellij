@@ -2,6 +2,8 @@ package net.nightvision.plugin.auth;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Screen;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.AuthenticationService;
 
@@ -65,11 +67,14 @@ public class AuthenticationsCreateScreen extends Screen {
             try {
                 AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
                 mainWindowFactory.openAuthenticationsPage();
+            } catch (CommandNotFoundException ex) {
+                mainWindowFactory.openInstallCLIPage();
             } catch(Exception exception) {
                 errorMessage.setText(exception.getMessage());
                 errorMessage.setVisible(true);
-                createButton.setEnabled(true);
             }
+
+            createButton.setEnabled(true);
         });
         createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }

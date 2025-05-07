@@ -6,6 +6,7 @@ import net.nightvision.plugin.Constants
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.ScanInfo
 import net.nightvision.plugin.PaginatedResult
+import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -26,7 +27,7 @@ object ScanService {
         val type = object : TypeToken<PaginatedResult<ScanInfo>>() {}.type
         val responseData: PaginatedResult<ScanInfo> = gson.fromJson(response.body(), type)
         //println(responseData.results)
-        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun startScan(targetName: String, authenticationName: String?) {
@@ -39,13 +40,9 @@ object ScanService {
             cmd.add("--auth")
             cmd.add(authenticationName)
         }
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
 
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val id = t.trim().takeIf { Regex("INFO Scan Details").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details

@@ -2,6 +2,7 @@ package net.nightvision.plugin.project;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Screen;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.ProjectService;
 
@@ -45,11 +46,14 @@ public class ProjectsCreateScreen extends Screen {
             try {
                 ProjectService.INSTANCE.createProject(projectName);
                 mainWindowFactory.openProjectsPage();
+            } catch (CommandNotFoundException ex) {
+                mainWindowFactory.openInstallCLIPage();
             } catch(Exception exception) {
                 errorMessage.setText(exception.getMessage());
                 errorMessage.setVisible(true);
-                createButton.setEnabled(true);
             }
+
+            createButton.setEnabled(true);
         });
         createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }

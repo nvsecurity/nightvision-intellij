@@ -5,6 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.nightvision.plugin.Screen;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.TargetService;
 
@@ -79,12 +80,14 @@ public class TargetsCreateScreen extends Screen {
             try {
                 TargetService.INSTANCE.createWebTarget(targetName, targetURL);
                 mainWindowFactory.openTargetsPage();
+            } catch (CommandNotFoundException ex) {
+                mainWindowFactory.openInstallCLIPage();
             } catch(Exception exception) {
                 errorMessageWebTarget.setText(exception.getMessage());
                 errorMessageWebTarget.setVisible(true);
-            } finally {
-                createWebTargetButton.setEnabled(true);
             }
+
+            createWebTargetButton.setEnabled(true);
 
         });
         createWebTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

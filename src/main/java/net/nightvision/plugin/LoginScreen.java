@@ -1,6 +1,8 @@
 package net.nightvision.plugin;
 
 import com.intellij.openapi.project.Project;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.LoginService;
 import net.nightvision.plugin.services.ProjectService;
 
@@ -18,14 +20,17 @@ public class LoginScreen extends Screen {
     public LoginScreen(Project project) {
         super(project);
 
-        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
-        loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, loginButton.getPreferredSize().height));
         loginButton.addActionListener(e -> {
-            boolean success = LoginService.INSTANCE.login();
-            if (success) {
-                ProjectService.INSTANCE.fetchCurrentProjectName();
-                mainWindowFactory.openOverviewPage();
+            try {
+                boolean success = LoginService.INSTANCE.login(project);
+                if (success) {
+                    ProjectService.INSTANCE.fetchCurrentProjectName();
+                    mainWindowFactory.openOverviewPage();
+                }
+            } catch (CommandNotFoundException ex) {
+                mainWindowFactory.openInstallCLIPage();
             }
+
         });
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
