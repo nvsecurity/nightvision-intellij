@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.TargetService;
 
@@ -82,6 +83,10 @@ public class TargetsCreateScreen extends Screen {
                 mainWindowFactory.openTargetsPage();
             } catch (CommandNotFoundException ex) {
                 mainWindowFactory.openInstallCLIPage();
+                return;
+            } catch (NotLoggedException ex) {
+                mainWindowFactory.openLoginPage();
+                return;
             } catch(Exception exception) {
                 errorMessageWebTarget.setText(exception.getMessage());
                 errorMessageWebTarget.setVisible(true);

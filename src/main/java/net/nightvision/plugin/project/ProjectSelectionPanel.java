@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBPanel;
 import net.nightvision.plugin.MainWindowFactory;
 import net.nightvision.plugin.MainWindowService;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.services.ProjectService;
 
@@ -71,6 +72,8 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
                     }
                 } catch (CommandNotFoundException ex) {
                     mainWindowFactory.openInstallCLIPage();
+                } catch (NotLoggedException ex) {
+                    mainWindowFactory.openLoginPage();
                 } catch(Exception exception) {
                     // TODO: handle better this exception, e.g. show message...
                     // Exception here will happen if the project name is invalid or if some other error happened...

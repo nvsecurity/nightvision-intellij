@@ -3,6 +3,7 @@ package net.nightvision.plugin.scans;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.AuthInfo;
@@ -64,6 +65,8 @@ public class ScansCreateScreen extends Screen {
             try {
                 new StartScanWorker(targetName, authName).execute();
                 mainWindowFactory.openScansPage();
+            } catch (NotLoggedException ex) {
+                mainWindowFactory.openLoginPage();
             } catch(Exception exception) {
                 errorMessageLabel.setText(exception.getMessage());
                 errorMessageLabel.setVisible(true);

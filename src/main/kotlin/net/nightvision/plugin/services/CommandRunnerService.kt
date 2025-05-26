@@ -1,5 +1,6 @@
 package net.nightvision.plugin.services
 
+import com.intellij.execution.ExecutionException
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level
@@ -9,6 +10,10 @@ import kotlinx.coroutines.withContext
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.exceptions.CommandNotFoundException
 import net.nightvision.plugin.exceptions.PermissionDeniedException
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.ProcessOutput
+import net.nightvision.plugin.exceptions.NotLoggedException
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -22,12 +27,44 @@ import java.util.concurrent.TimeUnit
 object CommandRunnerService {
     private val LOG = Logger.getInstance(CommandRunnerService::class.java)
 
+    fun getDestinationDirForPlatform(): String {
+        return if (System.getProperty("os.name").startsWith("Windows")) {
+            "${System.getProperty("user.home")}\\AppData\\Local\\NightVision\\bin"
+        } else {
+            "${System.getProperty("user.home")}/.local/nightvision/bin"
+        }
+    }
+
     data class ExecutionResponse(val output: String, val error: String)
+
+    private fun handleProcessResponse2(
+        command: String,
+        output: ProcessOutput
+    ): ExecutionResponse {
+        if (!output.isTimeout && output.exitCode == 0) {
+            println("Success: ${output.stdout.trim()}")
+        } else {
+            LOG.warn("Command exited with ${output.exitCode}: ${command}. Error: ${output.stderr.trim()}")
+            if (output.isTimeout) {
+                throw RuntimeException("The command timed out")
+            } else {
+                throw RuntimeException(
+                    "The command failed (exit=${output.exitCode}):\n${output.stderr.trim()}"
+                )
+            }
+        }
+
+        return ExecutionResponse(
+            output=output.stdout.trim(),
+            error=output.stderr.trim()
+        )
+    }
 
     private fun handleProcessResponse(
         command: String,
         process: Process
     ): ExecutionResponse {
+
         val output = process.inputStream.bufferedReader().use(BufferedReader::readText)
         val error = process.errorStream.bufferedReader().use(BufferedReader::readText)
 
@@ -53,20 +90,26 @@ object CommandRunnerService {
         unit: TimeUnit = TimeUnit.SECONDS
     ): ExecutionResponse {
         try {
-            val process = ProcessBuilder(*command)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start()
+            val destDir = getDestinationDirForPlatform()
+            val originalPath = System.getenv("PATH") ?: ""
+            val newPath = if (originalPath.startsWith(destDir)) {
+                originalPath
+            } else {
+                destDir + File.pathSeparator + originalPath
+            }
 
-    //        TODO: Need testing to see if this waitFor is really working or not. It seems not, so let's disable it
-    //        if (!process.waitFor(timeout, unit)) {
-    //            process.destroy()
-    //            throw RuntimeException("Command timed out: ${command.joinToString(" ")}")
-    //        }
+            val cmd = GeneralCommandLine(*command)
+                .withEnvironment("PATH", newPath)
+            val capHandler = CapturingProcessHandler(cmd)
+            val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
 
-            return handleProcessResponse(command.joinToString(" "), process)
-        } catch (io: IOException) {
-            throw getSpecificIOException(command.toList(), io)
+            return handleProcessResponse2(command.joinToString(" "), output)
+        } catch (e: IOException) {
+            throw getSpecificException(command.toList(), e)
+        } catch (e: RuntimeException) {
+            throw getSpecificException(command.toList(), e)
+        } catch (e: ExecutionException) {
+            throw RuntimeException("Failed to launch the command", e)
         }
 
     }
@@ -76,6 +119,21 @@ object CommandRunnerService {
      * Returns a [CompletableFuture] that completes with stdout or exceptionally on failure.
      */
     fun runCommandAsync(vararg command: String): CompletableFuture<ExecutionResponse> {
+//        val cmd = GeneralCommandLine(*command)
+//            .withEnvironment("PATH", newPath)
+
+//            val handler = OSProcessHandler(cmd)
+//            handler.startNotify()
+//            if (!handler.waitFor(timeout*1000)) {
+//                handler.destroyProcess()  // timed out, forcibly kill
+//                throw RuntimeException("The command did not finish within $timeout seconds")
+//            }
+//            val exitCode = handler.exitCode
+//            if (exitCode != 0) {
+//                throw RuntimeException("The command exited with code $exitCode")
+//            }
+
+        // TODO: Rewrite this to use GeneralCommandLine + OSProcessHandler?
         return CompletableFuture.supplyAsync({
             try {
                 runCommandSync(*command)
@@ -92,6 +150,9 @@ object CommandRunnerService {
             "--no-upload",
             "--output", fileName)
         try {
+            // TODO: Rewrite this to use GeneralCommandLine
+            // TODO: Rewrite this to use GeneralCommandLine
+            // TODO: Rewrite this to use GeneralCommandLine
             val process = withContext(Dispatchers.IO) {
                 ProcessBuilder(*command.toTypedArray())
                     .directory(File(directory))
@@ -107,13 +168,23 @@ object CommandRunnerService {
             }
 
             return handleProcessResponse(command.joinToString(" "), process)
-        } catch (io: IOException) {
-            throw getSpecificIOException(command, io)
+        } catch (e: IOException) {
+            throw getSpecificException(command.toList(), e)
+        } catch (e: RuntimeException) {
+            throw getSpecificException(command.toList(), e)
         }
 
     }
 
-    fun getSpecificIOException(command: List<String>, io: IOException): Exception {
+    fun getSpecificException(command: List<String>, e: Exception): Exception {
+        var k = getSpecificIOException(command, e)
+        if (k == e) {
+            k = getSpecificRuntimeException(command, e)
+        }
+        return k
+    }
+
+    fun getSpecificIOException(command: List<String>, io: Exception): Exception {
         val msg = io.message ?: ""
         when {
             "error=2" in msg || "No such file or directory" in msg ->
@@ -122,6 +193,15 @@ object CommandRunnerService {
                 return PermissionDeniedException(command)
             else ->
                 return io
+        }
+    }
+
+    fun getSpecificRuntimeException(command: List<String>, e: Exception): Exception {
+        val msg = e.message ?: ""
+        when {
+            "token has expired. Please try to log in again" in msg ->
+                return NotLoggedException(command)
+            else -> return e
         }
     }
 

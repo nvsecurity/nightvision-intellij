@@ -7,6 +7,7 @@ import net.nightvision.plugin.auth.AuthenticationDetailsScreen
 import net.nightvision.plugin.auth.AuthenticationsCreateScreen
 import net.nightvision.plugin.auth.AuthenticationsScreen
 import net.nightvision.plugin.exceptions.CommandNotFoundException
+import net.nightvision.plugin.exceptions.NotLoggedException
 import net.nightvision.plugin.models.AuthInfo
 import net.nightvision.plugin.models.ProjectInfo
 import net.nightvision.plugin.models.TargetInfo
@@ -45,6 +46,9 @@ class MainWindowFactory : ToolWindowFactory {
             }
         } catch (ex: CommandNotFoundException) {
             openInstallCLIPage()
+            return
+        } catch (ex: NotLoggedException) {
+            openLoginPage()
             return
         }
 

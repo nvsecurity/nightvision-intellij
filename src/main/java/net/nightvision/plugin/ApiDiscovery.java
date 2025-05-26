@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.services.ApiDiscoveryService;
 import net.nightvision.plugin.utils.IconUtils;
@@ -191,12 +192,15 @@ public class ApiDiscovery extends Screen {
                 } else if (cause instanceof PermissionDeniedException) {
                     JPanel errorPanel = getErrorPanel(ex.getMessage());
                     resultsPanel.add(errorPanel);
+                } else if (cause instanceof NotLoggedException) {
+                    mainWindowFactory.openLoginPage();
+                    return;
                 } else {
-                    JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again. Details: " + cause.getClass().getName() + " - " + cause.getMessage() + "</html>");
+                    JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + cause.getMessage() + "</html>");
                     resultsPanel.add(errorPanel);
                 }
             } catch (Exception ex) {
-                JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again. Details: " + ex.getClass().getName() + " - " + ex.getMessage() + "</html>");
+                JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + ex.getMessage() + "</html>");
                 resultsPanel.add(errorPanel);
             }
 

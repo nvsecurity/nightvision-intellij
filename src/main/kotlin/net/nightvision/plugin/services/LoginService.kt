@@ -3,6 +3,8 @@ package net.nightvision.plugin.services
 import com.intellij.openapi.project.Project
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.exceptions.CommandNotFoundException
+import net.nightvision.plugin.exceptions.NotLoggedException
+import net.nightvision.plugin.exceptions.PermissionDeniedException
 import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.Throws
@@ -12,7 +14,7 @@ object LoginService {
     var token = ""
         private set
 
-    @Throws(CommandNotFoundException::class)
+    @Throws(CommandNotFoundException::class, PermissionDeniedException::class, NotLoggedException::class)
     fun bypassLoginStepIfAuthenticatedAlready(project: Project): Boolean {
         try {
             val tokenService = TokenService.getInstance(project)
@@ -21,6 +23,8 @@ object LoginService {
         } catch (e: Exception) {
             return when (e) {
                 is CommandNotFoundException -> throw e
+                is PermissionDeniedException -> throw e
+                is NotLoggedException -> throw e
                 else                        -> false
             }
         }
@@ -28,12 +32,13 @@ object LoginService {
 
     fun login(project: Project): Boolean {
         val tokenService = TokenService.getInstance(project)
-        if (tokenService.token != "") {
-            return true
+        try {
+            if (tokenService.token != "") {
+                return true
+            }
+        } catch (e: NotLoggedException) {
+            runCommandSync(NIGHTVISION, "login")
         }
-
-        val response = runCommandSync(NIGHTVISION, "login")
-        println(response.output)
 
         token = tokenService.createToken(project)
         return token != ""

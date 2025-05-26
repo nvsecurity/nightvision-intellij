@@ -2,6 +2,7 @@ package net.nightvision.plugin;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.LoginService;
 import net.nightvision.plugin.services.ProjectService;
