@@ -109,7 +109,7 @@ object CommandRunnerService {
         } catch (e: RuntimeException) {
             throw getSpecificException(command.toList(), e)
         } catch (e: ExecutionException) {
-            throw RuntimeException("Failed to launch the command", e)
+            throw e
         }
 
     }

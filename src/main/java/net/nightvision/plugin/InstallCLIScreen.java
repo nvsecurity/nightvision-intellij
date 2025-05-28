@@ -3,6 +3,7 @@ package net.nightvision.plugin;
 import javax.swing.*;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.services.InstallCLIService;
 import net.nightvision.plugin.services.LoginService;
 import net.nightvision.plugin.services.ProjectService;
 
@@ -20,8 +21,13 @@ public class InstallCLIScreen extends Screen {
         super(project);
 
         installCLIButton.addActionListener(e -> {
-            // TODO: Implement CLI installation
-            mainWindowFactory.openLoginPage();
+            try {
+                InstallCLIService.INSTANCE.installCLI(false);
+                mainWindowFactory.openLoginPage();
+            } catch (Exception ex) {
+                // TODO: Show error message here
+                ex.printStackTrace();
+            }
         });
 
         installCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

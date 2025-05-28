@@ -1,5 +1,6 @@
 package net.nightvision.plugin;
 
+import com.intellij.execution.process.ProcessNotCreatedException;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.exceptions.NotLoggedException;
@@ -28,10 +29,9 @@ public class LoginScreen extends Screen {
                     ProjectService.INSTANCE.fetchCurrentProjectName();
                     mainWindowFactory.openOverviewPage();
                 }
-            } catch (CommandNotFoundException ex) {
+            } catch (ProcessNotCreatedException | CommandNotFoundException ex) {
                 mainWindowFactory.openInstallCLIPage();
             }
-
         });
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
