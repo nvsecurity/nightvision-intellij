@@ -121,6 +121,15 @@ object CommandRunnerService {
 
     }
 
+    fun getCLIVersion(): String {
+        val r = runCommandSync(NIGHTVISION, "version")
+        val message = r.output.ifBlank { r.error }
+        val regex = Regex("""(\d+\.\d+\.\d+)""")
+        val match = regex.find(message)
+        return match?.groups?.get(1)?.value
+            ?: ""
+    }
+
     fun getSpecificException(command: List<String>, e: Exception): Exception {
         var k = getSpecificIOException(command, e)
         if (k == e) {

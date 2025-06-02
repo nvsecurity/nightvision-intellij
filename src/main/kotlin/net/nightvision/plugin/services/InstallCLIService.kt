@@ -1,5 +1,6 @@
 package net.nightvision.plugin.services
 
+import net.nightvision.plugin.Constants
 import net.nightvision.plugin.services.CommandRunnerService.getDestinationDirForPlatform
 import java.io.IOException
 import java.net.URI
@@ -61,6 +62,44 @@ object InstallCLIService {
             )
             Files.setPosixFilePermissions(cliExe, perms)
         }
+    }
+
+    /**
+     * Compare two semantic‐version strings (“a.b.c” vs. “x.y.z”).
+     *
+     * Returns:
+     *   - negative if verA < verB
+     *   - zero     if verA == verB
+     *   - positive if verA > verB
+     */
+    private fun compareCLIVersions(verA: String, verB: String): Int {
+        // Split on dots, then parse each as Int. If one version is shorter, pad with zeroes.
+        val partsA = verA.split('.').mapNotNull { it.toIntOrNull() }
+        val partsB = verB.split('.').mapNotNull { it.toIntOrNull() }
+        val length = maxOf(partsA.size, partsB.size)
+
+        for (i in 0 until length) {
+            val a = partsA.getOrNull(i) ?: 0
+            val b = partsB.getOrNull(i) ?: 0
+            if (a != b) {
+                return a - b
+            }
+        }
+        return 0
+    }
+
+    /**
+     * Returns the current CLI version if must be updated, otherwise returns empty string.
+     */
+    fun shouldUpdateCLI(): String {
+        val cliVersion = CommandRunnerService.getCLIVersion()
+        if (cliVersion.isBlank()) {
+            return ""
+        }
+        if (compareCLIVersions(cliVersion, Constants.CLI_VERSION) < 0) {
+            return cliVersion
+        }
+        return ""
     }
 
     fun getCLIDownloadUrl(platform: String, arch: String): String {

@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import net.nightvision.plugin.services.InstallCLIService;
 import net.nightvision.plugin.utils.IconUtils;
 
 import java.awt.*;
@@ -21,6 +22,7 @@ public class OverviewScreen extends Screen {
     private JButton targetsButton;
     private JButton authenticationsButton;
     private JButton projectsButton;
+    private JButton updateCLIButton;
 
     public JPanel getOverviewPanel() {
         return overviewPanel;
@@ -37,6 +39,16 @@ public class OverviewScreen extends Screen {
 
     public OverviewScreen(Project project) {
         super(project);
+
+        String version = InstallCLIService.INSTANCE.shouldUpdateCLI();
+        if (version.isBlank()) {
+            updateCLIButton.setVisible(false);
+        } else {
+            updateCLIButton.addActionListener(e -> {
+                new UpdateCLIWorker().execute();
+            });
+            updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
 
         extraOptionsPanel.setVisible(isExtraOptionsVisible);
         setExtraOptionsActivatedTheme();
@@ -82,4 +94,25 @@ public class OverviewScreen extends Screen {
         projectsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
+    private class UpdateCLIWorker extends SwingWorker<Void, Void> {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            InstallCLIService.INSTANCE.installCLI(true);
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                updateCLIButton.setVisible(false);
+            } catch (Exception ex) {
+//                errorMessageLabel.setText(ex.toString());
+//                errorMessageLabel.setVisible(true);
+//                installCLIButton.setEnabled(true);
+//                installCLIButton.setText("Install CLI");
+            }
+        }
+    }
 }
