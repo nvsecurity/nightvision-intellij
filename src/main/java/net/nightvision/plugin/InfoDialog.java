@@ -20,11 +20,9 @@ public class InfoDialog extends JDialog {
 
         txtInfo.setText(text);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                okAction.actionPerformed(e);
-                onOK();
-            }
+        buttonOK.addActionListener(e -> {
+            okAction.actionPerformed(e);
+            onOK();
         });
     }
 

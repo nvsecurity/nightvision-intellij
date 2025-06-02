@@ -79,6 +79,17 @@ object CommandRunnerService {
         )
     }
 
+    fun getPathForGeneralCommandLine(): String {
+        val destDir = getDestinationDirForPlatform()
+        val originalPath = System.getenv("PATH") ?: ""
+        val newPath = if (originalPath.startsWith(destDir)) {
+            originalPath
+        } else {
+            destDir + File.pathSeparator + originalPath
+        }
+        return destDir
+    }
+
     /**
      * Executes the given command synchronously, waiting up to [timeout] [unit].
      * Returns stdout as a trimmed String, or throws an exception on failure.
@@ -90,16 +101,8 @@ object CommandRunnerService {
         unit: TimeUnit = TimeUnit.SECONDS
     ): ExecutionResponse {
         try {
-            val destDir = getDestinationDirForPlatform()
-            val originalPath = System.getenv("PATH") ?: ""
-            val newPath = if (originalPath.startsWith(destDir)) {
-                originalPath
-            } else {
-                destDir + File.pathSeparator + originalPath
-            }
-
             val cmd = GeneralCommandLine(*command)
-                .withEnvironment("PATH", newPath)
+                .withEnvironment("PATH", getPathForGeneralCommandLine())
             val capHandler = CapturingProcessHandler(cmd)
             val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
 
@@ -144,34 +147,31 @@ object CommandRunnerService {
         }, ApplicationManager.getApplication().executeOnPooledThread {} as java.util.concurrent.Executor)
     }
 
-    suspend fun runSwaggerExtractCommand(directory: String, lang: String, fileName: String): ExecutionResponse {
+    fun runSwaggerExtractCommand(
+        directory: String,
+        lang: String,
+        fileName: String,
+        timeout: Long = 360,
+        unit: TimeUnit = TimeUnit.SECONDS
+    ): ExecutionResponse {
         val command = listOf(NIGHTVISION, "swagger", "extract", directory,
             "--lang", lang,
             "--no-upload",
             "--output", fileName)
         try {
-            // TODO: Rewrite this to use GeneralCommandLine
-            // TODO: Rewrite this to use GeneralCommandLine
-            // TODO: Rewrite this to use GeneralCommandLine
-            val process = withContext(Dispatchers.IO) {
-                ProcessBuilder(*command.toTypedArray())
-                    .directory(File(directory))
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE)
-                    .start()
-            }.apply {
-                // TODO: This waitFor doesn't seem to work as expected, so let's ignore it for now
-//            if (!waitFor(240, TimeUnit.SECONDS)) {
-//                destroy()
-//                throw RuntimeException("Command 'nightvision swagger extract' timed out")
-//            }
-            }
+            val cmd = GeneralCommandLine(command)
+                .withEnvironment("PATH", getPathForGeneralCommandLine())
+                .withWorkDirectory(directory)
+            val capHandler = CapturingProcessHandler(cmd)
+            val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
 
-            return handleProcessResponse(command.joinToString(" "), process)
+            return handleProcessResponse2(command.joinToString(" "), output)
         } catch (e: IOException) {
             throw getSpecificException(command.toList(), e)
         } catch (e: RuntimeException) {
             throw getSpecificException(command.toList(), e)
+        } catch (e: ExecutionException) {
+            throw e
         }
 
     }

@@ -14,6 +14,7 @@ import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.services.ApiDiscoveryService;
 import net.nightvision.plugin.utils.IconUtils;
+import net.nightvision.plugin.utils.LabelUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -196,11 +197,11 @@ public class ApiDiscovery extends Screen {
                     mainWindowFactory.openLoginPage();
                     return;
                 } else {
-                    JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + cause.getMessage() + "</html>");
+                    JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + LabelUtils.addHtmlBreakLinesToLabel(cause.getMessage(), 50) + "</html>");
                     resultsPanel.add(errorPanel);
                 }
             } catch (Exception ex) {
-                JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + ex.getMessage() + "</html>");
+                JPanel errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + LabelUtils.addHtmlBreakLinesToLabel(ex.getMessage(), 50) + "</html>");
                 resultsPanel.add(errorPanel);
             }
 
