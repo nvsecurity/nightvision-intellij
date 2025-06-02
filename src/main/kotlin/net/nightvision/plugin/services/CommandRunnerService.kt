@@ -97,71 +97,16 @@ object CommandRunnerService {
     @Throws(CommandNotFoundException::class, PermissionDeniedException::class, IOException::class, Exception::class)
     fun runCommandSync(
         vararg command: String,
+        workingDirectory: String = "",
         timeout: Long = 30,
         unit: TimeUnit = TimeUnit.SECONDS
     ): ExecutionResponse {
         try {
-            val cmd = GeneralCommandLine(*command)
+            var cmd = GeneralCommandLine(*command)
                 .withEnvironment("PATH", getPathForGeneralCommandLine())
-            val capHandler = CapturingProcessHandler(cmd)
-            val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
-
-            return handleProcessResponse2(command.joinToString(" "), output)
-        } catch (e: IOException) {
-            throw getSpecificException(command.toList(), e)
-        } catch (e: RuntimeException) {
-            throw getSpecificException(command.toList(), e)
-        } catch (e: ExecutionException) {
-            throw e
-        }
-
-    }
-
-    /**
-     * Executes the given command asynchronously on a pooled thread.
-     * Returns a [CompletableFuture] that completes with stdout or exceptionally on failure.
-     */
-    fun runCommandAsync(vararg command: String): CompletableFuture<ExecutionResponse> {
-//        val cmd = GeneralCommandLine(*command)
-//            .withEnvironment("PATH", newPath)
-
-//            val handler = OSProcessHandler(cmd)
-//            handler.startNotify()
-//            if (!handler.waitFor(timeout*1000)) {
-//                handler.destroyProcess()  // timed out, forcibly kill
-//                throw RuntimeException("The command did not finish within $timeout seconds")
-//            }
-//            val exitCode = handler.exitCode
-//            if (exitCode != 0) {
-//                throw RuntimeException("The command exited with code $exitCode")
-//            }
-
-        // TODO: Rewrite this to use GeneralCommandLine + OSProcessHandler?
-        return CompletableFuture.supplyAsync({
-            try {
-                runCommandSync(*command)
-            } catch (e: Exception) {
-                LOG.error("Async command failed: ${command.joinToString(" ")}", e)
-                throw e
+            if (workingDirectory.isNotEmpty()) {
+                cmd = cmd.withWorkDirectory(workingDirectory)
             }
-        }, ApplicationManager.getApplication().executeOnPooledThread {} as java.util.concurrent.Executor)
-    }
-
-    fun runSwaggerExtractCommand(
-        directory: String,
-        lang: String,
-        fileName: String,
-        timeout: Long = 360,
-        unit: TimeUnit = TimeUnit.SECONDS
-    ): ExecutionResponse {
-        val command = listOf(NIGHTVISION, "swagger", "extract", directory,
-            "--lang", lang,
-            "--no-upload",
-            "--output", fileName)
-        try {
-            val cmd = GeneralCommandLine(command)
-                .withEnvironment("PATH", getPathForGeneralCommandLine())
-                .withWorkDirectory(directory)
             val capHandler = CapturingProcessHandler(cmd)
             val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
 

@@ -6,7 +6,6 @@ import net.nightvision.plugin.Constants
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.PaginatedResult
 import net.nightvision.plugin.models.AuthInfo
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -44,7 +43,7 @@ object AuthenticationService {
             cmd.add("--description")
             cmd.add(description)
         }
-        val response = runCommandSync(*cmd.toTypedArray(), timeout=200L)
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray(), timeout=200L)
         val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {

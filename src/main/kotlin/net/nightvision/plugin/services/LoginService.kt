@@ -6,7 +6,6 @@ import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.exceptions.CommandNotFoundException
 import net.nightvision.plugin.exceptions.NotLoggedException
 import net.nightvision.plugin.exceptions.PermissionDeniedException
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.Throws
 
@@ -42,7 +41,7 @@ object LoginService {
                 return true
             }
         } catch (e: NotLoggedException) {
-            runCommandSync(NIGHTVISION, "login")
+            CommandRunnerService.runCommandSync(NIGHTVISION, "login")
         }
 
         token = tokenService.createToken(project)
@@ -51,7 +50,7 @@ object LoginService {
 
     fun logout(project: Project) {
         val tokenService = TokenService.getInstance(project)
-        val response = runCommandSync(NIGHTVISION, "logout")
+        val response = CommandRunnerService.runCommandSync(NIGHTVISION, "logout")
         println(response.output)
         tokenService.token = ""
         token = ""

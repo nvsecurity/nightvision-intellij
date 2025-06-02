@@ -7,7 +7,6 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.project.Project
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.util.concurrent.TimeUnit
 
 @Service(Service.Level.PROJECT)
@@ -73,7 +72,7 @@ class TokenService(private val project: Project)
     }
 
     fun createToken(project: Project): String {
-        val response = runCommandSync(NIGHTVISION, "token", "create")
+        val response = CommandRunnerService.runCommandSync(NIGHTVISION, "token", "create")
 
         val t = response.output
         token = t.trim().takeIf { it.matches(Regex("^\\S{64}$")) } ?: ""

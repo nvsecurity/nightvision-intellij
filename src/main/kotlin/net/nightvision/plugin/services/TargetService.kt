@@ -7,7 +7,6 @@ import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.PaginatedResult
 import net.nightvision.plugin.models.TargetInfo
 import net.nightvision.plugin.models.TargetURL
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -93,7 +92,7 @@ object TargetService {
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "target", "create", targetName, targetURL))
         cmd.addAll(extraFlags);
 
-        val response = runCommandSync(*cmd.toTypedArray())
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
         val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {

@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -44,10 +45,9 @@ object ApiDiscoveryService {
 
         val directory = makeFilePathAbsolute(dirPath, project)
 
-        val response = CommandRunnerService.runSwaggerExtractCommand(
-            directory=directory,
-            lang=lang,
-            fileName=fileName
+        val response = CommandRunnerService.runCommandSync(
+            NIGHTVISION, "swagger", "extract", directory, "--lang", lang, "--no-upload", "--output", fileName,
+            workingDirectory = directory
         )
 
         val errorOutput = response.error

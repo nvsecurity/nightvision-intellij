@@ -6,7 +6,6 @@ import net.nightvision.plugin.Constants
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.PaginatedResult
 import net.nightvision.plugin.models.ProjectInfo
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -41,7 +40,7 @@ object ProjectService {
         }
 
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "create", projectName))
-        val response = runCommandSync(*cmd.toTypedArray())
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
         val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
@@ -61,7 +60,7 @@ object ProjectService {
     fun fetchCurrentProjectName() : String {
         val cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "show"))
 
-        val response = runCommandSync(*cmd.toTypedArray())
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
         val t = response.output
         val regexProjName = Regex("""(?m)^Name:\s*(.+)$""")
         val matchProjName = regexProjName.find(t)
@@ -80,7 +79,7 @@ object ProjectService {
         }
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "set", projectName))
 
-        val response = runCommandSync(*cmd.toTypedArray())
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
         val t = response.output
         val success = Regex("Current project changed").containsMatchIn(t.trim())
         if (success) {

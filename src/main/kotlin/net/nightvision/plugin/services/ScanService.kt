@@ -6,7 +6,6 @@ import net.nightvision.plugin.Constants
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.ScanInfo
 import net.nightvision.plugin.PaginatedResult
-import net.nightvision.plugin.services.CommandRunnerService.runCommandSync
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -41,7 +40,7 @@ object ScanService {
             cmd.add(authenticationName)
         }
 
-        val response = runCommandSync(*cmd.toTypedArray())
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
         val t = response.output
         val id = t.trim().takeIf { Regex("INFO Scan Details").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
