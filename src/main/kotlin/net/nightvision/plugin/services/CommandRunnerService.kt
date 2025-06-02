@@ -1,12 +1,9 @@
 package net.nightvision.plugin.services
 
 import com.intellij.execution.ExecutionException
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level
 import com.intellij.openapi.diagnostic.Logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.exceptions.CommandNotFoundException
 import net.nightvision.plugin.exceptions.PermissionDeniedException
@@ -14,10 +11,8 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessOutput
 import net.nightvision.plugin.exceptions.NotLoggedException
-import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 /**
@@ -37,7 +32,7 @@ object CommandRunnerService {
 
     data class ExecutionResponse(val output: String, val error: String)
 
-    private fun handleProcessResponse2(
+    private fun handleProcessResponse(
         command: String,
         output: ProcessOutput
     ): ExecutionResponse {
@@ -57,25 +52,6 @@ object CommandRunnerService {
         return ExecutionResponse(
             output=output.stdout.trim(),
             error=output.stderr.trim()
-        )
-    }
-
-    private fun handleProcessResponse(
-        command: String,
-        process: Process
-    ): ExecutionResponse {
-
-        val output = process.inputStream.bufferedReader().use(BufferedReader::readText)
-        val error = process.errorStream.bufferedReader().use(BufferedReader::readText)
-
-        if (process.exitValue() != 0) {
-            LOG.warn("Command exited with ${process.exitValue()}: ${command}. Error: $error")
-            throw RuntimeException("Command failed: $error")
-        }
-
-        return ExecutionResponse(
-            output=output.trim(),
-            error=error.trim()
         )
     }
 
@@ -110,7 +86,7 @@ object CommandRunnerService {
             val capHandler = CapturingProcessHandler(cmd)
             val output: ProcessOutput = capHandler.runProcess(unit.toMillis(timeout).toInt())
 
-            return handleProcessResponse2(command.joinToString(" "), output)
+            return handleProcessResponse(command.joinToString(" "), output)
         } catch (e: IOException) {
             throw getSpecificException(command.toList(), e)
         } catch (e: RuntimeException) {
