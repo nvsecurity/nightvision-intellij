@@ -14,6 +14,7 @@ import java.util.*
 import kotlin.io.path.exists
 
 object InstallCLIService {
+    var userCliVersion = "";
 
     fun installCLI(isUpdateCLI: Boolean) {
         val platform = normalizePlatform()
@@ -62,6 +63,9 @@ object InstallCLIService {
             )
             Files.setPosixFilePermissions(cliExe, perms)
         }
+
+        userCliVersion = ""
+        CommandRunnerService.getCLIVersion();
     }
 
     /**

@@ -24,6 +24,7 @@ public class OverviewScreen extends Screen {
     private JButton authenticationsButton;
     private JButton projectsButton;
     private JButton updateCLIButton;
+    private JLabel errorMessageLabel;
 
     public JPanel getOverviewPanel() {
         return overviewPanel;
@@ -41,10 +42,16 @@ public class OverviewScreen extends Screen {
     public OverviewScreen(Project project) {
         super(project);
 
+        errorMessageLabel.setVisible(false);
+
         String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
         boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
         if (shouldUpdateCLI) {
             updateCLIButton.addActionListener(e -> {
+                errorMessageLabel.setVisible(false);
+                errorMessageLabel.setText("");
+                updateCLIButton.setText("Updating...");
+                updateCLIButton.setEnabled(false);
                 new UpdateCLIWorker().execute();
             });
             updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -110,10 +117,10 @@ public class OverviewScreen extends Screen {
                 get();
                 updateCLIButton.setVisible(false);
             } catch (Exception ex) {
-//                errorMessageLabel.setText(ex.toString());
-//                errorMessageLabel.setVisible(true);
-//                installCLIButton.setEnabled(true);
-//                installCLIButton.setText("Install CLI");
+                errorMessageLabel.setText(ex.toString());
+                errorMessageLabel.setVisible(true);
+                updateCLIButton.setEnabled(true);
+                updateCLIButton.setText("Update CLI");
             }
         }
     }

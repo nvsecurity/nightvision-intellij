@@ -11,6 +11,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessOutput
 import net.nightvision.plugin.exceptions.NotLoggedException
+import net.nightvision.plugin.services.InstallCLIService.userCliVersion
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -98,12 +99,19 @@ object CommandRunnerService {
     }
 
     fun getCLIVersion(): String {
+        if (userCliVersion.isNotBlank()) {
+            return userCliVersion; // Some caching to not call the command every time we go to Overview page...
+        }
         val r = runCommandSync(NIGHTVISION, "version")
         val message = r.output.ifBlank { r.error }
         val regex = Regex("""(\d+\.\d+\.\d+)""")
         val match = regex.find(message)
-        return match?.groups?.get(1)?.value
+        val v = match?.groups?.get(1)?.value
             ?: ""
+        if (v.isNotBlank()) {
+            userCliVersion = v
+        }
+        return userCliVersion;
     }
 
     fun getSpecificException(command: List<String>, e: Exception): Exception {
