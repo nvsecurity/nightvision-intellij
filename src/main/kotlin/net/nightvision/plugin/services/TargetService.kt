@@ -31,7 +31,7 @@ object TargetService {
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         val type = object : TypeToken<PaginatedResult<TargetInfo>>() {}.type
         val responseData: PaginatedResult<TargetInfo> = gson.fromJson(response.body(), type)
-        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun getTargetSpecificInfo(targetType: String, targetId: String): TargetInfo? {
@@ -91,13 +91,9 @@ object TargetService {
 
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "target", "create", targetName, targetURL))
         cmd.addAll(extraFlags);
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
 
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details

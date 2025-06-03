@@ -41,7 +41,7 @@ public class AuthenticationsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        currentProjectWrapperPanel.add(new ProjectSelectionPanel(selectedProject -> {
+        currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             loadTable();
         }));
 

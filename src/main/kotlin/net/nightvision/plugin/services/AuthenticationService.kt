@@ -27,7 +27,7 @@ object AuthenticationService {
         val type = object : TypeToken<PaginatedResult<AuthInfo>>() {}.type
         val responseData: PaginatedResult<AuthInfo> = gson.fromJson(response.body(), type)
         //println(responseData.results)
-        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun createPlaywrightAuth(authName: String, authURL: String, description: String?) {
@@ -43,13 +43,8 @@ object AuthenticationService {
             cmd.add("--description")
             cmd.add(description)
         }
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
-
-        process.waitFor(200, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray(), timeout=200L)
+        val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details

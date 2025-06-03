@@ -2,6 +2,10 @@ package net.nightvision.plugin.project;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
+import net.nightvision.plugin.MainWindowFactory;
+import net.nightvision.plugin.MainWindowService;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.services.ProjectService;
 
@@ -17,7 +21,7 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
     // Callback (extra behavior) to execute when a project is selected.
     private final Consumer<String> onProjectSelected;
 
-    public ProjectSelectionPanel(Consumer<String> onProjectSelected) {
+    public ProjectSelectionPanel(MainWindowFactory mainWindowFactory, Consumer<String> onProjectSelected) {
         this.onProjectSelected = onProjectSelected;
         setLayout(new BorderLayout());
 
@@ -66,6 +70,10 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
                     if (onProjectSelected != null) {
                         onProjectSelected.accept(selected);
                     }
+                } catch (CommandNotFoundException ex) {
+                    mainWindowFactory.openInstallCLIPage();
+                } catch (NotLoggedException ex) {
+                    mainWindowFactory.openLoginPage();
                 } catch(Exception exception) {
                     // TODO: handle better this exception, e.g. show message...
                     // Exception here will happen if the project name is invalid or if some other error happened...

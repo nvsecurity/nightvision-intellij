@@ -9,6 +9,10 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBScrollPane;
+import net.nightvision.plugin.exceptions.CommandNotFoundException;
+import net.nightvision.plugin.exceptions.NotLoggedException;
+import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.services.ApiDiscoveryService;
 import net.nightvision.plugin.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +21,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
 
 import static net.nightvision.plugin.Constants.CONTACT_EMAIL;
 
@@ -180,9 +185,24 @@ public class ApiDiscovery extends Screen {
 
                 resultsPanel.add(panel);
 
-            } catch (Exception ignore) {
-                JPanel site = getErrorPanel();
-                resultsPanel.add(site);
+            } catch (ExecutionException ex) {
+                var cause = ex.getCause();
+                if (cause instanceof CommandNotFoundException) {
+                    mainWindowFactory.openInstallCLIPage();
+                    return;
+                } else if (cause instanceof PermissionDeniedException) {
+                    JBScrollPane errorPanel = getErrorPanel(ex.getMessage());
+                    resultsPanel.add(errorPanel);
+                } else if (cause instanceof NotLoggedException) {
+                    mainWindowFactory.openLoginPage();
+                    return;
+                } else {
+                    JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + cause.getMessage().replaceAll("\n", "<br>") + "</html>");
+                    resultsPanel.add(errorPanel);
+                }
+            } catch (Exception ex) {
+                JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + ex.getMessage().replaceAll("\n", "<br>") + "</html>");
+                resultsPanel.add(errorPanel);
             }
 
             enableEditing(true);
@@ -192,21 +212,34 @@ public class ApiDiscovery extends Screen {
         }
 
         @NotNull
-        private static JPanel getErrorPanel() {
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        private static JBScrollPane getErrorPanel(String errorMessage) {
+            // 1) Create a simple JPanel that will hold both subpanels in a vertical stack
+            JPanel content = new JPanel();
+            content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+            content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            JPanel emailLabel = getEmailPanel();
-            JPanel errorLabel = getErrorLabelPanel();
-            emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            // 2) Build your two sub‐panels (error + email)
+            JPanel errorLabelPanel = getErrorLabelPanel(errorMessage);
+            errorLabelPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            panel.add(errorLabel);
-            panel.add(emailLabel);
+            JPanel emailPanel = getEmailPanel();
+            emailPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            return panel;
+            // 3) Add them in order to the wrapper panel
+            content.add(errorLabelPanel);
+            content.add(Box.createVerticalStrut(5)); // small gap if you want spacing
+            content.add(emailPanel);
+
+            // 4) Wrap that wrapper in a JBScrollPane
+            JBScrollPane scrollPane = new JBScrollPane(content);
+            scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            // 5) (optional) give the scrollPane a preferred size so it’s visible under FlowLayout
+            scrollPane.setPreferredSize(new Dimension(400, 150));
+
+            return scrollPane;
         }
+
 
         @NotNull
         private static JPanel getEmailPanel() {
@@ -224,7 +257,7 @@ public class ApiDiscovery extends Screen {
                     try {
                         Desktop desktop = Desktop.getDesktop();
                         if (desktop.isSupported(Desktop.Action.MAIL)) {
-                            URI mailto = new URI("mailto:example@example.com?subject=Hello&body=This is a test email.");
+                            URI mailto = new URI(String.format("mailto:%s?subject=Subject&body=Hi,", CONTACT_EMAIL));
                             desktop.mail(mailto);
                         }
                     } catch (Exception ex) {
@@ -239,12 +272,12 @@ public class ApiDiscovery extends Screen {
         }
 
         @NotNull
-        private static JPanel getErrorLabelPanel() {
+        private static JPanel getErrorLabelPanel(String errorMessage) {
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            JLabel label = new JLabel("Error extracting API info. Please recheck the entered Path to the Root Directory and selected Language, then try again.");
+            JLabel label = new JLabel(errorMessage);
             label.setForeground(JBColor.red);
 
             panel.add(label);

@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -44,23 +45,13 @@ object ApiDiscoveryService {
 
         val directory = makeFilePathAbsolute(dirPath, project)
 
-        val process = withContext(Dispatchers.IO) {
-            ProcessBuilder(
-                "nightvision", "swagger", "extract", directory,
-                "--lang", lang,
-                "--no-upload",
-                "--output", fileName
-            )
-                .directory(File(directory))
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start()
-        }.apply {
-            waitFor(30, TimeUnit.SECONDS)
-        }
+        val response = CommandRunnerService.runCommandSync(
+            NIGHTVISION, "swagger", "extract", directory, "--lang", lang, "--no-upload", "--output", fileName,
+            workingDirectory = directory
+        )
 
-        val errorOutput = process.errorStream.bufferedReader().readText()
-        val normalOutput = process.inputStream.bufferedReader().readText()
+        val errorOutput = response.error
+        val normalOutput = response.output
         val logMessage = errorOutput.ifEmpty { normalOutput }
         println("Process output: $normalOutput")
         println("Process errors: $errorOutput")

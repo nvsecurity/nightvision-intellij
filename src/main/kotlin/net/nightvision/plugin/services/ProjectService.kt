@@ -31,7 +31,7 @@ object ProjectService {
             return listOf()
         }
         val responseData: PaginatedResult<ProjectInfo> = gson.fromJson(response.body(), type)
-        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun createProject(projectName: String) {
@@ -40,13 +40,8 @@ object ProjectService {
         }
 
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "create", projectName))
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
-
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details
@@ -64,13 +59,9 @@ object ProjectService {
 
     fun fetchCurrentProjectName() : String {
         val cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "show"))
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
 
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val regexProjName = Regex("""(?m)^Name:\s*(.+)$""")
         val matchProjName = regexProjName.find(t)
         currentProjectName = matchProjName?.groupValues?.get(1) ?: ""
@@ -87,13 +78,9 @@ object ProjectService {
             return
         }
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "set", projectName))
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
 
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val success = Regex("Current project changed").containsMatchIn(t.trim())
         if (success) {
             fetchCurrentProjectName()

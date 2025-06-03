@@ -26,7 +26,7 @@ object ScanService {
         val type = object : TypeToken<PaginatedResult<ScanInfo>>() {}.type
         val responseData: PaginatedResult<ScanInfo> = gson.fromJson(response.body(), type)
         //println(responseData.results)
-        return responseData.results // TODO: Results are only for the FIRST page of pagination here - Improve
+        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
     }
 
     fun startScan(targetName: String, authenticationName: String?) {
@@ -39,13 +39,9 @@ object ScanService {
             cmd.add("--auth")
             cmd.add(authenticationName)
         }
-        val process = ProcessBuilder(cmd)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
 
-        process.waitFor(30, TimeUnit.SECONDS)
-        val t = process.inputStream.bufferedReader().readText()
+        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+        val t = response.output
         val id = t.trim().takeIf { Regex("INFO Scan Details").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
             // TODO: Improve error message details
