@@ -88,18 +88,14 @@ object InstallCLIService {
         return 0
     }
 
-    /**
-     * Returns the current CLI version if must be updated, otherwise returns empty string.
-     */
-    fun shouldUpdateCLI(): String {
-        val cliVersion = CommandRunnerService.getCLIVersion()
+    fun shouldUpdateCLI(cliVersion: String): Boolean {
         if (cliVersion.isBlank()) {
-            return ""
+            return false
         }
         if (compareCLIVersions(cliVersion, Constants.CLI_VERSION) < 0) {
-            return cliVersion
+            return true
         }
-        return ""
+        return false
     }
 
     fun getCLIDownloadUrl(platform: String, arch: String): String {

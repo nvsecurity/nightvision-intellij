@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.InstallCLIService;
 import net.nightvision.plugin.utils.IconUtils;
 
@@ -40,14 +41,15 @@ public class OverviewScreen extends Screen {
     public OverviewScreen(Project project) {
         super(project);
 
-        String version = InstallCLIService.INSTANCE.shouldUpdateCLI();
-        if (version.isBlank()) {
-            updateCLIButton.setVisible(false);
-        } else {
+        String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
+        boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+        if (shouldUpdateCLI) {
             updateCLIButton.addActionListener(e -> {
                 new UpdateCLIWorker().execute();
             });
             updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else {
+            updateCLIButton.setVisible(false);
         }
 
         extraOptionsPanel.setVisible(isExtraOptionsVisible);

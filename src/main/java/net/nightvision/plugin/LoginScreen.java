@@ -23,14 +23,15 @@ public class LoginScreen extends Screen {
     public LoginScreen(Project project) {
         super(project);
 
-        String version = InstallCLIService.INSTANCE.shouldUpdateCLI();
-        if (version.isBlank()) {
-            updateCLIButton.setVisible(false);
-        } else {
+        String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
+        boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+        if (shouldUpdateCLI) {
             updateCLIButton.addActionListener(e -> {
                 new UpdateCLIWorker().execute();
             });
             updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else {
+            updateCLIButton.setVisible(false);
         }
 
         loginButton.addActionListener(e -> {
