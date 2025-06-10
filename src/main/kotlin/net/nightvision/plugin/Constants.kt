@@ -15,7 +15,7 @@ class Constants {
 
         const val CONTACT_EMAIL = "support@nightvision.net"
 
-        const val CLI_VERSION = "0.9.2"
+        const val CLI_VERSION = "0.9.5"
 
         fun getApiUrlFor(suffix: String): URI {
             return getUrlFor(API_V1_URL, suffix);
