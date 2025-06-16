@@ -39,22 +39,22 @@ class MainWindowFactory : ToolWindowFactory {
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        try {
-            if (LoginService.bypassLoginStepIfAuthenticatedAlready(project)) {
-                ProjectService.fetchCurrentProjectName()
-                openOverviewPage()
-                return
-            }
-        } catch (ex: CommandNotFoundException) {
-            openInstallCLIPage()
-            return
-        } catch (ex: NotLoggedException) {
-            openLoginPage()
-            return
-        } catch (ex: ProcessNotCreatedException) {
-            openInstallCLIPage();
-            return
-        }
+//        try {
+//            if (LoginService.bypassLoginStepIfAuthenticatedAlready(project)) {
+//                ProjectService.fetchCurrentProjectName()
+//                openOverviewPage()
+//                return
+//            }
+//        } catch (ex: CommandNotFoundException) {
+//            openInstallCLIPage()
+//            return
+//        } catch (ex: NotLoggedException) {
+//            openLoginPage()
+//            return
+//        } catch (ex: ProcessNotCreatedException) {
+//            openInstallCLIPage();
+//            return
+//        }
 
         openLoginPage()
     }

@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "2.2.0-RC2"
+  id("org.jetbrains.kotlin.jvm") version "1.9.25"
   id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaCommunity("2025.1.1.1")
+    intellijIdeaCommunity("2024.3.5")
     bundledPlugin("com.intellij.java")
     pluginVerifier()
   }
@@ -28,7 +28,7 @@ dependencies {
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2025.1.1.1"))
+    ides.ides(listOf("IC-2024.3.5"))
   }
 }
 

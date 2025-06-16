@@ -14,7 +14,7 @@ object LoginService {
     var token = ""
         private set
 
-    @Throws(CommandNotFoundException::class, PermissionDeniedException::class, NotLoggedException::class)
+    @Throws(CommandNotFoundException::class, PermissionDeniedException::class, NotLoggedException::class, ProcessNotCreatedException::class)
     fun bypassLoginStepIfAuthenticatedAlready(project: Project): Boolean {
         try {
             val tokenService = TokenService.getInstance(project)
