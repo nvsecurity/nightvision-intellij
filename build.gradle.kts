@@ -1,24 +1,41 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.25"
-  id("org.jetbrains.intellij") version "1.17.4"
+  id("org.jetbrains.kotlin.jvm") version "2.2.0-RC2"
+  id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
 group = "net.nightvision"
-version = "1.1-SNAPSHOT"
+version = "2.0-SNAPSHOT"
 
 
 repositories {
   mavenCentral()
+  intellijPlatform {
+    defaultRepositories()
+  }
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-  version.set("2024.1.7")
-  type.set("IC") // Target IDE Platform
+dependencies {
+  intellijPlatform {
+    intellijIdeaCommunity("2025.1.1.1")
+    bundledPlugin("com.intellij.java")
+    pluginVerifier()
+  }
+}
 
-  plugins.set(listOf())
+intellijPlatform {
+  pluginVerification {
+    ides.ides(listOf("IC-2025.1.1.1"))
+  }
+}
+
+tasks.named<KotlinJvmCompile>("compileKotlin"){
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_17)
+  }
 }
 
 tasks {
@@ -27,13 +44,9 @@ tasks {
     sourceCompatibility = "17"
     targetCompatibility = "17"
   }
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-  }
 
   patchPluginXml {
     sinceBuild.set("241")
-    untilBuild.set("243.*")
   }
 
   signPlugin {
