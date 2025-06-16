@@ -45,7 +45,7 @@ public class LoginScreen extends Screen {
                     // Ignore as it should be handled by checking authenticated part.
                 }
             }
-        };
+        }.queue();
     }
 
     public LoginScreen(Project project) {
