@@ -21,7 +21,7 @@ object InstallCLIService {
         val arch = normalizeArch()
 
         val destDir = Path.of(getDestinationDirForPlatform())
-        val cliExe = if (platform == "win32") {
+        val cliExe = if (platform == "windows") {
             destDir.resolve("nightvision.exe")
         } else {
             destDir.resolve("nightvision")
@@ -53,7 +53,7 @@ object InstallCLIService {
         Files.deleteIfExists(temp)
 
         // 5) make executable on Unix
-        if (platform != "win32") {
+        if (platform != "windows") {
             val perms = EnumSet.of(
                 PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE,
@@ -104,9 +104,7 @@ object InstallCLIService {
 
     fun getCLIDownloadUrl(platform: String, arch: String): String {
         // TODO: Consider throwing specific exception if platform and arch are not valid
-        val platformStr = if (platform == "win32") "windows" else platform
-        val archStr = if (arch == "x64") "amd64" else "arm64"
-        val downloadUrl = "https://downloads.nightvision.net/binaries/latest/nightvision_latest_${platformStr}_${archStr}.tar.gz"
+        val downloadUrl = "https://downloads.nightvision.net/binaries/latest/nightvision_latest_${platform}_${arch}.tar.gz"
         return downloadUrl
     }
 
@@ -131,7 +129,7 @@ object InstallCLIService {
     fun normalizePlatform(osName: String = System.getProperty("os.name")): String {
         val lower = osName.lowercase()
         return when {
-            lower.startsWith("windows")       -> "windows"
+            lower.startsWith("win")       -> "windows"
             lower.startsWith("mac")           // covers "Mac OS X", "Mac OS", etc.
                     || lower.startsWith("darwin")   // just in case
                 -> "darwin"
