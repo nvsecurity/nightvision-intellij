@@ -9,11 +9,14 @@ import net.nightvision.plugin.exceptions.CommandNotFoundException
 import net.nightvision.plugin.exceptions.PermissionDeniedException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
+import com.intellij.openapi.application.ApplicationManager
 import net.nightvision.plugin.exceptions.NotLoggedException
 import net.nightvision.plugin.services.InstallCLIService.userCliVersion
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 /**
@@ -64,7 +67,7 @@ object CommandRunnerService {
         } else {
             destDir + File.pathSeparator + originalPath
         }
-        return destDir
+        return newPath
     }
 
     /**
@@ -98,6 +101,7 @@ object CommandRunnerService {
 
     }
 
+    @Throws(ProcessNotCreatedException::class)
     fun getCLIVersion(): String {
         if (userCliVersion.isNotBlank()) {
             return userCliVersion; // Some caching to not call the command every time we go to Overview page...

@@ -1,5 +1,8 @@
 package net.nightvision.plugin.auth;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
@@ -7,6 +10,7 @@ import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.AuthenticationService;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,20 +69,36 @@ public class AuthenticationsCreateScreen extends Screen {
             String authUrl = authenticationURLTextField.getText();
             String description = authenticationDescriptionTextField.getText();
 
-            try {
-                AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
-                mainWindowFactory.openAuthenticationsPage();
-            } catch (CommandNotFoundException ex) {
-                mainWindowFactory.openInstallCLIPage();
-            } catch (NotLoggedException ex) {
-                mainWindowFactory.openLoginPage();
-                return;
-            } catch (Exception exception) {
-                errorMessage.setText(exception.getMessage());
-                errorMessage.setVisible(true);
-            }
+            new Task.Backgroundable(project, "Create Authentication Playwright", false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    try {
+                        AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
 
-            createButton.setEnabled(true);
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openAuthenticationsPage();
+                        });
+                    } catch (CommandNotFoundException ex) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openInstallCLIPage();
+                        });
+                    } catch (NotLoggedException ex) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openLoginPage();
+                        });
+                        return;
+                    } catch (Exception exception) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            errorMessage.setText(exception.getMessage());
+                            errorMessage.setVisible(true);
+                        });
+                    } finally {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            createButton.setEnabled(true);
+                        });
+                    }
+                }
+            }.queue();
         });
         createButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }

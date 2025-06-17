@@ -1,7 +1,10 @@
 package net.nightvision.plugin.target;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.nightvision.plugin.Screen;
@@ -9,6 +12,7 @@ import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.TargetService;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,21 +82,37 @@ public class TargetsCreateScreen extends Screen {
             String targetName = webTargetNameTextField.getText();
             String targetURL = webTargetUrlTextField.getText();
 
-            try {
-                TargetService.INSTANCE.createWebTarget(targetName, targetURL);
-                mainWindowFactory.openTargetsPage();
-            } catch (CommandNotFoundException ex) {
-                mainWindowFactory.openInstallCLIPage();
-                return;
-            } catch (NotLoggedException ex) {
-                mainWindowFactory.openLoginPage();
-                return;
-            } catch(Exception exception) {
-                errorMessageWebTarget.setText(exception.getMessage());
-                errorMessageWebTarget.setVisible(true);
-            }
+            new Task.Backgroundable(project, "Create Web Target", false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    try {
+                        TargetService.INSTANCE.createWebTarget(targetName, targetURL);
 
-            createWebTargetButton.setEnabled(true);
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openTargetsPage();
+                        });
+                    } catch (CommandNotFoundException ex) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openInstallCLIPage();
+                        });
+                        return;
+                    } catch (NotLoggedException ex) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openLoginPage();
+                        });
+                        return;
+                    } catch (Exception exception) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            errorMessageWebTarget.setText(exception.getMessage());
+                            errorMessageWebTarget.setVisible(true);
+                        });
+                    } finally {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            createWebTargetButton.setEnabled(true);
+                        });
+                    }
+                }
+            }.queue();
 
         });
         createWebTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -107,14 +127,27 @@ public class TargetsCreateScreen extends Screen {
             var isSwaggerURL = apiTargetSpecTypeTabbedPane.getSelectedComponent().equals(specURLPane);
             String swaggerPath = isSwaggerURL ? apiTargetSpecUrlTextField.getText() : swaggerFilePath;
 
-            try {
-                TargetService.INSTANCE.createApiTarget(targetName, targetURL, swaggerPath, isSwaggerURL);
-                mainWindowFactory.openTargetsPage();
-            } catch(Exception exception) {
-                errorMessageApiTarget.setText(exception.getMessage());
-                errorMessageApiTarget.setVisible(true);
-                createApiTargetButton.setEnabled(true);
-            }
+            new Task.Backgroundable(project, "Create API Target", false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    try {
+                        TargetService.INSTANCE.createApiTarget(targetName, targetURL, swaggerPath, isSwaggerURL);
+
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            mainWindowFactory.openTargetsPage();
+                        });
+                    } catch(Exception exception) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            errorMessageApiTarget.setText(exception.getMessage());
+                            errorMessageApiTarget.setVisible(true);
+                        });
+                    } finally {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            createApiTargetButton.setEnabled(true);
+                        });
+                    }
+                }
+            }.queue();
 
         });
         createApiTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

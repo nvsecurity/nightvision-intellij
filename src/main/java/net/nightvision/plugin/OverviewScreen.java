@@ -2,11 +2,16 @@ package net.nightvision.plugin;
 
 import javax.swing.*;
 
+import com.intellij.execution.process.ProcessNotCreatedException;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.InstallCLIService;
 import net.nightvision.plugin.utils.IconUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -39,25 +44,45 @@ public class OverviewScreen extends Screen {
 
     }
 
+    private void setupUpdateButton() {
+        updateCLIButton.setVisible(true);
+        updateCLIButton.addActionListener(e -> {
+            errorMessageLabel.setVisible(false);
+            errorMessageLabel.setText("");
+            updateCLIButton.setText("Updating...");
+            updateCLIButton.setEnabled(false);
+            new UpdateCLIWorker().execute();
+        });
+        updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
     public OverviewScreen(Project project) {
         super(project);
 
+        updateCLIButton.setVisible(false);
         errorMessageLabel.setVisible(false);
 
-        String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
-        boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
-        if (shouldUpdateCLI) {
-            updateCLIButton.addActionListener(e -> {
-                errorMessageLabel.setVisible(false);
-                errorMessageLabel.setText("");
-                updateCLIButton.setText("Updating...");
-                updateCLIButton.setEnabled(false);
-                new UpdateCLIWorker().execute();
-            });
-            updateCLIButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        } else {
-            updateCLIButton.setVisible(false);
-        }
+        new Task.Backgroundable(project, "Checking CLI Version", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                try {
+                    String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
+                    boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        if (shouldUpdateCLI) {
+                            setupUpdateButton();
+                        } else {
+                            updateCLIButton.setVisible(false);
+                        }
+                    });
+                } catch (ProcessNotCreatedException ex) {
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        mainWindowFactory.openInstallCLIPage();
+                    });
+                }
+            }
+        }.queue();
 
         extraOptionsPanel.setVisible(isExtraOptionsVisible);
         setExtraOptionsActivatedTheme();
