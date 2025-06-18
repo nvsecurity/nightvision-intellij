@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "net.nightvision"
-version = "2.0-SNAPSHOT"
+version = "2.1"
 
 
 repositories {
@@ -28,7 +28,7 @@ dependencies {
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2024.3.5"))
+    ides.ides(listOf("IC-2023.3.4", "IC-2024.3.5"))
   }
 }
 
