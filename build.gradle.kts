@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "net.nightvision"
-version = "2.0-SNAPSHOT"
+version = "2.1"
 
 
 repositories {
@@ -28,7 +28,7 @@ dependencies {
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2024.3.5"))
+    ides.ides(listOf("IC-2022.3.3", "IC-2023.3.8", "IC-2024.3.5"))
   }
 }
 
@@ -46,7 +46,7 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set("241")
+    sinceBuild.set("223")
   }
 
   signPlugin {
