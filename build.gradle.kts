@@ -28,7 +28,7 @@ dependencies {
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2023.3.4", "IC-2024.3.5"))
+    ides.ides(listOf("IC-2022.3.3", "IC-2023.3.8", "IC-2024.3.5"))
   }
 }
 
@@ -46,7 +46,7 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set("241")
+    sinceBuild.set("223")
   }
 
   signPlugin {

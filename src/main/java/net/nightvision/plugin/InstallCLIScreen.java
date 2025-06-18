@@ -51,7 +51,7 @@ public class InstallCLIScreen extends Screen {
                 String installedDir = CommandRunnerService.INSTANCE.getDestinationDirForPlatform();
                 new InfoDialog("<html><body>NightVision CLI is installed under the path:<br>-> "
                         + installedDir
-                        + "<br>Consider adding it to your path if you would like to execute it in your terminal.</body></html>",
+                        + "<br>Manually add it to your path if you would like to execute it from your terminal.</body></html>",
                         e -> mainWindowFactory.openLoginPage())
                 .setVisible(true);
             } catch (Exception ex) {
