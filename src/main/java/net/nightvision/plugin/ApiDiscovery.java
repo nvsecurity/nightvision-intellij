@@ -21,6 +21,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static net.nightvision.plugin.Constants.CONTACT_EMAIL;
@@ -42,13 +43,27 @@ public class ApiDiscovery extends Screen {
     private JPanel loadingPanel;
 
     private final String[] LANGUAGES = new String[] {
-        "Java",
+        "All languages",
         "C#",
+        "Go",
+        "Java",
+        "JavaScript/TypeScript",
         "PHP",
         "Python",
-        "JavaScript",
         "Ruby",
     };
+
+    private static final Map<String, String> LANGUAGE_CLI_IDS = Map.of(
+        "All languages", "all",
+        "C#", "dotnet",
+        "Go", "go",
+        "Java", "java",
+        "JavaScript/TypeScript", "js",
+        "PHP", "php",
+        "Python", "python",
+        "Ruby", "ruby"
+    );
+
 
     public JPanel getApiDiscoveryPanel() {
         return apiDiscoveryPanel;
@@ -69,7 +84,8 @@ public class ApiDiscovery extends Screen {
         uploadButton.addActionListener(e -> openFileDialog());
         uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         submitButton.addActionListener(e -> {
-            String lang = apiLangCombobox.getSelectedItem().toString();
+            String selected = apiLangCombobox.getSelectedItem().toString();
+            String lang = LANGUAGE_CLI_IDS.getOrDefault(selected, selected);
             String dirPath = pathToDirectory.getText();
 
             loadingPanel.setVisible(true);

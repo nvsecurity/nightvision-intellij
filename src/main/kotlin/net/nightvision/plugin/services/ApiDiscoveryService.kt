@@ -23,8 +23,15 @@ object ApiDiscoveryService {
 
         val directory = makeFilePathAbsolute(dirPath, project)
 
+        val command = mutableListOf(NIGHTVISION, "swagger", "extract", directory)
+        if (lang.isNotEmpty() && lang != "all") {
+            command.add("--lang")
+            command.add(lang)
+        }
+        command.addAll(listOf("--no-upload", "--output", fileName))
+
         val response = CommandRunnerService.runCommandSync(
-            NIGHTVISION, "swagger", "extract", directory, "--lang", lang, "--no-upload", "--output", fileName,
+            *command.toTypedArray(),
             workingDirectory = directory
         )
 
