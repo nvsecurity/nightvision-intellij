@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.InstallCLIService;
+import net.nightvision.plugin.services.ProjectService;
 import net.nightvision.plugin.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -106,19 +107,37 @@ public class OverviewScreen extends Screen {
         scansButton.setIcon(IconUtils.getIcon("/icons/scans.svg", 1f));
         scansButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scansButton.setHorizontalTextPosition(CENTER);
-        scansButton.addActionListener(e ->  mainWindowFactory.openScansPage());
+        scansButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openScansPage();
+            }
+        });
         scansButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         targetsButton.setIcon(IconUtils.getIcon("/icons/targets.svg", 1f));
         targetsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         targetsButton.setHorizontalTextPosition(CENTER);
-        targetsButton.addActionListener(e -> mainWindowFactory.openTargetsPage());
+        targetsButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openTargetsPage();
+            }
+        });
         targetsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         authenticationsButton.setIcon(IconUtils.getIcon("/icons/authentications.svg", 1f));
         authenticationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         authenticationsButton.setHorizontalTextPosition(CENTER);
-        authenticationsButton.addActionListener(e -> mainWindowFactory.openAuthenticationsPage());
+        authenticationsButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openAuthenticationsPage();
+            }
+        });
         authenticationsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         projectsButton.setIcon(IconUtils.getIcon("/icons/projects.svg", 1f));
