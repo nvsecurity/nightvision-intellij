@@ -7,9 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import java.io.File
 import java.nio.file.Files
@@ -22,24 +19,6 @@ object ApiDiscoveryService {
     private const val fileName: String = "nv-swagger-extraction-results.yml"
 
     fun extract(dirPath: String, lang: String, project: Project): ApiDiscoveryResults {
-        return runBlocking {
-            extractBlocking(dirPath, lang, project)
-        }
-    }
-
-    private fun makeFilePathAbsolute(filePath: String, project: Project): String {
-        val virtualFile: VirtualFile? = ApplicationManager.getApplication().runReadAction<VirtualFile?> {
-            project.basePath?.let { VfsUtil.findFile(Paths.get(it), true) }
-        }
-
-        return if (Paths.get(filePath).isAbsolute) {
-            filePath
-        } else {
-            virtualFile?.path?.let { Paths.get(it, filePath).toString() } ?: Paths.get(filePath).toAbsolutePath().toString()
-        }
-    }
-
-    private suspend fun extractBlocking(dirPath: String, lang: String, project: Project): ApiDiscoveryResults {
         ApiDiscoveryService.project = project
 
         val directory = makeFilePathAbsolute(dirPath, project)
@@ -58,14 +37,31 @@ object ApiDiscoveryService {
         val results: ApiDiscoveryResults = parseResults(logMessage)
         val filePath = Paths.get(directory, fileName).toString()
 
-        val data = readFile(filePath)
+        val data = Files.readString(Paths.get(filePath))
         val document = ApplicationManager.getApplication().runReadAction<Document> {
             createDocument(data)
         }
 
         openDocument(document)
-        deleteFile(filePath)
+
+        val cliOutputFile = File(filePath)
+        if (cliOutputFile.exists()) {
+            cliOutputFile.delete()
+        }
+
         return results
+    }
+
+    private fun makeFilePathAbsolute(filePath: String, project: Project): String {
+        val virtualFile: VirtualFile? = ApplicationManager.getApplication().runReadAction<VirtualFile?> {
+            project.basePath?.let { VfsUtil.findFile(Paths.get(it), true) }
+        }
+
+        return if (Paths.get(filePath).isAbsolute) {
+            filePath
+        } else {
+            virtualFile?.path?.let { Paths.get(it, filePath).toString() } ?: Paths.get(filePath).toAbsolutePath().toString()
+        }
     }
 
     private fun parseResults(message: String): ApiDiscoveryResults {
@@ -83,25 +79,9 @@ object ApiDiscoveryService {
         return ApiDiscoveryResults(extractedPaths, extractedClasses)
     }
 
-    private suspend fun readFile(filePath: String): String {
-        return withContext(Dispatchers.IO) {
-            val path = Paths.get(filePath)
-            Files.readString(path)
-        }
-    }
-
     private fun createDocument(content: String): Document {
         val editorFactory = EditorFactory.getInstance()
         return editorFactory.createDocument(content)
-    }
-
-    private suspend fun deleteFile(filePath: String) {
-        withContext(Dispatchers.IO) {
-            val file = File(filePath)
-            if (file.exists()) {
-                file.delete()
-            }
-        }
     }
 
     private fun openDocument(document: Document) {

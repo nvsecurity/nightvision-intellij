@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.25"
+  id("org.jetbrains.kotlin.jvm") version "2.3.20"
   id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
@@ -28,7 +28,7 @@ dependencies {
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2022.3.3", "IC-2023.3.8", "IC-2024.3.5"))
+    ides.ides(listOf("IC-2023.3.8", "IC-2024.3.5"))
   }
 }
 
@@ -46,7 +46,7 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set("223")
+    sinceBuild.set("233")
   }
 
   signPlugin {
