@@ -190,17 +190,21 @@ public class ApiDiscovery extends Screen {
             try {
                 ApiDiscoveryService.ApiDiscoveryResults result = get();
 
-                System.out.println(result);
-                JPanel panel = new JPanel();
-                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-                JLabel pathResults = new JLabel("Number of discovered paths: " + result.getPath());
-                JLabel classResults = new JLabel("Number of discovered classes: " + result.getClasses());
-
-                panel.add(pathResults);
-                panel.add(classResults);
-
-                resultsPanel.add(panel);
+                if (result.getPath() == 0 && result.getClasses() == 0) {
+                    JBScrollPane errorPanel = getErrorPanel(
+                        "<html>No API routes found. Please recheck the entered Path to the Root "
+                        + "Directory and selected Language, then try again.</html>"
+                    );
+                    resultsPanel.add(errorPanel);
+                } else {
+                    JPanel panel = new JPanel();
+                    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                    JLabel pathResults = new JLabel("Number of discovered paths: " + result.getPath());
+                    JLabel classResults = new JLabel("Number of discovered classes: " + result.getClasses());
+                    panel.add(pathResults);
+                    panel.add(classResults);
+                    resultsPanel.add(panel);
+                }
 
             } catch (ExecutionException ex) {
                 var cause = ex.getCause();
@@ -214,11 +218,17 @@ public class ApiDiscovery extends Screen {
                     mainWindowFactory.openLoginPage();
                     return;
                 } else {
-                    JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + cause.getMessage().replaceAll("\n", "<br>") + "</html>");
+                    JBScrollPane errorPanel = getErrorPanel(
+                        "<html>Error extracting API info. Please recheck the entered Path to the Root "
+                        + "Directory and selected Language, then try again.</html>"
+                    );
                     resultsPanel.add(errorPanel);
                 }
             } catch (Exception ex) {
-                JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + ex.getMessage().replaceAll("\n", "<br>") + "</html>");
+                JBScrollPane errorPanel = getErrorPanel(
+                    "<html>Error extracting API info. Please recheck the entered Path to the Root "
+                    + "Directory and selected Language, then try again.</html>"
+                );
                 resultsPanel.add(errorPanel);
             }
 
