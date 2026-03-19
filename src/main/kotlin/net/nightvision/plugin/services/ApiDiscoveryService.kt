@@ -1,34 +1,34 @@
 package net.nightvision.plugin.services
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.testFramework.LightVirtualFile
 import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.UUID
 
 object ApiDiscoveryService {
     data class ApiDiscoveryResults(val path: Int, val classes: Int)
 
-    private var project: Project? = null
-    private const val fileName: String = "nv-swagger-extraction-results.yml"
-
     fun extract(dirPath: String, lang: String, project: Project): ApiDiscoveryResults {
-        ApiDiscoveryService.project = project
-
         val directory = makeFilePathAbsolute(dirPath, project)
+        val dirName = File(directory).name.ifEmpty { "project" }
+        val displayName = "${dirName}-openapi.yml"
+        val cliOutputFileName = "nv-swagger-extraction-${UUID.randomUUID()}.yml"
 
         val command = mutableListOf(NIGHTVISION, "swagger", "extract", directory)
         if (lang.isNotEmpty() && lang != "all") {
             command.add("--lang")
             command.add(lang)
         }
-        command.addAll(listOf("--no-upload", "--output", fileName))
+        command.addAll(listOf("--no-upload", "--output", cliOutputFileName))
 
         val response = CommandRunnerService.runCommandSync(
             *command.toTypedArray(),
@@ -38,25 +38,21 @@ object ApiDiscoveryService {
         val errorOutput = response.error
         val normalOutput = response.output
         val logMessage = errorOutput.ifEmpty { normalOutput }
-        println("Process output: $normalOutput")
-        println("Process errors: $errorOutput")
 
-        val results: ApiDiscoveryResults = parseResults(logMessage)
-        val filePath = Paths.get(directory, fileName).toString()
-
-        val data = Files.readString(Paths.get(filePath))
-        val document = ApplicationManager.getApplication().runReadAction<Document> {
-            createDocument(data)
+        val cliOutputPath = Paths.get(directory, cliOutputFileName).toString()
+        val cliOutputFile = File(cliOutputPath)
+        try {
+            val results: ApiDiscoveryResults = parseResults(logMessage)
+            if (cliOutputFile.exists()) {
+                val content = Files.readString(Paths.get(cliOutputPath))
+                openInEditor(project, displayName, content)
+            }
+            return results
+        } finally {
+            if (cliOutputFile.exists()) {
+                cliOutputFile.delete()
+            }
         }
-
-        openDocument(document)
-
-        val cliOutputFile = File(filePath)
-        if (cliOutputFile.exists()) {
-            cliOutputFile.delete()
-        }
-
-        return results
     }
 
     private fun makeFilePathAbsolute(filePath: String, project: Project): String {
@@ -86,32 +82,16 @@ object ApiDiscoveryService {
         return ApiDiscoveryResults(extractedPaths, extractedClasses)
     }
 
-    private fun createDocument(content: String): Document {
-        val editorFactory = EditorFactory.getInstance()
-        return editorFactory.createDocument(content)
-    }
-
-    private fun openDocument(document: Document) {
-        val project = project ?: return
-        val fileEditorManager = com.intellij.openapi.fileEditor.FileEditorManager.getInstance(project)
+    private fun openInEditor(project: Project, displayName: String, content: String) {
+        val fileEditorManager = FileEditorManager.getInstance(project)
+        val yamlFileType = FileTypeManager.getInstance().getFileTypeByExtension("yml")
+        val virtualFile = LightVirtualFile(displayName, yamlFileType, content)
 
         ApplicationManager.getApplication().invokeLater {
-            val virtualFile = ApplicationManager.getApplication().runWriteAction<VirtualFile> {
-                createVirtualFile(document)
-            }
-
             fileEditorManager.openTextEditor(
-                com.intellij.openapi.fileEditor.OpenFileDescriptor(project, virtualFile),
+                OpenFileDescriptor(project, virtualFile),
                 true
             )
-        }
-    }
-
-    private fun createVirtualFile(document: Document): VirtualFile {
-        return ApplicationManager.getApplication().runWriteAction<VirtualFile> {
-            val file = File.createTempFile(fileName.removeSuffix(".yml") + "-", ".yml")
-            file.writeText(document.text)
-            LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file) ?: throw IllegalStateException("Cannot find virtual file")
         }
     }
 }
