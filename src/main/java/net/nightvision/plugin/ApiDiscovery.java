@@ -44,6 +44,7 @@ public class ApiDiscovery extends Screen {
     private final String[] LANGUAGES = new String[] {
         "Java",
         "C#",
+        "PHP",
         "Python",
         "JavaScript",
         "Ruby",
