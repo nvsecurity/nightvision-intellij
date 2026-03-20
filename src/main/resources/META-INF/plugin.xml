@@ -17,6 +17,26 @@
     NightVision plugin for IntelliJ IDEA - Document APIs, run DAST scans, and uncover vulnerabilities in both known and unknown endpoints!
   ]]></description>
 
+  <change-notes><![CDATA[
+    <h3>2.2</h3>
+    <b>Added</b>
+    <ul>
+      <li>PHP and Go language support for API Discovery</li>
+      <li>"All languages" option that runs extraction without specifying a language</li>
+      <li>Pre-fill API Discovery path with the current project directory</li>
+      <li>Meaningful tab names for generated OpenAPI specs</li>
+      <li>Resolve API URL from CLI config, matching the CLI's configured environment</li>
+    </ul>
+    <b>Fixed</b>
+    <ul>
+      <li>Plugin no longer crashes when no project is selected</li>
+      <li>NV logo renders cleanly at all sizes</li>
+      <li>Redesigned API Discovery form layout</li>
+      <li>Improved error messages when no API routes are found</li>
+      <li>Minimum supported IDE version raised to IntelliJ 2023.3</li>
+    </ul>
+  ]]></change-notes>
+
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
