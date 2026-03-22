@@ -65,13 +65,15 @@ public class ApiDiscovery extends Screen {
             "Select Repository", "Choose the root directory of your API",
             project, FileChooserDescriptorFactory.createSingleFolderDescriptor()
         );
+        if (project.getBasePath() != null) {
+            pathField.setText(project.getBasePath());
+        }
 
         // --- Language combo ---
         languageCombo = new ComboBox<>(LANGUAGES);
 
         // --- Submit button ---
         submitButton = new JButton("Generate OpenAPI Spec");
-        submitButton.setEnabled(false);
         submitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         submitButton.addActionListener(e -> onSubmit());
 
