@@ -24,6 +24,7 @@ dependencies {
     bundledPlugin("com.intellij.java")
     pluginVerifier()
   }
+  testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {
@@ -32,7 +33,7 @@ intellijPlatform {
   }
 }
 
-tasks.named<KotlinJvmCompile>("compileKotlin"){
+tasks.withType<KotlinJvmCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_17)
   }

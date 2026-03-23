@@ -12,19 +12,25 @@ import java.nio.file.Paths
 object ApiUrlService {
     private const val DEFAULT_API_URL = "https://api.nightvision.net"
 
-    private val configPath: String = Paths.get(
+    private val defaultConfigPath: String = Paths.get(
         System.getProperty("user.home"), ".nightvision", "nightvision.yml"
     ).toString()
 
     fun resolveApiUrl(): String {
+        return resolveApiUrl(
+            envUrl = System.getenv("NIGHTVISION_API_URL"),
+            configPath = defaultConfigPath
+        )
+    }
+
+    internal fun resolveApiUrl(envUrl: String?, configPath: String): String {
         // 1. Check environment variable
-        val envUrl = System.getenv("NIGHTVISION_API_URL")
         if (!envUrl.isNullOrBlank()) {
             return stripApiSuffix(envUrl)
         }
 
         // 2. Check CLI config file
-        val configUrl = readConfigApiUrl()
+        val configUrl = readConfigApiUrl(configPath)
         if (!configUrl.isNullOrBlank()) {
             return stripApiSuffix(configUrl)
         }
@@ -33,7 +39,7 @@ object ApiUrlService {
         return DEFAULT_API_URL
     }
 
-    private fun readConfigApiUrl(): String? {
+    internal fun readConfigApiUrl(configPath: String): String? {
         return try {
             val content = File(configPath).readText()
             val match = Regex("""^api-url:\s*(.+)$""", RegexOption.MULTILINE).find(content)
@@ -43,7 +49,7 @@ object ApiUrlService {
         }
     }
 
-    private fun stripApiSuffix(url: String): String {
+    internal fun stripApiSuffix(url: String): String {
         return url
             .replace(Regex("""/api/v1/?$"""), "")
             .trimEnd('/')
