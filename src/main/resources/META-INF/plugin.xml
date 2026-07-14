@@ -26,6 +26,7 @@
       <li>Pre-fill API Discovery path with the current project directory</li>
       <li>Meaningful tab names for generated OpenAPI specs</li>
       <li>Resolve API URL from CLI config, matching the CLI's configured environment</li>
+      <li>Paginated scan list with next/previous navigation</li>
     </ul>
     <b>Fixed</b>
     <ul>
@@ -34,6 +35,8 @@
       <li>Redesigned API Discovery form layout</li>
       <li>Improved error messages when no API routes are found</li>
       <li>Minimum supported IDE version raised to IntelliJ 2023.3</li>
+      <li>Restyled the detail screens and applied consistent padding and spacing across the plugin</li>
+      <li>Updated the NightVision website and support links to nightviz.ai</li>
     </ul>
   ]]></change-notes>
 
