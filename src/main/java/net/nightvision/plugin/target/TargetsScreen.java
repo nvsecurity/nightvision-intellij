@@ -51,6 +51,7 @@ public class TargetsScreen extends Screen {
         targetsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         targetsTable.setRowHeight(40);
 
+        addButtonPadding(createTargetButton, 6);
         createTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsCreatePage();
         });

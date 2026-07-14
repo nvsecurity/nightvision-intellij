@@ -59,6 +59,7 @@ public class ScansCreateScreen extends Screen {
             loadAuthenticationComboBox();
         }));
 
+        addButtonPadding(startScanButton, 6);
         startScanButton.addActionListener(e -> {
             errorMessageLabel.setVisible(false);
             errorMessageLabel.setText("");

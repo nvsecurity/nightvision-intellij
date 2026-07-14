@@ -94,12 +94,14 @@ public class OverviewScreen extends Screen {
         apiDiscoveryButton.setIcon(IconUtils.getIcon("/icons/api-discovery.svg", 1f));
         apiDiscoveryButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         apiDiscoveryButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(apiDiscoveryButton, 8);
         apiDiscoveryButton.addActionListener(e ->  mainWindowFactory.openApiDiscoveryPage());
         apiDiscoveryButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         apiAndWebSecurityButton.setIcon(IconUtils.getIcon("/icons/dast.svg", 1f));
         apiAndWebSecurityButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         apiAndWebSecurityButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(apiAndWebSecurityButton, 8);
         apiAndWebSecurityButton.addActionListener(e -> {
             isExtraOptionsVisible = !isExtraOptionsVisible;
             extraOptionsPanel.setVisible(isExtraOptionsVisible);
@@ -110,6 +112,7 @@ public class OverviewScreen extends Screen {
         scansButton.setIcon(IconUtils.getIcon("/icons/scans.svg", 1f));
         scansButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scansButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(scansButton, 8);
         scansButton.addActionListener(e -> {
             if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
                 mainWindowFactory.openProjectsPage();
@@ -122,6 +125,7 @@ public class OverviewScreen extends Screen {
         targetsButton.setIcon(IconUtils.getIcon("/icons/targets.svg", 1f));
         targetsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         targetsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(targetsButton, 8);
         targetsButton.addActionListener(e -> {
             if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
                 mainWindowFactory.openProjectsPage();
@@ -134,6 +138,7 @@ public class OverviewScreen extends Screen {
         authenticationsButton.setIcon(IconUtils.getIcon("/icons/authentications.svg", 1f));
         authenticationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         authenticationsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(authenticationsButton, 8);
         authenticationsButton.addActionListener(e -> {
             if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
                 mainWindowFactory.openProjectsPage();
@@ -146,9 +151,11 @@ public class OverviewScreen extends Screen {
         projectsButton.setIcon(IconUtils.getIcon("/icons/projects.svg", 1f));
         projectsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         projectsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(projectsButton, 8);
         projectsButton.addActionListener(e -> mainWindowFactory.openProjectsPage());
         projectsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
+
 
     private class UpdateCLIWorker extends SwingWorker<Void, Void> {
 

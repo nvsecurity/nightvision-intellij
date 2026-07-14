@@ -29,6 +29,7 @@ public class InstallCLIScreen extends Screen {
 
         errorMessageLabel.setVisible(false);
 
+        addButtonPadding(installCLIButton, 6);
         installCLIButton.addActionListener(e -> {
             errorMessageLabel.setVisible(false);
             errorMessageLabel.setText("");

@@ -48,6 +48,7 @@ public class AuthenticationsScreen extends Screen {
             loadTable();
         }));
 
+        addButtonPadding(createAuthenticationButton, 6);
         createAuthenticationButton.addActionListener(e -> {
             mainWindowFactory.openAuthCreatePage();
         });

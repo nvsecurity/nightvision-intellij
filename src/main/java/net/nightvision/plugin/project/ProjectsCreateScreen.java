@@ -40,11 +40,13 @@ public class ProjectsCreateScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(cancelButton, 6);
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
         });
         cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(createButton, 6);
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
             errorMessage.setText("");

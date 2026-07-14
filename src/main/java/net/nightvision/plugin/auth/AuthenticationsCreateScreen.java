@@ -49,6 +49,7 @@ public class AuthenticationsCreateScreen extends Screen {
         tabbedPane1.remove(0); // Removing Cookie
         tabbedPane1.remove(0); // Removing Header
 
+        addButtonPadding(cancelButton, 6);
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });
@@ -64,6 +65,7 @@ public class AuthenticationsCreateScreen extends Screen {
                </body></html>
                """);
 
+        addButtonPadding(createButton, 6);
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
             errorMessage.setText("");

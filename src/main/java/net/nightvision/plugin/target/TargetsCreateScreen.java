@@ -66,11 +66,13 @@ public class TargetsCreateScreen extends Screen {
         uploadButton.addActionListener(e -> openFileDialog());
         uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(cancelApiTargetButton, 6);
         cancelApiTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
         cancelApiTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(cancelWebTargetButton, 6);
         cancelWebTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
@@ -78,6 +80,7 @@ public class TargetsCreateScreen extends Screen {
 
         apiTargetSpecUrlTextField.setToolTipText("Enter URL here...");
 
+        addButtonPadding(createWebTargetButton, 6);
         createWebTargetButton.addActionListener(e -> {
             errorMessageWebTarget.setVisible(false);
             errorMessageWebTarget.setText("");
@@ -120,6 +123,7 @@ public class TargetsCreateScreen extends Screen {
         });
         createWebTargetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(createApiTargetButton, 6);
         createApiTargetButton.addActionListener(e -> {
             errorMessageApiTarget.setVisible(false);
             errorMessageApiTarget.setText("");

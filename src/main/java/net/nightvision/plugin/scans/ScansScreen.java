@@ -129,6 +129,7 @@ public class ScansScreen extends Screen {
         scanWebApplicationsButton.setIcon(webScanIcon);
         scanWebApplicationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scanWebApplicationsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(scanWebApplicationsButton, 8);
         scanWebApplicationsButton.addActionListener(e -> {
             mainWindowFactory.openScanCreatePage("URL");
         });
@@ -136,6 +137,7 @@ public class ScansScreen extends Screen {
         scanAPIsButton.setIcon(openApiIcon);
         scanAPIsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scanAPIsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(scanAPIsButton, 8);
         scanAPIsButton.addActionListener(e -> {
             mainWindowFactory.openScanCreatePage("OPENAPI");
         });

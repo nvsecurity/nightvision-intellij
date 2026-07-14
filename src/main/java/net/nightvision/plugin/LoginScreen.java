@@ -53,6 +53,7 @@ public class LoginScreen extends Screen {
         super(project);
 
         loginButton.setEnabled(false);
+        addButtonPadding(loginButton, 6);
         loginPanel.setBorder(JBUI.Borders.empty(8));
 
         errorMessageLabel.setVisible(false);

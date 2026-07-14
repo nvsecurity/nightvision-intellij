@@ -51,6 +51,7 @@ public class ProjectsScreen extends Screen {
         projectsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         projectsTable.setRowHeight(40);
 
+        addButtonPadding(createProjectButton, 6);
         createProjectButton.addActionListener(e -> {
             mainWindowFactory.openProjectCreatePage();
         });
