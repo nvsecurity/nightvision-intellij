@@ -38,8 +38,7 @@ public class ProjectDetailsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
-        detailsPanel.setLayout(boxLayout);
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
         String[] keysList = { "Project Name:", "Date Created:", "Last Updated:", "Check in Browser:" };
 
@@ -47,20 +46,9 @@ public class ProjectDetailsScreen extends Screen {
 
         for (Integer i : detailsDictionary.keySet()) {
             String key = keysList[i];
-            if (!detailsDictionary.containsKey(i)) {
-                continue;
-            }
             var content = detailsDictionary.get(i);
-            JPanel propertyPanel = new JPanel();
-            BoxLayout layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-            propertyPanel.setLayout(layout);
-
-            JLabel label = new JLabel(key);
-            label.setFont(label.getFont().deriveFont(Font.BOLD));
-            propertyPanel.add(label);
 
             JLabel value = new JLabel(content);
-            value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
             if ("Check in Browser:".equals(key)) {
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -78,16 +66,10 @@ public class ProjectDetailsScreen extends Screen {
                 });
             }
 
-            propertyPanel.add(value);
-            detailsPanel.add(propertyPanel);
-            detailsPanel.add(Box.createVerticalStrut(JBUI.scale(4)));
+            addDetailRow(detailsPanel, key, value);
         }
 
-        for (Component component : detailsPanel.getComponents()) {
-            if (component instanceof JComponent jComponent) {
-                jComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
-            }
-        }
+        detailsPanel.add(Box.createVerticalGlue());
     }
 
     @NotNull

@@ -40,9 +40,7 @@ public class AuthenticationDetailsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
-        detailsPanel.setLayout(boxLayout);
-
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
         String[] keysList = { "Authentication Name:", "Project:", "Authentication Type:", "Authentication ID:", "Target URL:",
                 "Date Created:", "Latest Updated:", "Description:", "Check in Browser:", "Authentication Script:"};
@@ -52,28 +50,14 @@ public class AuthenticationDetailsScreen extends Screen {
         for (Integer i : authDetailsDictionary.keySet()) {
             String key = keysList[i];
             var content = authDetailsDictionary.get(i);
-            JPanel propertyPanel = new JPanel();
-            BoxLayout layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-            propertyPanel.setLayout(layout);
-
-            JLabel label = new JLabel(key);
-            label.setFont(label.getFont().deriveFont(Font.BOLD));
-            propertyPanel.add(label);
-
 
             if (i == 9) {
-                detailsPanel.add(propertyPanel);
-                propertyPanel = new JPanel();
-                layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-                propertyPanel.setLayout(layout);
-                JBTextArea value = new JBTextArea(content);
-                propertyPanel.add(value);
-                detailsPanel.add(propertyPanel);
+                // The script spans the full width and keeps its own text-area border.
+                addDetailRow(detailsPanel, key, new JBTextArea(content), false);
                 continue;
             }
 
             JLabel value = new JLabel(content);
-            value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
             if ("Check in Browser:".equals(key)) {
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -91,16 +75,10 @@ public class AuthenticationDetailsScreen extends Screen {
                 });
             }
 
-            propertyPanel.add(value);
-            detailsPanel.add(propertyPanel);
-            detailsPanel.add(Box.createVerticalStrut(JBUI.scale(4)));
+            addDetailRow(detailsPanel, key, value);
         }
 
-        for (Component component : detailsPanel.getComponents()) {
-            if (component instanceof JComponent jComponent) {
-                jComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
-            }
-        }
+        detailsPanel.add(Box.createVerticalGlue());
     }
 
     @NotNull
