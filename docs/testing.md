@@ -77,6 +77,7 @@ nightvision login --api-url https://api.test.nightvision.net/api/v1/
 |---|---|
 | `make build` | Build the plugin |
 | `make run` | Launch sandbox IDE with plugin |
+| `make dev` | Launch sandbox IDE with plugin (dev loop) |
 | `make verify` | Run plugin verifier |
 | `make package` | Package plugin as .zip |
 | `make clean` | Remove build artifacts |
