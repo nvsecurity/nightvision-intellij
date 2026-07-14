@@ -14,7 +14,7 @@ class Constants {
 
         const val APP_URL = "https://app.nightvision.net" // TODO: derive from API_URL if environments diverge
 
-        const val CONTACT_EMAIL = "support@nightvision.net"
+        const val CONTACT_EMAIL = "support@nightviz.ai"
 
         const val CLI_VERSION = "0.9.5"
 
