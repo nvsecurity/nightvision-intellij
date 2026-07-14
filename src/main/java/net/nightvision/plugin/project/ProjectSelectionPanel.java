@@ -9,6 +9,7 @@ import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.services.ProjectService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
         setLayout(new BorderLayout());
 
         titleLabel = new JLabel("Current Project:");
+        titleLabel.setBorder(JBUI.Borders.emptyBottom(4));
         add(titleLabel, BorderLayout.NORTH);
 
         List<ProjectInfo> projectInfos = ProjectService.INSTANCE.getProjectInfos();

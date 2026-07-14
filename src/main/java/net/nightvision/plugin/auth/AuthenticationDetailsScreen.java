@@ -8,6 +8,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.AuthInfo;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -29,6 +30,8 @@ public class AuthenticationDetailsScreen extends Screen {
 
     public AuthenticationDetailsScreen(Project project, AuthInfo authInfo) {
         super(project);
+
+        authenticationDetailsPanel.setBorder(JBUI.Borders.empty(8));
 
         backButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
@@ -90,6 +93,7 @@ public class AuthenticationDetailsScreen extends Screen {
 
             propertyPanel.add(value);
             detailsPanel.add(propertyPanel);
+            detailsPanel.add(Box.createVerticalStrut(JBUI.scale(4)));
         }
 
         for (Component component : detailsPanel.getComponents()) {

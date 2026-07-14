@@ -12,6 +12,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.AuthenticationService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -33,6 +34,8 @@ public class AuthenticationsCreateScreen extends Screen {
 
     public AuthenticationsCreateScreen(Project project) {
         super(project);
+
+        authenticationsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {

@@ -14,6 +14,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.TargetService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -47,6 +48,8 @@ public class TargetsCreateScreen extends Screen {
 
     public TargetsCreateScreen(Project project) {
         super(project);
+
+        targetsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
         errorMessageApiTarget.setVisible(false);
         errorMessageWebTarget.setVisible(false);

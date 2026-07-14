@@ -7,6 +7,7 @@ import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.InstallCLIService;
 import net.nightvision.plugin.services.ScanService;
 
+import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,8 @@ public class InstallCLIScreen extends Screen {
 
     public InstallCLIScreen(Project project) {
         super(project);
+
+        installCLIPanel.setBorder(JBUI.Borders.empty(8));
 
         errorMessageLabel.setVisible(false);
 

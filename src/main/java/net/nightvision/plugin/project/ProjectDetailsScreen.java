@@ -7,6 +7,7 @@ import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -27,6 +28,8 @@ public class ProjectDetailsScreen extends Screen {
 
     public ProjectDetailsScreen(Project project, ProjectInfo projectInfo) {
         super(project);
+
+        projectDetailsPanel.setBorder(JBUI.Borders.empty(8));
 
         backButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
@@ -77,6 +80,7 @@ public class ProjectDetailsScreen extends Screen {
 
             propertyPanel.add(value);
             detailsPanel.add(propertyPanel);
+            detailsPanel.add(Box.createVerticalStrut(JBUI.scale(4)));
         }
 
         for (Component component : detailsPanel.getComponents()) {

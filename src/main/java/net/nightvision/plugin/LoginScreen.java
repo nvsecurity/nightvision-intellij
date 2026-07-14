@@ -13,6 +13,7 @@ import net.nightvision.plugin.services.LoginService;
 import net.nightvision.plugin.services.ProjectService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -52,6 +53,8 @@ public class LoginScreen extends Screen {
         super(project);
 
         loginButton.setEnabled(false);
+        loginPanel.setBorder(JBUI.Borders.empty(8));
+
         errorMessageLabel.setVisible(false);
         updateCLIButton.setVisible(false);
 

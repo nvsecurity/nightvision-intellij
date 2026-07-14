@@ -9,6 +9,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.services.ProjectService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -31,6 +32,8 @@ public class ProjectsScreen extends Screen {
 
     public ProjectsScreen(Project project) {
         super(project);
+
+        projectsPanel.setBorder(JBUI.Borders.empty(8));
 
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();

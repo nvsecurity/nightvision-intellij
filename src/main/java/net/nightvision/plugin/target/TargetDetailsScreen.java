@@ -8,6 +8,7 @@ import net.nightvision.plugin.models.TargetInfo;
 import net.nightvision.plugin.services.TargetService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -28,6 +29,8 @@ public class TargetDetailsScreen extends Screen {
 
     public TargetDetailsScreen(Project project, TargetInfo rawTargetInfo) {
         super(project);
+
+        targetDetailsPanel.setBorder(JBUI.Borders.empty(8));
 
         backButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
@@ -121,6 +124,7 @@ public class TargetDetailsScreen extends Screen {
 
             propertyPanel.add(value);
             detailsPanel.add(propertyPanel);
+            detailsPanel.add(Box.createVerticalStrut(JBUI.scale(4)));
         }
 
         for (Component component : detailsPanel.getComponents()) {

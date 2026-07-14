@@ -13,6 +13,7 @@ import net.nightvision.plugin.services.AuthenticationService;
 import net.nightvision.plugin.services.ScanService;
 import net.nightvision.plugin.services.TargetService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class ScansCreateScreen extends Screen {
     public ScansCreateScreen(Project project, String targetType) {
         super(project);
         this.targetType = targetType;
+
+        scansCreatePanel.setBorder(JBUI.Borders.empty(8));
 
         errorMessageLabel.setVisible(false);
 

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
+import com.intellij.util.ui.JBUI;
 import static javax.swing.SwingConstants.CENTER;
 
 public class OverviewScreen extends Screen {
@@ -59,6 +60,8 @@ public class OverviewScreen extends Screen {
 
     public OverviewScreen(Project project) {
         super(project);
+
+        overviewPanel.setBorder(JBUI.Borders.empty(8));
 
         updateCLIButton.setVisible(false);
         errorMessageLabel.setVisible(false);

@@ -10,6 +10,7 @@ import net.nightvision.plugin.project.ProjectSelectionPanel;
 import net.nightvision.plugin.services.ScanService;
 import net.nightvision.plugin.utils.IconUtils;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -35,6 +36,8 @@ public class ScansScreen extends Screen {
 
     public ScansScreen(Project project) {
         super(project);
+
+        scansPanel.setBorder(JBUI.Borders.empty(8));
 
         scansTable.setModel(new ScansTableModel());
         addHoverEffects(scansTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
