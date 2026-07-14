@@ -142,7 +142,8 @@ The `PUBLISH_TOKEN` is a permanent token from your JetBrains Marketplace account
 
 - **Plugin ID:** `net.nightvision.plugin` (declared in `plugin.xml`)
 - **Plugin name:** Nightvision
-- **Distribution:** JetBrains Marketplace (find it by searching "NightVision")
+- **Marketplace listing:** https://plugins.jetbrains.com/plugin/26915-nightvision
+  (Marketplace plugin ID `26915`)
 - **Vendor:** NightVision (support@nightviz.ai, https://www.nightviz.ai/)
 - **Minimum IDE:** `sinceBuild` 233 (IntelliJ 2023.3+), set in `patchPluginXml`
 
