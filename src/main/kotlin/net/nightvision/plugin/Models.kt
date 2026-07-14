@@ -3,7 +3,10 @@ package net.nightvision.plugin
 import com.google.gson.annotations.SerializedName
 
 data class PaginatedResult<T>(
-    val results: List<T>?
+    val results: List<T>?,
+    val next: String?,
+    val previous: String?,
+    val count: Int?
 )
 
 data class ScanInfo(

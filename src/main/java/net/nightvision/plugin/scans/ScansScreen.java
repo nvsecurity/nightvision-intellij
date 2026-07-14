@@ -3,6 +3,7 @@ package net.nightvision.plugin.scans;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.Loading;
+import net.nightvision.plugin.PaginatedResult;
 import net.nightvision.plugin.ScanInfo;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.VulnerablePathStatistics;
@@ -21,6 +22,8 @@ import static javax.swing.SwingConstants.CENTER;
 import static net.nightvision.plugin.utils.TableUtils.addHoverEffects;
 
 public class ScansScreen extends Screen {
+    private static final int PAGE_SIZE = 25;
+
     private JTable scansTable;
     private JPanel scansPanel;
     private JButton backButton;
@@ -28,7 +31,13 @@ public class ScansScreen extends Screen {
     private JPanel loadingPanelParent;
     private JButton scanWebApplicationsButton;
     private JButton scanAPIsButton;
-    private JPanel loadingPanel;
+    private JPanel paginationPanel;
+
+    private int currentPage = 1;
+    private int totalCount = 0;
+    private final JLabel pageLabel = new JLabel();
+    private final JButton prevButton = new JButton("<");
+    private final JButton nextButton = new JButton(">");
 
     public JPanel getScansPanel() {
         return scansPanel;
@@ -63,6 +72,7 @@ public class ScansScreen extends Screen {
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
+            currentPage = 1;
             loadTable();
         }));
 
@@ -144,31 +154,78 @@ public class ScansScreen extends Screen {
         scanAPIsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 
+        prevButton.setEnabled(false);
+        nextButton.setEnabled(false);
+        prevButton.addActionListener(e -> { currentPage--; loadTable(); });
+        nextButton.addActionListener(e -> { currentPage++; loadTable(); });
+        prevButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        nextButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        paginationPanel.add(pageLabel);
+        paginationPanel.add(prevButton);
+        paginationPanel.add(nextButton);
+        paginationPanel.setVisible(false);
+
         loadTable();
     }
 
     private void loadTable() {
-        new LoadScansWorker().execute();
-
-        loadingPanel = new Loading().getLoadingPanel();
-        loadingPanelParent.add(loadingPanel);
-        scansTable.setVisible(false);
+        showLoadingState();
+        new LoadScansWorker(currentPage).execute();
     }
 
-    private class LoadScansWorker extends SwingWorker<List<ScanInfo>, Void> {
+    // Clearing loadingPanelParent first keeps a superseded load from stranding a
+    // spinner that would then paint over the list, and adding without a
+    // revalidate leaves the new panel with no bounds, so it never shows.
+    private void showLoadingState() {
+        loadingPanelParent.removeAll();
+        loadingPanelParent.add(new Loading().getLoadingPanel());
+        loadingPanelParent.revalidate();
+        loadingPanelParent.repaint();
+        scansTable.setVisible(false);
+        paginationPanel.setVisible(false);
+    }
+
+    private void updatePagination() {
+        int lastPage = Math.max(1, (totalCount + PAGE_SIZE - 1) / PAGE_SIZE);
+        int start = (currentPage - 1) * PAGE_SIZE + 1;
+        int end = Math.min(currentPage * PAGE_SIZE, totalCount);
+        pageLabel.setText(start + "-" + end + " of " + totalCount);
+        prevButton.setEnabled(currentPage > 1);
+        nextButton.setEnabled(currentPage < lastPage);
+        paginationPanel.setVisible(totalCount > PAGE_SIZE);
+    }
+
+    private class LoadScansWorker extends SwingWorker<PaginatedResult<ScanInfo>, Void> {
+        private final int page;
+
+        LoadScansWorker(int page) {
+            this.page = page;
+        }
+
         @Override
-        protected List<ScanInfo> doInBackground() throws Exception {
-            return ScanService.INSTANCE.getScans();
+        protected PaginatedResult<ScanInfo> doInBackground() throws Exception {
+            return ScanService.INSTANCE.getScans(page);
         }
 
         @Override
         protected void done() {
             try {
-                List<ScanInfo> scanInfos = get();
-                ((ScansTableModel) scansTable.getModel()).setScans(scanInfos);
+                PaginatedResult<ScanInfo> result = get();
+                totalCount = result.getCount() != null ? result.getCount() : 0;
 
-                loadingPanelParent.remove(loadingPanel);
+                int lastPage = Math.max(1, (totalCount + PAGE_SIZE - 1) / PAGE_SIZE);
+                if (currentPage > lastPage) {
+                    currentPage = lastPage;
+                    loadTable();
+                    return;
+                }
+
+                ((ScansTableModel) scansTable.getModel()).setScans(result.getResults());
+                updatePagination();
+
+                loadingPanelParent.removeAll();
                 loadingPanelParent.revalidate();
+                loadingPanelParent.repaint();
                 scansTable.setVisible(true);
             } catch (Exception ignore) {
                 // TODO: Show error message + stop loading panel
