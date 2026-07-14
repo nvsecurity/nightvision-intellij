@@ -12,13 +12,13 @@ categories:
       - 'bug'
       - 'quick-fix'
   - title: '🧰 Maintenance'
-    label:
+    labels:
       - 'chore'
       - 'maintenance'
       - 'maintain'
       - 'cleanup'
   - title: '📝 Documentation'
-    label:
+    labels:
       - 'documentation'
       - 'docs'
 

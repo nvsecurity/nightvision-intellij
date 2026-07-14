@@ -169,10 +169,8 @@ The `PUBLISH_TOKEN` is a permanent token from your JetBrains Marketplace account
 - **`verifyPlugin` failures**: an API incompatibility against `IC-2023.3.8` or
   `IC-2024.3.5`. Check the flagged API usage and the `sinceBuild` floor.
 - **Release Drafter not updating**: ensure PRs are merged to `main` and the
-  action has `GITHUB_TOKEN` permissions. Note that the Maintenance and
-  Documentation categories in `.github/release-drafter.yml` use `label:`
-  (singular) rather than `labels:`; PRs with those labels may not be categorized
-  until that is corrected.
+  action has `GITHUB_TOKEN` permissions. If PRs land in the wrong section, check
+  that their labels match a category in `.github/release-drafter.yml`.
 - **Published version doesn't match the release tag**: the shipped version comes
   from `build.gradle.kts`, not the git tag. Bump `build.gradle.kts` before
   publishing.
