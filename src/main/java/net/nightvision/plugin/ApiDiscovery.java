@@ -22,13 +22,17 @@ import static net.nightvision.plugin.Constants.CONTACT_EMAIL;
 
 public class ApiDiscovery extends Screen {
 
-    private static final String[] LANGUAGES = {
+    // Package-private for testing.
+    static final String[] LANGUAGES = {
         "All languages", "C#", "Go", "Java", "JavaScript/TypeScript", "PHP", "Python", "Ruby",
     };
 
-    private static final Map<String, String> LANGUAGE_CLI_IDS = Map.of(
+    // Values must match the --lang options accepted by `nightvision swagger extract`.
+    // "all" is a sentinel: ApiDiscoveryService omits --lang entirely for it.
+    // Package-private for testing.
+    static final Map<String, String> LANGUAGE_CLI_IDS = Map.of(
         "All languages", "all",
-        "C#", "dotnet",
+        "C#", "csharp",
         "Go", "go",
         "Java", "java",
         "JavaScript/TypeScript", "js",
