@@ -58,5 +58,10 @@ tasks {
 
   publishPlugin {
     token.set(System.getenv("PUBLISH_TOKEN"))
+    // By default publishPlugin picks its archive on signPlugin's didWork flag, which
+    // is false whenever signing is skipped, up to date, or restored from the build
+    // cache. In those cases it silently uploads the unsigned archive and still
+    // reports success. Point it at the signed archive so signing cannot be lost.
+    archiveFile.set(signPlugin.flatMap { it.signedArchiveFile })
   }
 }
