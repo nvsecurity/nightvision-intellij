@@ -1,5 +1,6 @@
 package net.nightvision.plugin
 
+import net.nightvision.plugin.services.ApiUrlService
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -8,12 +9,12 @@ class Constants {
     companion object {
         const val NIGHTVISION = "nightvision"
         const val API_V1_SUFFIX = "api/v1"
-        const val API_URL = "https://api.nightvision.net"
-        const val API_V1_URL = "$API_URL/$API_V1_SUFFIX"
+        val API_URL: String = ApiUrlService.resolveApiUrl()
+        val API_V1_URL: String = "$API_URL/$API_V1_SUFFIX"
 
-        const val APP_URL = "https://app.nightvision.net"
+        const val APP_URL = "https://app.nightvision.net" // TODO: derive from API_URL if environments diverge
 
-        const val CONTACT_EMAIL = "support@nightvision.net"
+        const val CONTACT_EMAIL = "support@nightviz.ai"
 
         const val CLI_VERSION = "0.9.5"
 

@@ -108,7 +108,7 @@ object CommandRunnerService {
         }
         val r = runCommandSync(NIGHTVISION, "version")
         val message = r.output.ifBlank { r.error }
-        val regex = Regex("""(\d+\.\d+\.\d+)""")
+        val regex = Regex("""Version\s+(\d+\.\d+\.\d+)""")
         val match = regex.find(message)
         val v = match?.groups?.get(1)?.value
             ?: ""

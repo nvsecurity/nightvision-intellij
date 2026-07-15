@@ -9,6 +9,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.ProjectInfo;
 import net.nightvision.plugin.services.ProjectService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -32,6 +33,8 @@ public class ProjectsScreen extends Screen {
     public ProjectsScreen(Project project) {
         super(project);
 
+        projectsPanel.setBorder(JBUI.Borders.empty(8));
+
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
@@ -48,6 +51,7 @@ public class ProjectsScreen extends Screen {
         projectsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         projectsTable.setRowHeight(40);
 
+        addButtonPadding(createProjectButton, 6);
         createProjectButton.addActionListener(e -> {
             mainWindowFactory.openProjectCreatePage();
         });

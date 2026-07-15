@@ -1,163 +1,258 @@
 package net.nightvision.plugin;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
-import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.JBUI;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
+import com.intellij.icons.AllIcons;
 import net.nightvision.plugin.services.ApiDiscoveryService;
-import net.nightvision.plugin.utils.IconUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static net.nightvision.plugin.Constants.CONTACT_EMAIL;
 
 public class ApiDiscovery extends Screen {
-    private JPanel apiDiscoveryPanel;
-    private JTextField pathToDirectory;
-    private JButton uploadButton;
-    private JPanel pathPanel;
-    private JComboBox<String> apiLangCombobox;
-    private JPanel pathInputPanel;
-    private JPanel pathUploadPanel;
-    private JButton submitButton;
-    private JPanel languagePanel;
-    private JPanel submitPanel;
-    private JPanel resultsPanel;
-    private JButton backButton;
-    private JPanel backButtonPanel;
-    private JPanel loadingPanel;
 
-    private final String[] LANGUAGES = new String[] {
-        "Java",
-        "C#",
-        "Python",
-        "JavaScript",
-        "Ruby",
+    // Package-private for testing.
+    static final String[] LANGUAGES = {
+        "All languages", "C#", "Go", "Java", "JavaScript/TypeScript", "PHP", "Python", "Ruby",
     };
 
+    // Values must match the --lang options accepted by `nightvision swagger extract`.
+    // "all" is a sentinel: ApiDiscoveryService omits --lang entirely for it.
+    // Package-private for testing.
+    static final Map<String, String> LANGUAGE_CLI_IDS = Map.of(
+        "All languages", "all",
+        "C#", "csharp",
+        "Go", "go",
+        "Java", "java",
+        "JavaScript/TypeScript", "js",
+        "PHP", "php",
+        "Python", "python",
+        "Ruby", "ruby"
+    );
+
+    private final JPanel rootPanel;
+    private final TextFieldWithBrowseButton pathField;
+    private final ComboBox<String> languageCombo;
+    private final JButton submitButton;
+    private final JPanel resultsPanel;
+    private final JPanel loadingPanel;
+
     public JPanel getApiDiscoveryPanel() {
-        return apiDiscoveryPanel;
+        return rootPanel;
     }
 
     public ApiDiscovery(Project project) {
         super(project);
-        apiDiscoveryPanel.setLayout(new BoxLayout(apiDiscoveryPanel, BoxLayout.Y_AXIS));
-        apiDiscoveryPanel.removeAll();
-        resultsPanel.setLayout(new FlowLayout(FlowLayout. LEFT));
 
-        backButton.setIcon(IconUtils.getIcon("/icons/back.svg", 1f));
-        backButton.setBorder(null);
+        // --- Back button ---
+        JButton backButton = new JButton("Back", AllIcons.Actions.Back);
+        backButton.setBorderPainted(false);
+        backButton.setContentAreaFilled(false);
+        backButton.setMargin(JBUI.emptyInsets());
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButton.addActionListener(e -> mainWindowFactory.openOverviewPage());
-        uploadButton.setIcon(IconUtils.getIcon("/icons/custom-file-select.svg", 1f));
-        uploadButton.setBorder(null);
-        uploadButton.addActionListener(e -> openFileDialog());
-        uploadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        submitButton.addActionListener(e -> {
-            String lang = apiLangCombobox.getSelectedItem().toString();
-            String dirPath = pathToDirectory.getText();
 
-            loadingPanel.setVisible(true);
-            apiDiscoveryPanel.add(loadingPanel);
+        // --- Path field ---
+        pathField = new TextFieldWithBrowseButton();
+        pathField.addBrowseFolderListener(
+            "Select Repository", "Choose the root directory of your API",
+            project, FileChooserDescriptorFactory.createSingleFolderDescriptor()
+        );
+        if (project.getBasePath() != null) {
+            pathField.setText(project.getBasePath());
+        }
 
-            resultsPanel.setVisible(false);
-            resultsPanel.removeAll();
+        // --- Language combo ---
+        languageCombo = new ComboBox<>(LANGUAGES);
 
-            enableEditing(false);
-
-            apiDiscoveryPanel.revalidate();
-
-            new ExtractWorker(dirPath, lang).execute();
-        });
+        // --- Submit button ---
+        submitButton = new JButton("Generate OpenAPI Spec");
         submitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        submitButton.addActionListener(e -> onSubmit());
 
-        pathToDirectory.getDocument().addDocumentListener(new DocumentListener() {
-            private void updateButtonState() {
-                submitButton.setEnabled(!pathToDirectory.getText().trim().isEmpty());
-                submitPanel.revalidate();
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateButtonState();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateButtonState();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateButtonState();
-            }
+        // Enable submit only when path is non-empty
+        pathField.getTextField().getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void update() { submitButton.setEnabled(!pathField.getText().trim().isEmpty()); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { update(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { update(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { update(); }
         });
 
-        initCombobox();
-
-        pathPanel.add(pathInputPanel, BorderLayout.CENTER);
-        pathUploadPanel.setPreferredSize(null);
-        pathPanel.add(pathUploadPanel, BorderLayout.EAST);
-
-        pathPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, pathPanel.getPreferredSize().height));
-        languagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, languagePanel.getPreferredSize().height));
-        submitPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, submitPanel.getPreferredSize().height));
-
-        backButtonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, backButtonPanel.getPreferredSize().height));
+        // --- Loading ---
         loadingPanel = new Loading().getLoadingPanel();
+        // Loading declares a MAX_VALUE preferred size, which the grids and border
+        // layouts it is normally dropped into clamp away. GridBag has no such
+        // policy and would hand the row that height, so fall back to the size the
+        // panel's own layout computes.
+        loadingPanel.setPreferredSize(null);
         loadingPanel.setVisible(false);
 
-        apiDiscoveryPanel.add(backButtonPanel);
-        apiDiscoveryPanel.add(pathPanel);
-        apiDiscoveryPanel.add(languagePanel);
-        apiDiscoveryPanel.add(submitPanel);
-        apiDiscoveryPanel.add(loadingPanel);
-        apiDiscoveryPanel.add(resultsPanel);
+        // --- Results ---
+        resultsPanel = new JPanel();
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+
+        // --- Layout ---
+        int pad = 4; // consistent left padding for text alignment
+
+        JPanel form = new JPanel();
+        form.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Row 0: back button
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = JBUI.insets(0, pad, 16, 0);
+        form.add(backButton, gbc);
+
+        // Row 1: path label
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = JBUI.insets(0, pad, 4, 0);
+        form.add(new JLabel("Path to the root directory of your API"), gbc);
+
+        // Row 2: path field
+        gbc.gridy = 2;
+        gbc.insets = JBUI.insetsBottom(12);
+        form.add(pathField, gbc);
+
+        // Row 3: language label
+        gbc.gridy = 3;
+        gbc.insets = JBUI.insets(0, pad, 4, 0);
+        form.add(new JLabel("API Language"), gbc);
+
+        // Row 4: language combo
+        gbc.gridy = 4;
+        gbc.insets = JBUI.insetsBottom(12);
+        form.add(languageCombo, gbc);
+
+        // Row 5: submit button (centered, natural width)
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = JBUI.insetsBottom(12);
+        form.add(submitButton, gbc);
+
+        // Reset for full-width left-aligned rows
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Row 6: loading
+        gbc.gridy = 6;
+        gbc.insets = JBUI.insets(0, pad, 0, 0);
+        form.add(loadingPanel, gbc);
+
+        // Row 7: results. This row takes the remaining vertical space, which
+        // also pushes the form to the top, so no separate spacer row is needed.
+        // The results panel must keep that space even when empty, so it stays
+        // visible throughout: GridBag skips invisible components, and a
+        // word-wrapping error message pinned to a zero-weight row is allotted
+        // the height GridBag computed before the text area knew its width,
+        // which clipped the last line.
+        gbc.gridy = 7;
+        gbc.insets = JBUI.insets(0, pad, 0, 0);
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        form.add(resultsPanel, gbc);
+
+        rootPanel = new JPanel(new BorderLayout());
+        rootPanel.setBorder(JBUI.Borders.empty(8));
+        rootPanel.add(form, BorderLayout.CENTER);
     }
 
-    private void openFileDialog() {
-        FileChooserDescriptor descriptor = new FileChooserDescriptor(false,true,false,false,false,false)
-            .withTitle("Select Repository")
-            .withDescription("Choose a repository to open");
+    private void onSubmit() {
+        String selected = (String) languageCombo.getSelectedItem();
+        String lang = LANGUAGE_CLI_IDS.getOrDefault(selected, selected);
+        String dirPath = pathField.getText();
 
-        VirtualFile selectedDir = FileChooser.chooseFile(descriptor, project, null);
-        if (selectedDir != null) {
-            pathToDirectory.setText(selectedDir.getPath());
+        // setVisible only invalidates; without a revalidate the grid never lays the
+        // spinner out, and GridBag skipped it while it was hidden, so it would keep
+        // the zero bounds it has never been given and no spinner would appear.
+        loadingPanel.setVisible(true);
+        loadingPanel.revalidate();
+        loadingPanel.repaint();
+        resultsPanel.removeAll();
+        resultsPanel.revalidate();
+        resultsPanel.repaint();
+        setEditing(false);
+
+        new ExtractWorker(dirPath, lang).execute();
+    }
+
+    private void setEditing(boolean enabled) {
+        pathField.setEnabled(enabled);
+        languageCombo.setEnabled(enabled);
+        submitButton.setEnabled(enabled && !pathField.getText().trim().isEmpty());
+    }
+
+    private void showResults(ApiDiscoveryService.ApiDiscoveryResults result) {
+        resultsPanel.removeAll();
+        if (result.getPath() == 0 && result.getClasses() == 0) {
+            resultsPanel.add(makeErrorPanel(
+                "No API routes found. Please recheck the path and selected language, then try again."
+            ));
+        } else {
+            String resultText = "Discovered paths: " + result.getPath()
+                + "\nDiscovered classes: " + result.getClasses();
+            JTextArea resultArea = new JTextArea(resultText);
+            resultArea.setFont(UIManager.getFont("Label.font"));
+            resultArea.setEditable(false);
+            resultArea.setOpaque(false);
+            resultArea.setBackground(UIManager.getColor("Panel.background"));
+            resultArea.setSelectionColor(UIManager.getColor("TextArea.selectionBackground"));
+            resultArea.setSelectedTextColor(UIManager.getColor("TextArea.selectionForeground"));
+            resultsPanel.add(resultArea);
         }
-    }
-    
-    private void initCombobox() {
-        for (String lang : LANGUAGES) {
-            apiLangCombobox.addItem(lang);
-        }
+        resultsPanel.revalidate();
+        resultsPanel.repaint();
     }
 
-    private void enableEditing(Boolean enabled) {
-        uploadButton.setEnabled(enabled);
-        submitButton.setEnabled(enabled);
-        pathToDirectory.setEnabled(enabled);
-        apiLangCombobox.setEnabled(enabled);
+    private void showError(String message) {
+        resultsPanel.removeAll();
+        resultsPanel.add(makeErrorPanel(message));
+        resultsPanel.revalidate();
+        resultsPanel.repaint();
+    }
+
+    private static JPanel makeErrorPanel(String message) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        String fullMessage = message
+            + "\n\nIf the problem persists, contact us at " + CONTACT_EMAIL;
+
+        JTextArea text = new JTextArea(fullMessage);
+        text.setFont(UIManager.getFont("Label.font"));
+        text.setForeground(JBColor.RED);
+        text.setEditable(false);
+        text.setLineWrap(true);
+        text.setWrapStyleWord(true);
+        text.setBackground(UIManager.getColor("Panel.background"));
+        text.setSelectionColor(UIManager.getColor("TextArea.selectionBackground"));
+        text.setSelectedTextColor(UIManager.getColor("TextArea.selectionForeground"));
+        panel.add(text);
+
+        return panel;
     }
 
     private class ExtractWorker extends SwingWorker<ApiDiscoveryService.ApiDiscoveryResults, Void> {
         private final String dirPath;
         private final String lang;
 
-        public ExtractWorker(String dirPath, String lang) {
+        ExtractWorker(String dirPath, String lang) {
             this.dirPath = dirPath;
             this.lang = lang;
         }
@@ -169,119 +264,34 @@ public class ApiDiscovery extends Screen {
 
         @Override
         protected void done() {
-            resultsPanel.setVisible(true);
+            loadingPanel.setVisible(false);
+            loadingPanel.revalidate();
+            loadingPanel.repaint();
             try {
-                ApiDiscoveryService.ApiDiscoveryResults result = get();
-
-                System.out.println(result);
-                JPanel panel = new JPanel();
-                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-                JLabel pathResults = new JLabel("Number of discovered paths: " + result.getPath());
-                JLabel classResults = new JLabel("Number of discovered classes: " + result.getClasses());
-
-                panel.add(pathResults);
-                panel.add(classResults);
-
-                resultsPanel.add(panel);
-
+                showResults(get());
             } catch (ExecutionException ex) {
                 var cause = ex.getCause();
                 if (cause instanceof CommandNotFoundException) {
                     mainWindowFactory.openInstallCLIPage();
                     return;
                 } else if (cause instanceof PermissionDeniedException) {
-                    JBScrollPane errorPanel = getErrorPanel(ex.getMessage());
-                    resultsPanel.add(errorPanel);
+                    showError("Permission denied. Check that the NightVision CLI has execute permissions.");
                 } else if (cause instanceof NotLoggedException) {
                     mainWindowFactory.openLoginPage();
                     return;
                 } else {
-                    JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + cause.getClass().getName() + " - " + cause.getMessage().replaceAll("\n", "<br>") + "</html>");
-                    resultsPanel.add(errorPanel);
+                    if (cause != null) {
+                        System.err.println("API Discovery error: " + cause);
+                        cause.printStackTrace();
+                    }
+                    showError("Error extracting API info. Please recheck the path and selected language, then try again.");
                 }
             } catch (Exception ex) {
-                JBScrollPane errorPanel = getErrorPanel("<html>Error extracting API info. Please recheck the entered Path to the Root <br>Directory and selected Language, then try again.<br>Details: " + ex.getClass().getName() + " - " + ex.getMessage().replaceAll("\n", "<br>") + "</html>");
-                resultsPanel.add(errorPanel);
+                System.err.println("API Discovery error: " + ex);
+                ex.printStackTrace();
+                showError("Error extracting API info. Please recheck the path and selected language, then try again.");
             }
-
-            enableEditing(true);
-
-            apiDiscoveryPanel.remove(loadingPanel);
-            apiDiscoveryPanel.revalidate();
-        }
-
-        @NotNull
-        private static JBScrollPane getErrorPanel(String errorMessage) {
-            // 1) Create a simple JPanel that will hold both subpanels in a vertical stack
-            JPanel content = new JPanel();
-            content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-            content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            // 2) Build your two sub‐panels (error + email)
-            JPanel errorLabelPanel = getErrorLabelPanel(errorMessage);
-            errorLabelPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            JPanel emailPanel = getEmailPanel();
-            emailPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            // 3) Add them in order to the wrapper panel
-            content.add(errorLabelPanel);
-            content.add(Box.createVerticalStrut(5)); // small gap if you want spacing
-            content.add(emailPanel);
-
-            // 4) Wrap that wrapper in a JBScrollPane
-            JBScrollPane scrollPane = new JBScrollPane(content);
-            scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            // 5) (optional) give the scrollPane a preferred size so it’s visible under FlowLayout
-            scrollPane.setPreferredSize(new Dimension(400, 150));
-
-            return scrollPane;
-        }
-
-
-        @NotNull
-        private static JPanel getEmailPanel() {
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-            JLabel label = new JLabel("If the problem persists, contact us at ");
-            label.setForeground(JBColor.red);
-
-            JLabel emailLabel = new JLabel(String.format("<html><a href=''>%s</a></html>", CONTACT_EMAIL));
-            emailLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            emailLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    try {
-                        Desktop desktop = Desktop.getDesktop();
-                        if (desktop.isSupported(Desktop.Action.MAIL)) {
-                            URI mailto = new URI(String.format("mailto:%s?subject=Subject&body=Hi,", CONTACT_EMAIL));
-                            desktop.mail(mailto);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-
-            panel.add(label);
-            panel.add(emailLabel);
-            return panel;
-        }
-
-        @NotNull
-        private static JPanel getErrorLabelPanel(String errorMessage) {
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            JLabel label = new JLabel(errorMessage);
-            label.setForeground(JBColor.red);
-
-            panel.add(label);
-            return panel;
+            setEditing(true);
         }
     }
 }

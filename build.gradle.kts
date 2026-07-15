@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.25"
+  id("org.jetbrains.kotlin.jvm") version "2.3.20"
   id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
 group = "net.nightvision"
-version = "2.1"
+version = "2.2"
 
 
 repositories {
@@ -24,15 +24,16 @@ dependencies {
     bundledPlugin("com.intellij.java")
     pluginVerifier()
   }
+  testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2022.3.3", "IC-2023.3.8", "IC-2024.3.5"))
+    ides.ides(listOf("IC-2023.3.8", "IC-2024.3.5"))
   }
 }
 
-tasks.named<KotlinJvmCompile>("compileKotlin"){
+tasks.withType<KotlinJvmCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_17)
   }
@@ -46,7 +47,7 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set("223")
+    sinceBuild.set("233")
   }
 
   signPlugin {

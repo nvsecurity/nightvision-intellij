@@ -7,12 +7,15 @@ import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.PaginatedResult
 import net.nightvision.plugin.models.ProjectInfo
 import java.net.http.HttpClient
+import java.time.Duration
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
 object ProjectService {
-    val httpClient = HttpClient.newBuilder().build()
+    val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(15))
+        .build()
     val gson = GsonBuilder().create()
     private var currentProjectName = ""
     private var currentProjectId = ""

@@ -1,5 +1,6 @@
 package net.nightvision.plugin.target;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Constants;
 import net.nightvision.plugin.Screen;
@@ -8,6 +9,7 @@ import net.nightvision.plugin.models.TargetInfo;
 import net.nightvision.plugin.services.TargetService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -29,6 +31,8 @@ public class TargetDetailsScreen extends Screen {
     public TargetDetailsScreen(Project project, TargetInfo rawTargetInfo) {
         super(project);
 
+        targetDetailsPanel.setBorder(JBUI.Borders.empty(8));
+
         backButton.addActionListener(e -> {
             mainWindowFactory.openTargetsPage();
         });
@@ -36,8 +40,7 @@ public class TargetDetailsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
-        detailsPanel.setLayout(boxLayout);
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
         String[] keysList = { "Target Name:", "Project:", "Target Type:", "Target Accessibility:", "Target ID:",
             "Date Created:", "Last Scanned:", "Base URL:", "API Spec:", "API Spec Status:", "Target is ready to scan:",
@@ -53,20 +56,9 @@ public class TargetDetailsScreen extends Screen {
 
         for (Integer i : targetDetailsDictionary.keySet()) {
             String key = keysList[i];
-            if (!targetDetailsDictionary.containsKey(i)) {
-                continue;
-            }
             var content = targetDetailsDictionary.get(i);
-            JPanel propertyPanel = new JPanel();
-            BoxLayout layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-            propertyPanel.setLayout(layout);
-
-            JLabel label = new JLabel(key);
-            label.setFont(label.getFont().deriveFont(Font.BOLD));
-            propertyPanel.add(label);
 
             JLabel value = new JLabel(content);
-            value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
             if ("API Spec:".equals(key)) {
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -95,7 +87,7 @@ public class TargetDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = new URI(finalSpecUrl);
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -111,7 +103,7 @@ public class TargetDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = Constants.Companion.getAppUrlFor("targets/" + finalTargetInfo.getId());
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -119,15 +111,10 @@ public class TargetDetailsScreen extends Screen {
                 });
             }
 
-            propertyPanel.add(value);
-            detailsPanel.add(propertyPanel);
+            addDetailRow(detailsPanel, key, value);
         }
 
-        for (Component component : detailsPanel.getComponents()) {
-            if (component instanceof JComponent jComponent) {
-                jComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
-            }
-        }
+        detailsPanel.add(Box.createVerticalGlue());
     }
 
     @NotNull

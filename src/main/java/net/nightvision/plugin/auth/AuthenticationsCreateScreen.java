@@ -12,6 +12,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.AuthenticationService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -34,6 +35,8 @@ public class AuthenticationsCreateScreen extends Screen {
     public AuthenticationsCreateScreen(Project project) {
         super(project);
 
+        authenticationsCreatePanel.setBorder(JBUI.Borders.empty(8));
+
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
@@ -46,6 +49,7 @@ public class AuthenticationsCreateScreen extends Screen {
         tabbedPane1.remove(0); // Removing Cookie
         tabbedPane1.remove(0); // Removing Header
 
+        addButtonPadding(cancelButton, 6);
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });
@@ -61,6 +65,7 @@ public class AuthenticationsCreateScreen extends Screen {
                </body></html>
                """);
 
+        addButtonPadding(createButton, 6);
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
             errorMessage.setText("");

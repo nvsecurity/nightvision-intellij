@@ -1,5 +1,6 @@
 package net.nightvision.plugin.auth;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBTextArea;
 import net.nightvision.plugin.Constants;
@@ -8,6 +9,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.AuthInfo;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -30,6 +32,8 @@ public class AuthenticationDetailsScreen extends Screen {
     public AuthenticationDetailsScreen(Project project, AuthInfo authInfo) {
         super(project);
 
+        authenticationDetailsPanel.setBorder(JBUI.Borders.empty(8));
+
         backButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();
         });
@@ -37,9 +41,7 @@ public class AuthenticationDetailsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        BoxLayout boxLayout = new BoxLayout(detailsPanel, BoxLayout.Y_AXIS);
-        detailsPanel.setLayout(boxLayout);
-
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
         String[] keysList = { "Authentication Name:", "Project:", "Authentication Type:", "Authentication ID:", "Target URL:",
                 "Date Created:", "Latest Updated:", "Description:", "Check in Browser:", "Authentication Script:"};
@@ -49,28 +51,14 @@ public class AuthenticationDetailsScreen extends Screen {
         for (Integer i : authDetailsDictionary.keySet()) {
             String key = keysList[i];
             var content = authDetailsDictionary.get(i);
-            JPanel propertyPanel = new JPanel();
-            BoxLayout layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-            propertyPanel.setLayout(layout);
-
-            JLabel label = new JLabel(key);
-            label.setFont(label.getFont().deriveFont(Font.BOLD));
-            propertyPanel.add(label);
-
 
             if (i == 9) {
-                detailsPanel.add(propertyPanel);
-                propertyPanel = new JPanel();
-                layout = new BoxLayout(propertyPanel, BoxLayout.Y_AXIS);
-                propertyPanel.setLayout(layout);
-                JBTextArea value = new JBTextArea(content);
-                propertyPanel.add(value);
-                detailsPanel.add(propertyPanel);
+                // The script spans the full width and keeps its own text-area border.
+                addDetailRow(detailsPanel, key, new JBTextArea(content), false);
                 continue;
             }
 
             JLabel value = new JLabel(content);
-            value.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
             if ("Check in Browser:".equals(key)) {
                 value.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -80,7 +68,7 @@ public class AuthenticationDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = Constants.Companion.getAppUrlFor("authentications/" + authInfo.getId());
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -88,15 +76,10 @@ public class AuthenticationDetailsScreen extends Screen {
                 });
             }
 
-            propertyPanel.add(value);
-            detailsPanel.add(propertyPanel);
+            addDetailRow(detailsPanel, key, value);
         }
 
-        for (Component component : detailsPanel.getComponents()) {
-            if (component instanceof JComponent jComponent) {
-                jComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
-            }
-        }
+        detailsPanel.add(Box.createVerticalGlue());
     }
 
     @NotNull

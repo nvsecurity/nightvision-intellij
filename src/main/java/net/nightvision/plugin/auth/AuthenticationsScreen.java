@@ -9,6 +9,7 @@ import net.nightvision.plugin.models.AuthInfo;
 import net.nightvision.plugin.project.ProjectSelectionPanel;
 import net.nightvision.plugin.services.AuthenticationService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -34,6 +35,8 @@ public class AuthenticationsScreen extends Screen {
     public AuthenticationsScreen(Project project) {
         super(project);
 
+        authenticationsPanel.setBorder(JBUI.Borders.empty(8));
+
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
@@ -45,6 +48,7 @@ public class AuthenticationsScreen extends Screen {
             loadTable();
         }));
 
+        addButtonPadding(createAuthenticationButton, 6);
         createAuthenticationButton.addActionListener(e -> {
             mainWindowFactory.openAuthCreatePage();
         });

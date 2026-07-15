@@ -9,6 +9,7 @@ import net.nightvision.plugin.models.TargetInfo;
 import net.nightvision.plugin.project.ProjectSelectionPanel;
 import net.nightvision.plugin.services.TargetService;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -32,6 +33,8 @@ public class TargetsScreen extends Screen {
     public TargetsScreen(Project project) {
         super(project);
 
+        targetsPanel.setBorder(JBUI.Borders.empty(8));
+
         backButton.addActionListener(e -> {
             mainWindowFactory.openOverviewPage();
         });
@@ -48,6 +51,7 @@ public class TargetsScreen extends Screen {
         targetsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         targetsTable.setRowHeight(40);
 
+        addButtonPadding(createTargetButton, 6);
         createTargetButton.addActionListener(e -> {
             mainWindowFactory.openTargetsCreatePage();
         });

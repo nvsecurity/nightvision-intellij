@@ -8,7 +8,7 @@
   <name>Nightvision</name>
 
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-  <vendor email="support@nightvision.net" url="https://www.nightvision.net/">NightVision</vendor>
+  <vendor email="support@nightviz.ai" url="https://www.nightviz.ai/">NightVision</vendor>
 
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -16,6 +16,29 @@
   <description><![CDATA[
     NightVision plugin for IntelliJ IDEA - Document APIs, run DAST scans, and uncover vulnerabilities in both known and unknown endpoints!
   ]]></description>
+
+  <change-notes><![CDATA[
+    <h3>2.2</h3>
+    <b>Added</b>
+    <ul>
+      <li>PHP and Go language support for API Discovery</li>
+      <li>"All languages" option that runs extraction without specifying a language</li>
+      <li>Pre-fill API Discovery path with the current project directory</li>
+      <li>Meaningful tab names for generated OpenAPI specs</li>
+      <li>Resolve API URL from CLI config, matching the CLI's configured environment</li>
+      <li>Paginated scan list with next/previous navigation</li>
+    </ul>
+    <b>Fixed</b>
+    <ul>
+      <li>Plugin no longer crashes when no project is selected</li>
+      <li>NV logo renders cleanly at all sizes</li>
+      <li>Redesigned API Discovery form layout</li>
+      <li>Improved error messages when no API routes are found</li>
+      <li>Minimum supported IDE version raised to IntelliJ 2023.3</li>
+      <li>Restyled the detail screens and applied consistent padding and spacing across the plugin</li>
+      <li>Updated the NightVision website and support links to nightviz.ai</li>
+    </ul>
+  ]]></change-notes>
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

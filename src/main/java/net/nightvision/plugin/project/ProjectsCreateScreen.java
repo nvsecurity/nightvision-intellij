@@ -11,6 +11,7 @@ import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.services.ProjectService;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -29,6 +30,8 @@ public class ProjectsCreateScreen extends Screen {
     public ProjectsCreateScreen(Project project) {
         super(project);
 
+        projectsCreatePanel.setBorder(JBUI.Borders.empty(8));
+
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
@@ -37,11 +40,13 @@ public class ProjectsCreateScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(cancelButton, 6);
         cancelButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
         });
         cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        addButtonPadding(createButton, 6);
         createButton.addActionListener(e -> {
             errorMessage.setVisible(false);
             errorMessage.setText("");

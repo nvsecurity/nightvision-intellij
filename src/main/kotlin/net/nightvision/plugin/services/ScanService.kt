@@ -7,26 +7,33 @@ import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.ScanInfo
 import net.nightvision.plugin.PaginatedResult
 import java.net.http.HttpClient
+import java.time.Duration
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
 object ScanService {
-    val httpClient = HttpClient.newBuilder().build()
+    val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(15))
+        .build()
     val gson = GsonBuilder().create()
 
-    fun getScans(): List<ScanInfo> {
+    fun getScans(page: Int = 1): PaginatedResult<ScanInfo> {
         val token = LoginService.token
+        val params = mutableMapOf<String, String>("project" to ProjectService.getCurrentProjectId())
+        if (page > 1) params["page"] = page.toString()
         val request = HttpRequest.newBuilder()
-            .uri(Constants.getApiUrlFor("scans", mapOf("project" to ProjectService.getCurrentProjectId())))
+            .uri(Constants.getApiUrlFor("scans", params))
             .header("Authorization", "Token $token")
             .build()
-
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() !in 200..299) {
+            // Without this the error body parses to a PaginatedResult of nulls, or to
+            // null outright, and the failure only surfaces as an NPE in the caller.
+            throw RuntimeException("Could not load scans: HTTP ${response.statusCode()}")
+        }
         val type = object : TypeToken<PaginatedResult<ScanInfo>>() {}.type
-        val responseData: PaginatedResult<ScanInfo> = gson.fromJson(response.body(), type)
-        //println(responseData.results)
-        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
+        return gson.fromJson(response.body(), type)
     }
 
     fun startScan(targetName: String, authenticationName: String?) {

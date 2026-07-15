@@ -47,3 +47,8 @@ src/main/resources/toptal/*
 .DS_Store
 
 .gradle
+
+### Agent artifacts ###
+.claude/
+.agent-sandbox-config/
+analysis/

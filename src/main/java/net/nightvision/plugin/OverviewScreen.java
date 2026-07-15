@@ -10,11 +10,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import net.nightvision.plugin.services.CommandRunnerService;
 import net.nightvision.plugin.services.InstallCLIService;
+import net.nightvision.plugin.services.ProjectService;
 import net.nightvision.plugin.utils.IconUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
+import com.intellij.util.ui.JBUI;
 import static javax.swing.SwingConstants.CENTER;
 
 public class OverviewScreen extends Screen {
@@ -59,6 +61,8 @@ public class OverviewScreen extends Screen {
     public OverviewScreen(Project project) {
         super(project);
 
+        overviewPanel.setBorder(JBUI.Borders.empty(8));
+
         updateCLIButton.setVisible(false);
         errorMessageLabel.setVisible(false);
 
@@ -90,12 +94,14 @@ public class OverviewScreen extends Screen {
         apiDiscoveryButton.setIcon(IconUtils.getIcon("/icons/api-discovery.svg", 1f));
         apiDiscoveryButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         apiDiscoveryButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(apiDiscoveryButton, 8);
         apiDiscoveryButton.addActionListener(e ->  mainWindowFactory.openApiDiscoveryPage());
         apiDiscoveryButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         apiAndWebSecurityButton.setIcon(IconUtils.getIcon("/icons/dast.svg", 1f));
         apiAndWebSecurityButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         apiAndWebSecurityButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(apiAndWebSecurityButton, 8);
         apiAndWebSecurityButton.addActionListener(e -> {
             isExtraOptionsVisible = !isExtraOptionsVisible;
             extraOptionsPanel.setVisible(isExtraOptionsVisible);
@@ -106,27 +112,50 @@ public class OverviewScreen extends Screen {
         scansButton.setIcon(IconUtils.getIcon("/icons/scans.svg", 1f));
         scansButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         scansButton.setHorizontalTextPosition(CENTER);
-        scansButton.addActionListener(e ->  mainWindowFactory.openScansPage());
+        addButtonPadding(scansButton, 8);
+        scansButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openScansPage();
+            }
+        });
         scansButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         targetsButton.setIcon(IconUtils.getIcon("/icons/targets.svg", 1f));
         targetsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         targetsButton.setHorizontalTextPosition(CENTER);
-        targetsButton.addActionListener(e -> mainWindowFactory.openTargetsPage());
+        addButtonPadding(targetsButton, 8);
+        targetsButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openTargetsPage();
+            }
+        });
         targetsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         authenticationsButton.setIcon(IconUtils.getIcon("/icons/authentications.svg", 1f));
         authenticationsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         authenticationsButton.setHorizontalTextPosition(CENTER);
-        authenticationsButton.addActionListener(e -> mainWindowFactory.openAuthenticationsPage());
+        addButtonPadding(authenticationsButton, 8);
+        authenticationsButton.addActionListener(e -> {
+            if (ProjectService.INSTANCE.getCurrentProjectName().isEmpty()) {
+                mainWindowFactory.openProjectsPage();
+            } else {
+                mainWindowFactory.openAuthenticationsPage();
+            }
+        });
         authenticationsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         projectsButton.setIcon(IconUtils.getIcon("/icons/projects.svg", 1f));
         projectsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         projectsButton.setHorizontalTextPosition(CENTER);
+        addButtonPadding(projectsButton, 8);
         projectsButton.addActionListener(e -> mainWindowFactory.openProjectsPage());
         projectsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
+
 
     private class UpdateCLIWorker extends SwingWorker<Void, Void> {
 
