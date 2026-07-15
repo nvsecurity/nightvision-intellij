@@ -185,6 +185,19 @@ public class ScansScreen extends Screen {
         paginationPanel.setVisible(false);
     }
 
+    private void showLoadError() {
+        loadingPanelParent.removeAll();
+        JLabel error = new JLabel(
+            "Could not load scans. Check your NightVision login and connection, then try again."
+        );
+        error.setForeground(JBColor.RED);
+        loadingPanelParent.add(error);
+        loadingPanelParent.revalidate();
+        loadingPanelParent.repaint();
+        scansTable.setVisible(false);
+        paginationPanel.setVisible(false);
+    }
+
     private void updatePagination() {
         int lastPage = Math.max(1, (totalCount + PAGE_SIZE - 1) / PAGE_SIZE);
         int start = (currentPage - 1) * PAGE_SIZE + 1;
@@ -227,8 +240,8 @@ public class ScansScreen extends Screen {
                 loadingPanelParent.revalidate();
                 loadingPanelParent.repaint();
                 scansTable.setVisible(true);
-            } catch (Exception ignore) {
-                // TODO: Show error message + stop loading panel
+            } catch (Exception e) {
+                showLoadError();
             }
         }
     }

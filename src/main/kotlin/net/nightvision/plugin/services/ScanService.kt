@@ -27,6 +27,11 @@ object ScanService {
             .header("Authorization", "Token $token")
             .build()
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() !in 200..299) {
+            // Without this the error body parses to a PaginatedResult of nulls, or to
+            // null outright, and the failure only surfaces as an NPE in the caller.
+            throw RuntimeException("Could not load scans: HTTP ${response.statusCode()}")
+        }
         val type = object : TypeToken<PaginatedResult<ScanInfo>>() {}.type
         return gson.fromJson(response.body(), type)
     }
