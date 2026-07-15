@@ -7,12 +7,15 @@ import net.nightvision.plugin.Constants.Companion.NIGHTVISION
 import net.nightvision.plugin.ScanInfo
 import net.nightvision.plugin.PaginatedResult
 import java.net.http.HttpClient
+import java.time.Duration
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
 object ScanService {
-    val httpClient = HttpClient.newBuilder().build()
+    val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(15))
+        .build()
     val gson = GsonBuilder().create()
 
     fun getScans(page: Int = 1): PaginatedResult<ScanInfo> {
