@@ -26,7 +26,13 @@ jobs:
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+      # publishPlugin depends on signPlugin, and signPlugin reads its certificate
+      # and key from the environment. Without them here it is skipped, and the
+      # plugin is published unsigned with the build still reporting success.
       - name: Publish to Marketplace
         run: ./gradlew publishPlugin
         env:
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
