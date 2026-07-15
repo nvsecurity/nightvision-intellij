@@ -1,5 +1,6 @@
 package net.nightvision.plugin.scans;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Constants;
 import net.nightvision.plugin.ScanInfo;
@@ -55,7 +56,7 @@ public class ScanDetailsScreen extends Screen {
             public void mouseClicked(MouseEvent e) {
                 try {
                     URI uri = Constants.Companion.getAppUrlFor("scans/" + scanInfo.getId() + "/findings");
-                    Desktop.getDesktop().browse(uri);
+                    BrowserUtil.browse(uri);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

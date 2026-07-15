@@ -1,5 +1,6 @@
 package net.nightvision.plugin.auth;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBTextArea;
 import net.nightvision.plugin.Constants;
@@ -67,7 +68,7 @@ public class AuthenticationDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = Constants.Companion.getAppUrlFor("authentications/" + authInfo.getId());
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }

@@ -1,5 +1,6 @@
 package net.nightvision.plugin.target;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Constants;
 import net.nightvision.plugin.Screen;
@@ -86,7 +87,7 @@ public class TargetDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = new URI(finalSpecUrl);
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -102,7 +103,7 @@ public class TargetDetailsScreen extends Screen {
                     public void mouseClicked(MouseEvent e) {
                         try {
                             URI uri = Constants.Companion.getAppUrlFor("targets/" + finalTargetInfo.getId());
-                            Desktop.getDesktop().browse(uri);
+                            BrowserUtil.browse(uri);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
