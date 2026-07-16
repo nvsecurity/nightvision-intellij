@@ -14,28 +14,9 @@
        injected at build time by patchPluginXml from the "Plugin description"
        section of README.md (see build.gradle.kts). Do not add one here. -->
 
-  <change-notes><![CDATA[
-    <h3>2.2.0</h3>
-    <b>Added</b>
-    <ul>
-      <li>PHP and Go language support for API Discovery</li>
-      <li>"All languages" option that runs extraction without specifying a language</li>
-      <li>Pre-fill API Discovery path with the current project directory</li>
-      <li>Meaningful tab names for generated OpenAPI specs</li>
-      <li>Resolve API URL from CLI config, matching the CLI's configured environment</li>
-      <li>Paginated scan list with next/previous navigation</li>
-    </ul>
-    <b>Fixed</b>
-    <ul>
-      <li>Plugin no longer crashes when no project is selected</li>
-      <li>NV logo renders cleanly at all sizes</li>
-      <li>Redesigned API Discovery form layout</li>
-      <li>Improved error messages when no API routes are found</li>
-      <li>Minimum supported IDE version raised to IntelliJ 2023.3</li>
-      <li>Restyled the detail screens and applied consistent padding and spacing across the plugin</li>
-      <li>Updated the NightVision website and support links to nightviz.ai</li>
-    </ul>
-  ]]></change-notes>
+  <!-- The change-notes shown on the Plugin Page and in the IDE Plugin Manager are
+       injected at build time by patchPluginXml from CHANGELOG.md (see the changelog
+       block in build.gradle.kts). Do not add them here. -->
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

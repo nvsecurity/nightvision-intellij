@@ -1,3 +1,4 @@
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
@@ -6,12 +7,13 @@ plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "2.3.20"
   id("org.jetbrains.intellij.platform") version "2.6.0"
-  // Applied for the markdownToHTML function used by patchPluginXml below.
+  // Single-sources the plugin change-notes from CHANGELOG.md (see the changelog
+  // block and patchPluginXml below) and provides the markdownToHTML helper.
   id("org.jetbrains.changelog") version "2.5.0"
 }
 
 group = "net.nightvision"
-version = "2.2.0"
+version = "2.2.1"
 
 
 repositories {
@@ -34,6 +36,15 @@ intellijPlatform {
   pluginVerification {
     ides.ides(listOf("IC-2023.3.8", "IC-2024.3.5"))
   }
+}
+
+// CHANGELOG.md is the single source of truth for release notes. patchPluginXml
+// (below) renders the current version's section into the plugin change-notes,
+// and patchChangelog rolls the Unreleased section into a dated version section
+// at release time.
+changelog {
+  version.set(project.version.toString())
+  repositoryUrl.set("https://github.com/nvsecurity/nightvision-intellij")
 }
 
 tasks.withType<KotlinJvmCompile> {
@@ -65,6 +76,19 @@ tasks {
           throw GradleException("Plugin description markers missing or out of order in README.md:\n$start ... $end")
         }
         subList(from + 1, to).joinToString("\n").let(::markdownToHTML)
+      }
+    })
+
+    // The change-notes are single-sourced from CHANGELOG.md: render the section
+    // matching the release version, falling back to the Unreleased section.
+    changeNotes.set(provider {
+      with(changelog) {
+        renderItem(
+          (getOrNull(project.version.toString()) ?: getUnreleased())
+            .withHeader(false)
+            .withEmptySections(false),
+          Changelog.OutputType.HTML,
+        )
       }
     })
   }
