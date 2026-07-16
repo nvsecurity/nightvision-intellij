@@ -6,10 +6,15 @@ plugin is a native Swing tool window with no DOM, so capture is a macOS
 screen-automation procedure (assisted, not a one-command script) followed by
 a deterministic crop step (`crop.py`).
 
-The screenshots are uploaded by hand into the Marketplace vendor console
-(plugin edit page, "Plugin Screenshots"). JetBrains hosts them; they are not
-hotlinked from this repo, so there is no URL-permanence rule and nothing here
-gets bundled into the plugin `.zip` (`buildPlugin` ships only the jar).
+The canonical PNGs are committed under `docs-assets/screenshots/` in this
+(public) repo and serve two consumers: they are uploaded by hand into the
+Marketplace vendor console (plugin edit page, "Plugin Screenshots", which
+JetBrains re-hosts), and they are referenced by the NightVision IntelliJ
+documentation page through this repo's raw GitHub URLs. Because a docs page
+may hotlink those raw URLs, treat committed filenames as stable once
+referenced: refresh in place, avoid renaming or deleting. Nothing under
+`docs-assets/` or `scripts/` is bundled into the plugin `.zip` (`buildPlugin`
+ships only the jar).
 
 ## When to regenerate
 
@@ -20,16 +25,23 @@ silently; the listing keeps showing the old UI until someone re-shoots.
 ## Shot inventory
 
 Eight panel-only crops, one uniform crop box so they share an aspect ratio
-(JetBrains rejects mixed aspect ratios in a single listing):
+(JetBrains recommends against mixed aspect ratios in a single listing).
+Committed under `docs-assets/screenshots/` with feature-based names; carousel
+ordering is set at upload time in the console, so no numeric prefixes:
 
-1. `01-overview` -- the two top-level actions
-2. `02-api-discovery` -- discovery form with the project path pre-filled
-3. `03-api-discovery-languages` -- API Language dropdown open (all languages)
-4. `04-security-testing-menu` -- Scans / Targets / Authentications / Projects
-5. `05-scans-list` -- scan list with vulnerability-count badges
-6. `06-scan-details` -- restyled stacked detail layout
-7. `07-targets-list` -- target list (OpenAPI + Web)
-8. `08-target-details` -- the richest detail screen (base URL, spec, status)
+- `overview.png`: the two top-level actions
+- `api-discovery.png`: discovery form with the project path pre-filled
+- `api-discovery-languages.png`: API Language dropdown open (all languages)
+- `security-testing-menu.png`: Scans / Targets / Authentications / Projects
+- `scans-list.png`: scan list with vulnerability-count badges
+- `scan-details.png`: restyled stacked detail layout
+- `targets-list.png`: target list (OpenAPI + Web)
+- `target-details.png`: the richest detail screen (base URL, spec, status)
+
+The two API Discovery shots expose the discovery path field, so capture them
+with a neutral path (e.g. `/tmp/javaspringvulny`) -- never commit a shot
+showing a real home directory. They are held out of the committed set until
+re-captured that way.
 
 ## Prerequisites
 
@@ -85,7 +97,7 @@ Eight panel-only crops, one uniform crop box so they share an aspect ratio
 
    ```sh
    # Full window at the calibrated geometry -> 2800x1816 native PNG.
-   screencapture -x -R "56,54,1400,908" 01-overview.png
+   screencapture -x -R "56,54,1400,908" overview.png
    ```
 
    Clicks use `cliclick c:X,Y` in logical screen coordinates. To convert a
@@ -104,9 +116,12 @@ fixed box, producing uniform ~`931x1319` panel-only PNGs.
 venv/bin/python scripts/screenshots/crop.py <src-dir> <out-dir>
 ```
 
+The canonical `<out-dir>` is `docs-assets/screenshots/`; review the crops,
+commit them there, and upload the same files to the Marketplace carousel.
+
 The default box `(1799, 171, 2730, 1490)` is calibrated to the window
 geometry above. If you capture at a different window position, size, or
-display scale, recompute it: crop `08-target-details.png` (the tallest
+display scale, recompute it: crop `target-details.png` (the tallest
 screen) with a candidate box, eyeball that the left edge starts at the panel
 divider, the right edge stops before the tool stripe, the top clears the
 editor tab bar, and the bottom clears "Check in Browser". Pass a custom box
