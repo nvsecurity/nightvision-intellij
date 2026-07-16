@@ -38,10 +38,10 @@ ordering is set at upload time in the console, so no numeric prefixes:
 - `targets-list.png`: target list (OpenAPI + Web)
 - `target-details.png`: the richest detail screen (base URL, spec, status)
 
-The two API Discovery shots expose the discovery path field, so capture them
-with a neutral path (e.g. `/tmp/javaspringvulny`) -- never commit a shot
-showing a real home directory. They are held out of the committed set until
-re-captured that way.
+The two API Discovery shots expose the discovery path field, so they are
+captured with a neutral path (`/tmp/javaspringvulny`); never commit a shot
+showing a real home directory. Open a project at that path, or triple-click
+the field and type the neutral path before capturing.
 
 ## Prerequisites
 
