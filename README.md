@@ -1,11 +1,28 @@
 # NightVision IntelliJ Plugin
 
-[NightVision](https://www.nightviz.ai/) plugin for IntelliJ IDEA: document
-APIs, run DAST scans, and uncover vulnerabilities in both known and unknown
-endpoints.
+<!-- Plugin description -->
+[NightVision](https://www.nightviz.ai/) brings fast DAST scanning backed by
+static API discovery to IntelliJ IDEA: document APIs, run scans, and uncover
+vulnerabilities in both known and unknown endpoints without leaving the IDE.
+
+- **API Discovery**: generate an OpenAPI specification from source code
+  (C#, Go, Java, JavaScript/TypeScript, PHP, Python, Ruby) without running
+  the application
+- **DAST scans**: launch scans against your targets and follow their progress
+- **Workspace management**: create and browse projects, targets, and
+  authentications
+
+Requires a NightVision account and the NightVision CLI; the plugin offers to
+install the CLI for you. Documentation at
+[docs.nightviz.ai](https://docs.nightviz.ai/).
+<!-- Plugin description end -->
 
 Install it from the
 [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/26915-nightvision).
+
+<!-- The marked section above doubles as the plugin description on the
+Marketplace listing; patchPluginXml extracts it at build time. Keep it
+self-contained. -->
 
 ## Requirements
 
