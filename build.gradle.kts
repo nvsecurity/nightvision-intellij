@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "2.3.20"
-  id("org.jetbrains.intellij.platform") version "2.6.0"
+  id("org.jetbrains.intellij.platform") version "2.18.1"
   // Single-sources the plugin change-notes from CHANGELOG.md (see the changelog
   // block and patchPluginXml below) and provides the markdownToHTML helper.
   id("org.jetbrains.changelog") version "2.5.0"
