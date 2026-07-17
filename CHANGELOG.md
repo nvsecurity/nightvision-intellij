@@ -7,6 +7,7 @@
 ### Fixed
 
 - The plugin is now published as a signed build
+- Detect the `nightvision` CLI using the login-shell PATH, so an installed CLI is found when the IDE is launched from the Dock or Finder
 
 ## [2.2.0]
 
