@@ -12,6 +12,7 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.util.EnvironmentUtil
 import net.nightvision.plugin.exceptions.NotLoggedException
 import net.nightvision.plugin.services.InstallCLIService.userCliVersion
 import java.io.File
@@ -60,14 +61,27 @@ object CommandRunnerService {
     }
 
     fun getPathForGeneralCommandLine(): String {
-        val destDir = getDestinationDirForPlatform()
-        val originalPath = System.getenv("PATH") ?: ""
-        val newPath = if (originalPath.startsWith(destDir)) {
-            originalPath
+        // Resolve the base PATH from the login shell rather than the raw process
+        // environment. A GUI-launched IDE (Dock, Finder, Toolbox) inherits a
+        // minimal launchd PATH, so System.getenv("PATH") would miss a CLI on the
+        // user's shell PATH and wrongly show the Install CLI screen. EnvironmentUtil
+        // captures the login-shell environment, matching how the rest of the IDE
+        // resolves PATH-sensitive tools. NV-4586.
+        val basePath = EnvironmentUtil.getValue("PATH") ?: ""
+        return prependCliDir(getDestinationDirForPlatform(), basePath)
+    }
+
+    /**
+     * Prepend the CLI install dir [destDir] to [basePath] unless it is already
+     * first. Kept separate from the environment lookup so it can be unit tested
+     * without a live platform.
+     */
+    fun prependCliDir(destDir: String, basePath: String): String {
+        return if (basePath.startsWith(destDir)) {
+            basePath
         } else {
-            destDir + File.pathSeparator + originalPath
+            destDir + File.pathSeparator + basePath
         }
-        return newPath
     }
 
     /**

@@ -1,32 +1,83 @@
-# nightvision-intellij
-NightVision plugin for IntelliJ
+# NightVision IntelliJ Plugin
 
-## Steps to execute (development mode)
+<!-- Plugin description -->
+[NightVision](https://www.nightviz.ai/) brings fast DAST scanning backed by
+static API discovery to IntelliJ IDEA: document APIs, run scans, and uncover
+vulnerabilities in both known and unknown endpoints without leaving the IDE.
 
-1. Click on Gradle's icon on the right side of the screen (usually is there).
+- **API Discovery**: generate an OpenAPI specification from source code
+  (C#, Go, Java, JavaScript/TypeScript, PHP, Python, Ruby) without running
+  the application
+- **DAST scans**: launch scans against your targets and follow their progress
+- **Workspace management**: create and browse projects, targets, and
+  authentications
 
-2. Select `Tasks` -> `Intellij` -> `runIde`:
+Requires a NightVision account and the NightVision CLI; the plugin offers to
+install the CLI for you. Documentation at
+[docs.nightviz.ai](https://docs.nightviz.ai/).
+<!-- Plugin description end -->
+
+Install it from the
+[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/26915-nightvision).
+
+<!-- The marked section above doubles as the plugin description on the
+Marketplace listing; patchPluginXml extracts it at build time. Keep it
+self-contained. -->
+
+## Requirements
+
+- IntelliJ IDEA 2023.3 or newer (Community or Ultimate)
+- A NightVision account
+- The NightVision CLI: the plugin offers to install it, or you can
+  [install it manually](https://docs.nightviz.ai/welcome/tutorials-and-guides/installing-the-cli/)
+
+The plugin is a UI over the NightVision CLI; API discovery and scan
+operations are delegated to it. Support: support@nightviz.ai.
+
+## Running in development mode
+
+JDK 17 is required to build.
+
+1. Run `make dev` (or `./gradlew runIde`). Alternatively, use the Gradle tool
+   window: `Tasks` -> `intellij` -> `runIde`:
 
 <p align="center">
   <img src="./docs-assets/runIdeButton.png" alt="runIde task" width="250" />
 </p>
 
-3. Once a new window of Intellij shows up, select any project to continue.
+2. A sandbox IDE opens with the plugin installed. Open any project to
+   continue.
 
-4. Once viewing a project, you may see `NightVision` on the right side of your IDE:
+3. Once viewing a project, look for `NightVision` on the right side of the
+   IDE:
     - Light theme:
         <p align="center">
-        <img src="./docs-assets/nightvisionPluginButton.png" alt="runIde task" width="50" />
+        <img src="./docs-assets/nightvisionPluginButton.png" alt="NightVision tool window button, light theme" width="50" />
         </p>
 
     - Dark theme:
         <p align="center">
-        <img src="./docs-assets/nightvisionPluginButtonDarcula.png" alt="runIde task" width="60" />
+        <img src="./docs-assets/nightvisionPluginButtonDarcula.png" alt="NightVision tool window button, dark theme" width="60" />
         </p>
 
-5. If you are not logged in, you will see a button to log in. Once you're logged in, you'll go to the Overview page:
+4. If the CLI is not yet authenticated you will see a Login button; once
+   logged in you land on the Overview page:
 
-    - Light theme:
-        <p align="center">
-        <img src="./docs-assets/overviewButtons.png" alt="runIde task" width="200" />    
-        </p>
+<p align="center">
+  <img src="./docs-assets/overviewButtons.png" alt="Overview page" width="200" />
+</p>
+
+## Development tasks
+
+| Command        | Purpose                                              |
+| -------------- | ---------------------------------------------------- |
+| `make build`   | Compile and run the test suite (`./gradlew build`)   |
+| `make dev`     | Launch a sandbox IDE with the plugin installed       |
+| `make test`    | Build plus plugin verification                       |
+| `make verify`  | Run the IntelliJ Plugin Verifier                     |
+| `make package` | Build the distributable `.zip` (`./gradlew buildPlugin`) |
+| `make clean`   | Delete build outputs                                 |
+
+See [docs/testing.md](./docs/testing.md) for the manual test checklist and
+[.agents/skills/release-process.md](./.agents/skills/release-process.md) for
+the release process.
