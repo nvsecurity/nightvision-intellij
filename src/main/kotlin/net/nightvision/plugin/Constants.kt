@@ -16,7 +16,17 @@ class Constants {
 
         const val CONTACT_EMAIL = "support@nightviz.ai"
 
-        const val CLI_VERSION = "0.9.5"
+        // Oldest NightVision CLI the plugin will use without prompting for an
+        // update. Raise this when the plugin starts relying on newer CLI
+        // behaviour.
+        //
+        // 0.15.0 is the oldest version observed to complete a scan of a target
+        // that is not reachable from the internet: the QUIC relay transport and
+        // its yamux fallback arrived in 0.13.0, and older CLIs fail to bring up
+        // the relay tunnel (NV-4827). This was pinned at 0.9.5 long enough for
+        // that to reach a customer of the VS Code extension, so NV-4872 tracks
+        // replacing the literal with something that stays current.
+        const val CLI_VERSION = "0.15.0"
 
         fun getApiUrlFor(suffix: String): URI {
             return getUrlFor(API_V1_URL, suffix);
