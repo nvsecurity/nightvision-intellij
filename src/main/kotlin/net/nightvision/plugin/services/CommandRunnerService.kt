@@ -197,6 +197,54 @@ object CommandRunnerService {
     }
 
     /**
+     * Names a nightvision executable can take on Windows, in the relative order
+     * PATHEXT gives them by default, so that where a directory holds more than
+     * one the resolved path names the same file a shell would run. Getting the
+     * order wrong would misreport exactly the ambiguous case the NV-4873
+     * tooltip exists to settle. PATHEXT ranks .COM ahead of all of these, but
+     * nothing ships nightvision in the DOS .com format, so it is not looked up.
+     */
+    private val WINDOWS_CLI_NAMES = listOf("nightvision.exe", "nightvision.bat", "nightvision.cmd")
+
+    /**
+     * Absolute path of the nightvision the plugin will actually run, or null if
+     * none is on the search path.
+     *
+     * getPathForGeneralCommandLine prepends the plugin's own install directory,
+     * so a copy it installed once takes precedence over any newer CLI the user
+     * has installed since. Nothing surfaced which binary was in use, leaving a
+     * user running a current CLI in their terminal no way to see that the
+     * plugin was using an old one (NV-4873).
+     */
+    fun resolveCliPath(): String? = resolveCliPathIn(getPathForGeneralCommandLine())
+
+    /**
+     * First nightvision executable on [searchPath]. Split from the environment
+     * lookup so it can be unit tested against a constructed path.
+     */
+    fun resolveCliPathIn(
+        searchPath: String,
+        windows: Boolean = System.getProperty("os.name").startsWith("Windows"),
+        isExecutable: (File) -> Boolean = { it.isFile && it.canExecute() }
+    ): String? {
+        // On Windows canExecute() is true for any readable file, so the name
+        // carries the executability and the extension list is what matters.
+        val names = if (windows) WINDOWS_CLI_NAMES else listOf(NIGHTVISION)
+        for (dir in searchPath.split(File.pathSeparator)) {
+            if (dir.isBlank()) {
+                continue
+            }
+            for (name in names) {
+                val candidate = File(dir, name)
+                if (isExecutable(candidate)) {
+                    return candidate.path
+                }
+            }
+        }
+        return null
+    }
+
+    /**
      * How often the startup wait re-checks whether the process is still alive.
      */
     private const val STARTUP_POLL_MS = 100L

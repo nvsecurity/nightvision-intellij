@@ -143,4 +143,62 @@ class CommandRunnerServiceTest {
         assertEquals(12, detail.lines().size)
         assertTrue(detail.endsWith("reason line 40"))
     }
+
+    @Test
+    fun `resolveCliPathIn returns the first match on the search path`() {
+        val sep = File.pathSeparator
+        val path = "/first${sep}/second"
+        val found = CommandRunnerService.resolveCliPathIn(
+            path, windows = false, isExecutable = { it.path == "/second/nightvision" })
+        assertEquals("/second/nightvision", found)
+    }
+
+    @Test
+    fun `resolveCliPathIn prefers the earlier directory`() {
+        val sep = File.pathSeparator
+        // The plugin prepends its own install dir, which is why a copy it
+        // installed once shadows a newer CLI installed later (NV-4873).
+        val path = "$cliDir${sep}/usr/local/bin"
+        val found = CommandRunnerService.resolveCliPathIn(
+            path, windows = false, isExecutable = { true })
+        assertEquals("$cliDir/nightvision", found)
+    }
+
+    @Test
+    fun `resolveCliPathIn looks for the exe name on Windows`() {
+        val found = CommandRunnerService.resolveCliPathIn(
+            "C:\\tools", windows = true,
+            isExecutable = { it.name == "nightvision.exe" })
+        assertTrue("got $found", found!!.endsWith("nightvision.exe"))
+    }
+
+    @Test
+    fun `resolveCliPathIn falls back to cmd and bat on Windows`() {
+        val found = CommandRunnerService.resolveCliPathIn(
+            "C:\\tools", windows = true,
+            isExecutable = { it.name == "nightvision.cmd" })
+        assertTrue("got $found", found!!.endsWith("nightvision.cmd"))
+    }
+
+    @Test
+    fun `resolveCliPathIn prefers bat over cmd, as PATHEXT does`() {
+        val found = CommandRunnerService.resolveCliPathIn(
+            "C:\\tools", windows = true,
+            isExecutable = { it.name == "nightvision.cmd" || it.name == "nightvision.bat" })
+        assertTrue("got $found", found!!.endsWith("nightvision.bat"))
+    }
+
+    @Test
+    fun `resolveCliPathIn returns null when nothing is on the path`() {
+        assertNull(CommandRunnerService.resolveCliPathIn(
+            "/nowhere", windows = false, isExecutable = { false }))
+    }
+
+    @Test
+    fun `resolveCliPathIn skips empty path entries`() {
+        val sep = File.pathSeparator
+        val found = CommandRunnerService.resolveCliPathIn(
+            "${sep}${sep}/only", windows = false, isExecutable = { it.path == "/only/nightvision" })
+        assertEquals("/only/nightvision", found)
+    }
 }

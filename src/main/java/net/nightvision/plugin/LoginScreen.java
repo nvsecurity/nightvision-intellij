@@ -34,10 +34,13 @@ public class LoginScreen extends Screen {
                 try {
                     String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
                     boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+                    // Resolved here rather than on the EDT: it walks PATH and
+                    // stats each candidate.
+                    String cliPath = shouldUpdateCLI ? CommandRunnerService.INSTANCE.resolveCliPath() : null;
 
                     ApplicationManager.getApplication().invokeLater(() -> {
                         if (shouldUpdateCLI) {
-                            setupUpdateButton();
+                            setupUpdateButton(cliVersion, cliPath);
                         } else {
                             updateCLIButton.setVisible(false);
                         }
@@ -127,8 +130,10 @@ public class LoginScreen extends Screen {
         }
     }
 
-    private void setupUpdateButton() {
+    private void setupUpdateButton(String cliVersion, String cliPath) {
         updateCLIButton.setVisible(true);
+        updateCLIButton.setToolTipText(
+                cliUpdateTooltip(cliVersion, cliPath, Constants.CLI_VERSION));
         updateCLIButton.addActionListener(e -> {
             errorMessageLabel.setVisible(false);
             errorMessageLabel.setText("");

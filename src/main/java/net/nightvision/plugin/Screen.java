@@ -42,13 +42,59 @@ public abstract class Screen {
      * first line, which is rarely the line carrying the reason (NV-4827).
      */
     protected static String asWrappedHtml(String text) {
-        String escaped = text
+        return wrapHtml(escapeHtml(text));
+    }
+
+    // Text the caller does not control, made safe to drop into a label's HTML.
+    private static String escapeHtml(String text) {
+        return text
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\n", "<br>");
+    }
+
+    // Caps the label at a readable width so long text wraps instead of
+    // stretching the tool window.
+    private static String wrapHtml(String bodyHtml) {
         return "<html><body style='width: " + JBUI.scale(MESSAGE_WRAP_WIDTH) + "px'>"
-                + escaped + "</body></html>";
+                + bodyHtml + "</body></html>";
+    }
+
+    /**
+     * Tooltip for the Update CLI button, naming the CLI it means. The plugin
+     * prepends its own install directory to PATH, so the binary it runs is not
+     * necessarily the one the user's terminal resolves; without the path here,
+     * "your CLI is out of date" gives no way to tell which CLI is meant
+     * (NV-4873).
+     */
+    protected static String cliUpdateTooltip(String version, String resolvedPath, String required) {
+        StringBuilder text = new StringBuilder();
+        text.append("NightVision CLI ").append(version.isBlank() ? "(unknown version)" : version);
+        if (resolvedPath != null && !resolvedPath.isBlank()) {
+            text.append("\n").append(resolvedPath);
+        }
+        text.append("\nThe plugin needs ").append(required).append(" or newer.");
+        return asWrappedHtml(text.toString());
+    }
+
+    /**
+     * The warning shown under the Update CLI button, wording it as the VS Code
+     * plugin does under its own. The tooltip above carries the same facts, but
+     * only reaches a user who already suspects something is wrong and hovers to
+     * find out; an out-of-date CLI is worth saying on the screen (NV-4873).
+     */
+    protected static String cliUpdateMessage(String version, String resolvedPath, String required) {
+        StringBuilder html = new StringBuilder();
+        html.append("<b>You have version ")
+                .append(escapeHtml(version.isBlank() ? "(unknown)" : version))
+                .append(" of the NightVision CLI, but the plugin requires version ")
+                .append(escapeHtml(required))
+                .append(" to be fully operational.</b>");
+        if (resolvedPath != null && !resolvedPath.isBlank()) {
+            html.append("<br>Using ").append(escapeHtml(resolvedPath));
+        }
+        return wrapHtml(html.toString());
     }
 
     // pad is scaled, so the padding tracks the IDE's display scaling the way the
