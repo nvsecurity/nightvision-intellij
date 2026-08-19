@@ -49,16 +49,27 @@ object ScanService {
         return gson.fromJson(response.body(), type)
     }
 
+    /**
+     * The CLI invocation for a scan. The authentication flag is omitted for a
+     * blank name as well as a null one: the create-scan combo box carries an
+     * empty entry when the project has no authentications, and passing that
+     * through sent the CLI an --auth with an empty value.
+     */
+    fun buildScanCommand(targetName: String, authenticationName: String?): List<String> {
+        val cmd = ArrayList<String>(listOf(NIGHTVISION, "scan", targetName))
+        if (!authenticationName.isNullOrBlank()) {
+            cmd.add("--auth")
+            cmd.add(authenticationName)
+        }
+        return cmd
+    }
+
     fun startScan(targetName: String, authenticationName: String?) {
         if (targetName.isBlank()) {
             throw IllegalArgumentException("Target name can't be empty.");
         }
 
-        var cmd = ArrayList<String>(listOf(NIGHTVISION, "scan", targetName))
-        if (authenticationName != null) {
-            cmd.add("--auth")
-            cmd.add(authenticationName)
-        }
+        val cmd = buildScanCommand(targetName, authenticationName)
 
         val outcome = CommandRunnerService.runCommandUntilStarted(
             *cmd.toTypedArray(),

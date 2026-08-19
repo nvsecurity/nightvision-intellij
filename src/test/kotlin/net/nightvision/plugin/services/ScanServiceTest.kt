@@ -65,4 +65,29 @@ class ScanServiceTest {
         assertTrue(message.contains("the real reason"))
         assertFalse(message.contains("progress chatter"))
     }
+
+    @Test
+    fun `scan command passes the target as its own argument`() {
+        val cmd = ScanService.buildScanCommand("my target with spaces", null)
+        assertEquals(listOf("nightvision", "scan", "my target with spaces"), cmd)
+    }
+
+    @Test
+    fun `scan command carries the authentication when one is chosen`() {
+        val cmd = ScanService.buildScanCommand("t", "my-auth")
+        assertEquals(listOf("nightvision", "scan", "t", "--auth", "my-auth"), cmd)
+    }
+
+    @Test
+    fun `scan command omits the auth flag when no authentication is chosen`() {
+        assertEquals(listOf("nightvision", "scan", "t"), ScanService.buildScanCommand("t", null))
+    }
+
+    @Test
+    fun `scan command omits the auth flag for the combo box empty entry`() {
+        // The create-scan combo carries an empty entry when the project has no
+        // authentications; that must not become an --auth with an empty value.
+        assertEquals(listOf("nightvision", "scan", "t"), ScanService.buildScanCommand("t", ""))
+        assertEquals(listOf("nightvision", "scan", "t"), ScanService.buildScanCommand("t", "   "))
+    }
 }
