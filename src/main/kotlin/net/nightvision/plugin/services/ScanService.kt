@@ -19,6 +19,13 @@ object ScanService {
      */
     val SCAN_STARTED = Regex("INFO Scan Details")
 
+    /**
+     * How long the CLI is given to report a scan before the attempt is judged
+     * to have hung. Only startup is bounded; once the scan is under way the CLI
+     * runs for as long as the scan takes.
+     */
+    const val SCAN_START_TIMEOUT_MS = 120_000L
+
     val httpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(15))
         .build()
@@ -53,10 +60,50 @@ object ScanService {
             cmd.add(authenticationName)
         }
 
-        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
-        if (!SCAN_STARTED.containsMatchIn(response.output)) {
-            throw RuntimeException(noScanStartedMessage(response.output, response.error))
+        val outcome = CommandRunnerService.runCommandUntilStarted(
+            *cmd.toTypedArray(),
+            marker = SCAN_STARTED,
+            startupTimeoutMs = SCAN_START_TIMEOUT_MS
+        )
+        if (outcome.started) {
+            return
         }
+        val message = if (outcome.timedOut) {
+            startupTimedOutMessage(SCAN_START_TIMEOUT_MS, outcome.output)
+        } else {
+            noScanStartedMessage(outcome.output, "")
+        }
+        // Routed through the same mapping runCommandSync uses, so an expired
+        // login still sends the user to the login page rather than surfacing
+        // as a bare failure.
+        throw CommandRunnerService.getSpecificRuntimeException(
+            cmd, RuntimeException(message)
+        )
+    }
+
+    /**
+     * Message for a CLI that never reported a scan and had to be stopped. The
+     * relay is named because it is the usual cause: a target that is not
+     * reachable from the internet is scanned through it, and an older CLI can
+     * obtain a relay id and then never bring the tunnel up (NV-4827).
+     *
+     * What the CLI printed before it hung is appended rather than dropped. It
+     * carries the real reason whenever the relay is not the cause, and the
+     * caller routes an expired login to the login page by matching the message
+     * text, which cannot match words that were never included. It goes through
+     * significantOutput first, so the progress narration a hung scan produces
+     * most of does not push that reason off the screen.
+     */
+    fun startupTimedOutMessage(timeoutMs: Long, output: String): String {
+        val seconds = Math.round(timeoutMs / 1000.0)
+        val message = "The NightVision CLI did not start a scan within $seconds seconds and was " +
+            "stopped. The most common cause is a failed connection to the NightVision " +
+            "relay, which is required for targets that are not reachable from the internet."
+        val detail = CommandRunnerService.significantOutput(output)
+        if (detail.isEmpty()) {
+            return message
+        }
+        return "$message\n$detail"
     }
 
     /**

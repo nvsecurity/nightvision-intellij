@@ -17,7 +17,10 @@ import net.nightvision.plugin.exceptions.NotLoggedException
 import net.nightvision.plugin.services.InstallCLIService.userCliVersion
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.TimeUnit
 
 /**
@@ -191,6 +194,201 @@ object CommandRunnerService {
             throw e
         }
 
+    }
+
+    /**
+     * How often the startup wait re-checks whether the process is still alive.
+     */
+    private const val STARTUP_POLL_MS = 100L
+
+    /**
+     * Outcome of a command run under a startup deadline. Exactly one of
+     * [started], [exited] and [timedOut] is true.
+     *
+     * @param started the marker appeared, so the scan was accepted. The
+     *                process is normally still running; a marker seen as it
+     *                ended on its own counts too, since the acceptance stands
+     * @param exited  the process ended before the marker appeared
+     * @param timedOut the deadline passed with the process still running and no
+     *                 marker, so the process was destroyed
+     * @param output   everything the process printed, both streams interleaved
+     */
+    data class StartupOutcome(
+        val started: Boolean,
+        val exited: Boolean,
+        val timedOut: Boolean,
+        val output: String
+    )
+
+    /**
+     * Runs [command] and waits only until [marker] appears in its output rather
+     * than for the process to finish, then leaves it running.
+     *
+     * A long-running command cannot be run through [runCommandSync]: that waits
+     * for the whole process and destroys it at the timeout, so a scan lasting
+     * longer than the timeout was killed mid-run. Killing the CLI sends SIGTERM,
+     * which it handles by cancelling the scan server-side, so the cap did not
+     * merely time out the wait, it cancelled a scan that was running perfectly
+     * well. Bounding startup instead means the deadline can only ever fire while
+     * there is no scan to cancel (NV-4827).
+     *
+     * Both streams are drained on background threads for the life of the
+     * process, so a caller that returns early cannot leave the child blocked on
+     * a full pipe.
+     */
+    fun runCommandUntilStarted(
+        vararg command: String,
+        marker: Regex,
+        startupTimeoutMs: Long,
+        workingDirectory: String = ""
+    ): StartupOutcome {
+        var cmd = GeneralCommandLine(*command)
+            .withEnvironment("PATH", getPathForGeneralCommandLine())
+        if (workingDirectory.isNotEmpty()) {
+            cmd = cmd.withWorkDirectory(workingDirectory)
+        }
+        return awaitStartup(cmd, marker, startupTimeoutMs, command.toList())
+    }
+
+    /**
+     * The process half of [runCommandUntilStarted], split out so it can be
+     * exercised against real processes without a live platform supplying the
+     * login-shell PATH.
+     */
+    fun awaitStartup(
+        commandLine: GeneralCommandLine,
+        marker: Regex,
+        startupTimeoutMs: Long,
+        command: List<String>
+    ): StartupOutcome {
+        try {
+            val process = commandLine.createProcess()
+            val buffer = StringBuilder()
+            val sawMarker = CountDownLatch(1)
+            // Cleared once the outcome has been reported. The streams still have
+            // to be drained for the life of the process, but past that point the
+            // buffer is nobody's: a scan runs for as long as it takes, and
+            // appending its whole output would grow the IDE's heap for nothing.
+            val capturing = AtomicBoolean(true)
+
+            fun pump(stream: InputStream): Thread {
+                val t = Thread {
+                    try {
+                        stream.bufferedReader().forEachLine { line ->
+                            // Checked inside the lock, not before it: outside,
+                            // a line could pass the check and then lose the
+                            // race to stopCapturing, dropping the last
+                            // diagnostic the process managed to print.
+                            synchronized(buffer) {
+                                if (capturing.get()) {
+                                    buffer.append(line).append('\n')
+                                }
+                            }
+                            if (marker.containsMatchIn(line)) {
+                                sawMarker.countDown()
+                            }
+                        }
+                    } catch (e: IOException) {
+                        LOG.debug("Output stream closed for ${command.firstOrNull()}", e)
+                    }
+                }
+                t.isDaemon = true
+                t.start()
+                return t
+            }
+
+            val pumps = listOf(pump(process.inputStream), pump(process.errorStream))
+
+            val deadline = System.currentTimeMillis() + startupTimeoutMs
+            var started = false
+            while (true) {
+                if (sawMarker.await(STARTUP_POLL_MS, TimeUnit.MILLISECONDS)) {
+                    started = true
+                    break
+                }
+                if (!process.isAlive) {
+                    break
+                }
+                if (System.currentTimeMillis() >= deadline) {
+                    break
+                }
+            }
+
+            if (started) {
+                // Deliberately left running: the scan is under way and the
+                // process must see it through.
+                return StartupOutcome(started = true, exited = false, timedOut = false,
+                    output = stopCapturing(capturing, buffer))
+            }
+
+            // The marker can land between the loop's last check and here, and on
+            // the timeout path the process is still healthy: destroying it first
+            // would cancel the very scan the marker just announced, and report
+            // that as a timeout. Testing before the destroy keeps the deadline
+            // from firing on a scan that started.
+            if (sawMarker.count == 0L) {
+                return StartupOutcome(started = true, exited = false, timedOut = false,
+                    output = stopCapturing(capturing, buffer))
+            }
+
+            val alive = process.isAlive
+            if (alive) {
+                stopProcess(process)
+            }
+            // Let the pumps finish so the reported output is not cut short.
+            pumps.forEach { it.join(STARTUP_POLL_MS * 5) }
+            // A marker arriving during the drain still counts, but only where the
+            // process ended on its own: once it has been destroyed the scan is
+            // gone whatever the marker said.
+            if (sawMarker.count == 0L && !alive) {
+                return StartupOutcome(started = true, exited = false, timedOut = false,
+                    output = stopCapturing(capturing, buffer))
+            }
+            return StartupOutcome(
+                started = false,
+                exited = !alive,
+                timedOut = alive,
+                output = stopCapturing(capturing, buffer)
+            )
+        } catch (e: IOException) {
+            throw getSpecificException(command, e)
+        } catch (e: ProcessNotCreatedException) {
+            throw getSpecificException(command, e)
+        }
+    }
+
+    /**
+     * How long a process gets to act on the SIGTERM before it is killed
+     * outright.
+     */
+    private const val TERMINATE_GRACE_MS = 2_000L
+
+    /**
+     * Ends [process], escalating if it does not go. destroy() is a SIGTERM, and
+     * a CLI wedged badly enough to miss its startup deadline is exactly the one
+     * that may not act on it; without the escalation the deadline would report
+     * a scan as stopped while the process ran on.
+     */
+    private fun stopProcess(process: Process) {
+        process.destroy()
+        if (!process.waitFor(TERMINATE_GRACE_MS, TimeUnit.MILLISECONDS)) {
+            LOG.warn("CLI did not exit on terminate within ${TERMINATE_GRACE_MS}ms; killing it")
+            process.destroyForcibly()
+        }
+    }
+
+    /**
+     * Final read of the output, after which the pumps stop appending. Called on
+     * every exit from [awaitStartup], since nothing reads the buffer again.
+     */
+    private fun stopCapturing(capturing: AtomicBoolean, buffer: StringBuilder): String {
+        // Clearing the flag and reading the buffer happen together, so a pump
+        // holding the lock has already appended and no line is lost between
+        // the two.
+        return synchronized(buffer) {
+            capturing.set(false)
+            buffer.toString().trim()
+        }
     }
 
     @Throws(ProcessNotCreatedException::class)

@@ -1,5 +1,6 @@
 package net.nightvision.plugin.services
 
+import net.nightvision.plugin.exceptions.NotLoggedException
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -12,6 +13,25 @@ class ScanServiceTest {
             │ Scan ID: 4f1c2b0e-0000-4000-8000-000000000000
         """.trimIndent()
         assertTrue(ScanService.SCAN_STARTED.containsMatchIn(output))
+    }
+
+    @Test
+    fun `timeout message carries what the CLI printed before it hung`() {
+        val message = ScanService.startupTimedOutMessage(
+            120_000L, "ERROR token has expired. Please try to log in again\n")
+        assertTrue("got: $message", message.contains("token has expired"))
+        // The caller routes on the message text, so the words have to survive.
+        assertEquals(
+            NotLoggedException::class.java,
+            CommandRunnerService.getSpecificRuntimeException(
+                listOf("nightvision", "scan"), RuntimeException(message)).javaClass)
+    }
+
+    @Test
+    fun `timeout message stands alone when the CLI printed nothing`() {
+        val message = ScanService.startupTimedOutMessage(120_000L, "   ")
+        assertTrue("got: $message", message.contains("did not start a scan within 120 seconds"))
+        assertFalse("got: $message", message.trimEnd().endsWith("\n"))
     }
 
     @Test
