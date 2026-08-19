@@ -13,11 +13,15 @@ import net.nightvision.plugin.services.AuthenticationService;
 import net.nightvision.plugin.services.ScanService;
 import net.nightvision.plugin.services.TargetService;
 
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static net.nightvision.plugin.project.ProjectSelectionPanel.getCommonRendererForCombobox;
 
@@ -28,7 +32,7 @@ public class ScansCreateScreen extends Screen {
     private JComboBox authenticationComboBox;
     private JButton startScanButton;
     private JLabel targetLabel;
-    private JLabel errorMessageLabel;
+    private JLabel scanStatusLabel;
     private JPanel scansCreatePanel;
 
     private String targetType;
@@ -43,7 +47,7 @@ public class ScansCreateScreen extends Screen {
 
         scansCreatePanel.setBorder(JBUI.Borders.empty(8));
 
-        errorMessageLabel.setVisible(false);
+        scanStatusLabel.setVisible(false);
 
         targetLabel.setText("Target (" + (targetType.equalsIgnoreCase("URL") ? "WEB" : "API") + ")");
 
@@ -61,21 +65,11 @@ public class ScansCreateScreen extends Screen {
 
         addButtonPadding(startScanButton, 6);
         startScanButton.addActionListener(e -> {
-            errorMessageLabel.setVisible(false);
-            errorMessageLabel.setText("");
+            showStatus("Starting scan, please wait...");
             startScanButton.setEnabled(false);
             var targetName = (String) targetComboBox.getSelectedItem();
             var authName = (String) authenticationComboBox.getSelectedItem();
-            try {
-                new StartScanWorker(targetName, authName).execute();
-                mainWindowFactory.openScansPage();
-            } catch (NotLoggedException ex) {
-                mainWindowFactory.openLoginPage();
-            } catch(Exception exception) {
-                errorMessageLabel.setText(exception.getMessage());
-                errorMessageLabel.setVisible(true);
-                startScanButton.setEnabled(true);
-            }
+            new StartScanWorker(targetName, authName).execute();
         });
         startScanButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -84,6 +78,21 @@ public class ScansCreateScreen extends Screen {
 
         loadTargetComboBox();
         loadAuthenticationComboBox();
+    }
+
+    /**
+     * Says the scan is being started. The screen stays put for as long as the
+     * startup deadline allows, which is up to two minutes, and a greyed-out
+     * button is the only other sign that anything is happening. Navigating to
+     * the scan list on submit used to be the acknowledgement that the click
+     * had registered; holding the page takes it away. The wording is the VS
+     * Code extension's, which prints the same sentence under its own Start
+     * Scan button.
+     */
+    private void showStatus(String message) {
+        scanStatusLabel.setForeground(UIUtil.getLabelForeground());
+        scanStatusLabel.setText(message);
+        scanStatusLabel.setVisible(true);
     }
 
     private class StartScanWorker extends SwingWorker<Void, Void> {
@@ -103,15 +112,52 @@ public class ScansCreateScreen extends Screen {
 
         @Override
         protected void done() {
+            // startScan waits on the CLI for as long as the startup deadline
+            // allows, which is long enough for the user to leave this screen.
+            // Acting on a detached instance would either replace whatever they
+            // navigated to or write the CLI's reason into a label that is no
+            // longer displayed, which is the stranded-message defect this
+            // routing exists to avoid (NV-4885). Mounted, not showing: a user
+            // who parks on the Terminal tool window for the two minutes this
+            // can take still wants the result when they come back.
+            if (!isMounted(scansCreatePanel)) {
+                return;
+            }
             try {
                 get();
-            } catch (CommandNotFoundException ex) {
-                mainWindowFactory.openInstallCLIPage();
-            } catch(Exception exception) {
-                errorMessageLabel.setText(exception.getMessage());
-                errorMessageLabel.setVisible(true);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                showError(ex);
+                return;
+            } catch (ExecutionException ex) {
+                // SwingWorker wraps whatever doInBackground threw, so the cause
+                // is what the routing below has to look at. Matching on the
+                // wrapper meant the CLI-not-found branch never ran and every
+                // failure surfaced as an ExecutionException toString.
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                if (cause instanceof CommandNotFoundException) {
+                    mainWindowFactory.openInstallCLIPage();
+                    return;
+                }
+                if (cause instanceof NotLoggedException) {
+                    mainWindowFactory.openLoginPage();
+                    return;
+                }
+                showError(cause);
+                return;
             }
+            // Only leave the page once the scan is known to have started.
+            // Navigating on submit stranded every failure message on a screen
+            // the user had already been taken off (NV-4827).
+            mainWindowFactory.openScansPage();
+        }
 
+        private void showError(Throwable t) {
+            String message = t.getMessage();
+            scanStatusLabel.setForeground(JBColor.RED);
+            scanStatusLabel.setText(asWrappedHtml(
+                    message == null || message.isBlank() ? t.toString() : message));
+            scanStatusLabel.setVisible(true);
             startScanButton.setEnabled(true);
         }
     }

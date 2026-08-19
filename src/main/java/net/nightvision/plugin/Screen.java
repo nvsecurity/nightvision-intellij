@@ -18,6 +18,39 @@ public abstract class Screen {
         this.mainWindowFactory = project.getService(MainWindowService.class).getWindowFactory();
     }
 
+    // Width a wrapped error message is capped at, so a long CLI line wraps
+    // instead of stretching the tool window.
+    protected static final int MESSAGE_WRAP_WIDTH = 320;
+
+    /**
+     * Whether [panel] is still mounted in the tool window.
+     *
+     * Navigation replaces the tool window's contents wholesale, so a screen the
+     * user has left has no parent, while one whose tool window is merely hidden,
+     * collapsed or unselected still does. AWT visibility is the wrong test:
+     * isShowing() also goes false when the user switches to another tool window,
+     * and a background result arriving then is still wanted.
+     */
+    protected static boolean isMounted(JComponent panel) {
+        return panel.getParent() != null;
+    }
+
+    /**
+     * Renders multi-line text in a JLabel. Swing labels draw plain text on one
+     * line and ignore newlines, so CLI output shown to the user is escaped and
+     * converted to HTML. Without this a reported failure is truncated to its
+     * first line, which is rarely the line carrying the reason (NV-4827).
+     */
+    protected static String asWrappedHtml(String text) {
+        String escaped = text
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\n", "<br>");
+        return "<html><body style='width: " + JBUI.scale(MESSAGE_WRAP_WIDTH) + "px'>"
+                + escaped + "</body></html>";
+    }
+
     // pad is scaled, so the padding tracks the IDE's display scaling the way the
     // button's own text and icon do.
     protected static void addButtonPadding(JButton button, int pad) {

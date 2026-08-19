@@ -37,19 +37,97 @@ object CommandRunnerService {
 
     data class ExecutionResponse(val output: String, val error: String)
 
+    /**
+     * The phrase an expired login is reclassified on. Named here because two
+     * things depend on it: getSpecificRuntimeException matches it, and
+     * significantOutput must never drop the line carrying it.
+     */
+    const val EXPIRED_TOKEN_PHRASE = "token has expired. Please try to log in again"
+
+    /**
+     * How many lines of CLI output a message keeps. No screen in this plugin
+     * scrolls, so an unbounded detail runs off the tool window and takes the
+     * reason with it. The tail is what survives, because the CLI narrates
+     * forward and fails last.
+     */
+    private const val MAX_DETAIL_LINES = 12
+
+    /** The CLI's progress narration: timestamped, INFO level, one per step. */
+    private val PROGRESS_LINE = Regex("""^\[[^\]]*]\s+INFO\b""")
+
+    /**
+     * The part of the CLI's output worth putting in front of a user. A scan
+     * that fails prints a page of INFO lines covering DNS, TCP and TLS before
+     * saying what went wrong, which pushed the reason off the screen entirely.
+     * Fatal errors are printed plain rather than logged (NV-4827), so dropping
+     * the INFO narration keeps every reason while removing the noise.
+     *
+     * If nothing survives, the narration was all the CLI said, so its tail is
+     * kept rather than claiming the CLI gave no reason at all.
+     */
+    fun significantOutput(text: String): String {
+        val lines = text.trim().lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val kept = lines.filter {
+            !PROGRESS_LINE.containsMatchIn(it) || EXPIRED_TOKEN_PHRASE in it
+        }
+        val chosen = if (kept.isNotEmpty()) kept else lines
+        return chosen.takeLast(MAX_DETAIL_LINES).joinToString("\n")
+    }
+
+    /**
+     * The CLI's own account of a failure, preferring stderr but falling back to
+     * stdout. Several CLI errors are printed to stdout rather than logged, so a
+     * message built from stderr alone is empty for exactly the failures a user
+     * most needs explained (NV-4827).
+     *
+     * The result reaches getSpecificRuntimeException, which reclassifies on the
+     * expired-token phrase, so the fallback could in principle widen that match
+     * to stdout. It does not, on either of the two caller shapes. runCommandSync
+     * hands the streams over separately, and the CLI emits that phrase only
+     * through its logger, which writes to stderr, so stderr is non-empty
+     * whenever the phrase is present and the fallback is not reached for it.
+     * The scan-startup caller has no separate stderr to hand over, since
+     * awaitStartup merges both streams into one buffer, so it passes that
+     * buffer as stdout and an empty stderr and the fallback runs every time.
+     * What it returns still carries the CLI's stderr, which is the only place
+     * the phrase can have come from, so the match is no wider there either.
+     */
+    fun failureDetail(stdout: String, stderr: String): String {
+        val err = stderr.trim()
+        if (err.isNotEmpty()) {
+            return significantOutput(err)
+        }
+        return significantOutput(stdout)
+    }
+
     private fun handleProcessResponse(
         command: String,
         output: ProcessOutput
     ): ExecutionResponse {
         if (!output.isTimeout && output.exitCode == 0) {
-            println("Success: ${output.stdout.trim()}")
+            // The command line only, deliberately, never output.stdout. This is
+            // the shared success path for every runCommandSync caller, and
+            // TokenService.createToken reads a live API token off it, so
+            // logging the output here would put credentials in idea.log. The
+            // println this replaced did exactly that on every login.
+            //
+            // The failure branch below logs failureDetail, which can fall back
+            // to stdout, and that is not the same exposure: the CLI prints a
+            // token as the very last statement of a successful run, after every
+            // failure path has already exited, so a run that failed has no
+            // token on stdout to fall back to. Note that plenty of other CLI
+            // errors do reach stdout, which is why the fallback exists at all.
+            LOG.debug("Command succeeded: ${command}")
         } else {
-            LOG.warn("Command exited with ${output.exitCode}: ${command}. Error: ${output.stderr.trim()}")
+            val detail = failureDetail(output.stdout, output.stderr)
+            LOG.warn("Command exited with ${output.exitCode}: ${command}. Detail: ${detail}")
             if (output.isTimeout) {
                 throw RuntimeException("The command timed out")
+            } else if (detail.isEmpty()) {
+                throw RuntimeException("The command failed (exit=${output.exitCode}) without reporting a reason.")
             } else {
                 throw RuntimeException(
-                    "The command failed (exit=${output.exitCode}):\n${output.stderr.trim()}"
+                    "The command failed (exit=${output.exitCode}):\n${detail}"
                 )
             }
         }
@@ -155,7 +233,7 @@ object CommandRunnerService {
     fun getSpecificRuntimeException(command: List<String>, e: Exception): Exception {
         val msg = e.message ?: ""
         when {
-            "token has expired. Please try to log in again" in msg ->
+            EXPIRED_TOKEN_PHRASE in msg ->
                 return NotLoggedException(command)
             else -> return e
         }

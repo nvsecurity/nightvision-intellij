@@ -13,6 +13,12 @@ import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
 object ScanService {
+    /**
+     * The CLI logs this record as soon as the backend has accepted the scan, so
+     * its presence is what distinguishes a started scan from a failed attempt.
+     */
+    val SCAN_STARTED = Regex("INFO Scan Details")
+
     val httpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(15))
         .build()
@@ -48,11 +54,22 @@ object ScanService {
         }
 
         val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
-        val t = response.output
-        val id = t.trim().takeIf { Regex("INFO Scan Details").containsMatchIn(it) } ?: ""
-        if (id.isBlank()) {
-            // TODO: Improve error message details
-            throw RuntimeException("Some error happened when creating your scan.")
+        if (!SCAN_STARTED.containsMatchIn(response.output)) {
+            throw RuntimeException(noScanStartedMessage(response.output, response.error))
         }
+    }
+
+    /**
+     * Message for a CLI run that ended without ever logging its scan details.
+     * The CLI's own output carries the reason (target not in the project, relay
+     * setup failure, a rejected start-scan request), so it is reported rather
+     * than replaced with a generic failure (NV-4827).
+     */
+    fun noScanStartedMessage(stdout: String, stderr: String): String {
+        val detail = CommandRunnerService.failureDetail(stdout, stderr)
+        if (detail.isEmpty()) {
+            return "The NightVision CLI exited without starting a scan and without reporting a reason."
+        }
+        return "The NightVision CLI exited without starting a scan:\n${detail}"
     }
 }
