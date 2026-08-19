@@ -56,7 +56,7 @@ class ScanServiceTest {
     @Test
     fun `message stands alone when the CLI reported nothing at all`() {
         val message = ScanService.noScanStartedMessage("", "")
-        assertTrue(message.contains("without reporting a reason"))
+        assertTrue(message.contains("reported no reason"))
     }
 
     @Test

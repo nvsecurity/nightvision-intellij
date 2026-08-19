@@ -201,4 +201,17 @@ class CommandRunnerServiceTest {
             "${sep}${sep}/only", windows = false, isExecutable = { it.path == "/only/nightvision" })
         assertEquals("/only/nightvision", found)
     }
+
+    @Test
+    fun `missingRecordMessage reports the CLI detail`() {
+        val m = CommandRunnerService.missingRecordMessage("create the project", "", "name already taken")
+        assertTrue(m.contains("create the project"))
+        assertTrue(m.contains("name already taken"))
+    }
+
+    @Test
+    fun `missingRecordMessage stands alone when the CLI said nothing`() {
+        val m = CommandRunnerService.missingRecordMessage("create the target", "", "")
+        assertTrue(m.contains("reported no reason"))
+    }
 }

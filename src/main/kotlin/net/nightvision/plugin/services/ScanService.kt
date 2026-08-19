@@ -123,11 +123,6 @@ object ScanService {
      * setup failure, a rejected start-scan request), so it is reported rather
      * than replaced with a generic failure (NV-4827).
      */
-    fun noScanStartedMessage(stdout: String, stderr: String): String {
-        val detail = CommandRunnerService.failureDetail(stdout, stderr)
-        if (detail.isEmpty()) {
-            return "The NightVision CLI exited without starting a scan and without reporting a reason."
-        }
-        return "The NightVision CLI exited without starting a scan:\n${detail}"
-    }
+    fun noScanStartedMessage(stdout: String, stderr: String): String =
+        CommandRunnerService.missingRecordMessage("start a scan", stdout, stderr)
 }

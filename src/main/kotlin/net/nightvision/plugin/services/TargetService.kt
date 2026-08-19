@@ -99,8 +99,9 @@ object TargetService {
         val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
-            // TODO: Improve error message details
-            throw RuntimeException("Some error happened when creating your target.")
+            throw RuntimeException(
+                CommandRunnerService.missingRecordMessage("create the target", response.output, response.error)
+            )
         }
     }
 }

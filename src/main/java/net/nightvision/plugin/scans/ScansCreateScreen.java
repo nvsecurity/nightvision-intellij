@@ -153,10 +153,8 @@ public class ScansCreateScreen extends Screen {
         }
 
         private void showError(Throwable t) {
-            String message = t.getMessage();
             scanStatusLabel.setForeground(JBColor.RED);
-            scanStatusLabel.setText(asWrappedHtml(
-                    message == null || message.isBlank() ? t.toString() : message));
+            scanStatusLabel.setText(asWrappedError(t));
             scanStatusLabel.setVisible(true);
             startScanButton.setEnabled(true);
         }

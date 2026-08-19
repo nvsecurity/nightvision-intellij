@@ -62,6 +62,16 @@ public abstract class Screen {
     }
 
     /**
+     * The reported text of a failure, wrapped for a JLabel. An exception with
+     * no message of its own falls back to its toString, so the label never
+     * renders blank where a reason was expected.
+     */
+    protected static String asWrappedError(Throwable t) {
+        String message = t.getMessage();
+        return asWrappedHtml(message == null || message.isBlank() ? t.toString() : message);
+    }
+
+    /**
      * Tooltip for the Update CLI button, naming the CLI it means. The plugin
      * prepends its own install directory to PATH, so the binary it runs is not
      * necessarily the one the user's terminal resolves; without the path here,

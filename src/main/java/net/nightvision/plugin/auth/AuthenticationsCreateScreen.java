@@ -77,24 +77,40 @@ public class AuthenticationsCreateScreen extends Screen {
             new Task.Backgroundable(project, "Create Authentication Playwright", false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
+                    // createPlaywrightAuth records an interactive browser login
+                    // and runs to a 200 second timeout, so the user can easily
+                    // navigate away before it returns. A late callback would
+                    // otherwise replace whatever screen they moved to.
                     try {
                         AuthenticationService.INSTANCE.createPlaywrightAuth(authName, authUrl, description);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(authenticationsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openAuthenticationsPage();
                         });
                     } catch (CommandNotFoundException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(authenticationsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openInstallCLIPage();
                         });
                     } catch (NotLoggedException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(authenticationsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openLoginPage();
                         });
                         return;
                     } catch (Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessage.setText(exception.getMessage());
+                            if (!isMounted(authenticationsCreatePanel)) {
+                                return;
+                            }
+                            errorMessage.setText(asWrappedError(exception));
                             errorMessage.setVisible(true);
                         });
                     } finally {

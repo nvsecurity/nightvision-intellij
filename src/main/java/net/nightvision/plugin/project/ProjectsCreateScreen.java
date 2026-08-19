@@ -60,19 +60,31 @@ public class ProjectsCreateScreen extends Screen {
                         ProjectService.INSTANCE.createProject(projectName);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openProjectsPage();
                         });
                     } catch (CommandNotFoundException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openInstallCLIPage();
                         });
                     } catch (NotLoggedException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openLoginPage();
                         });
                     } catch(Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessage.setText(exception.getMessage());
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
+                            errorMessage.setText(asWrappedError(exception));
                             errorMessage.setVisible(true);
                         });
                     }

@@ -95,21 +95,33 @@ public class TargetsCreateScreen extends Screen {
                         TargetService.INSTANCE.createWebTarget(targetName, targetURL);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openTargetsPage();
                         });
                     } catch (CommandNotFoundException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openInstallCLIPage();
                         });
                         return;
                     } catch (NotLoggedException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openLoginPage();
                         });
                         return;
                     } catch (Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessageWebTarget.setText(exception.getMessage());
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
+                            errorMessageWebTarget.setText(asWrappedError(exception));
                             errorMessageWebTarget.setVisible(true);
                         });
                     } finally {
@@ -141,11 +153,17 @@ public class TargetsCreateScreen extends Screen {
                         TargetService.INSTANCE.createApiTarget(targetName, targetURL, swaggerPath, isSwaggerURL);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openTargetsPage();
                         });
                     } catch(Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessageApiTarget.setText(exception.getMessage());
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
+                            errorMessageApiTarget.setText(asWrappedError(exception));
                             errorMessageApiTarget.setVisible(true);
                         });
                     } finally {

@@ -103,6 +103,26 @@ object CommandRunnerService {
         return significantOutput(stdout)
     }
 
+    /**
+     * Message for a CLI run that ended without the record the caller needed,
+     * where [what] names the action in the infinitive ("create the project").
+     * The CLI's own output carries the reason, so it is reported rather than
+     * replaced with a generic failure (NV-4827).
+     *
+     * The runCommandSync callers only arrive here after a zero exit, since
+     * handleProcessResponse throws on anything else, but the scan-startup
+     * caller arrives on any exit that precedes the marker. Nothing below reads
+     * the exit status, so the two are formatted alike; do not add a branch that
+     * assumes a clean exit.
+     */
+    fun missingRecordMessage(what: String, stdout: String, stderr: String): String {
+        val detail = failureDetail(stdout, stderr)
+        if (detail.isEmpty()) {
+            return "The NightVision CLI did not $what, and reported no reason."
+        }
+        return "The NightVision CLI did not $what:\n$detail"
+    }
+
     private fun handleProcessResponse(
         command: String,
         output: ProcessOutput
