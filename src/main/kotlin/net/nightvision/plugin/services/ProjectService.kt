@@ -68,11 +68,11 @@ object ProjectService {
         val t = response.output
         val regexProjName = Regex("""(?m)^Name:\s*(.+)$""")
         val matchProjName = regexProjName.find(t)
-        currentProjectName = matchProjName?.groupValues?.get(1) ?: ""
+        currentProjectName = matchProjName?.groupValues?.get(1)?.trim() ?: ""
 
         val regexProjId = Regex("""(?m)^Id:\s*(.+)$""")
         val matchProjId = regexProjId.find(t)
-        currentProjectId = matchProjId?.groupValues?.get(1) ?: ""
+        currentProjectId = matchProjId?.groupValues?.get(1)?.trim() ?: ""
 
         return currentProjectName
     }
@@ -83,14 +83,18 @@ object ProjectService {
         }
         var cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "set", projectName))
 
-        val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
-        val t = response.output
-        val success = Regex("Current project changed").containsMatchIn(t.trim())
-        if (success) {
-            fetchCurrentProjectName()
-            return
+        CommandRunnerService.runCommandSync(*cmd.toTypedArray())
+
+        // Confirmed by reading the project back, not by matching what the CLI
+        // said. It answers "Current project changed to X." when it switches but
+        // "X is already the current project" when X was already current, and
+        // matching only the first reported selecting the current project as a
+        // failure. runCommandSync has already thrown if the CLI rejected the
+        // name, so what is left to check is the outcome rather than the wording.
+        val actual = fetchCurrentProjectName()
+        if (actual != projectName) {
+            throw RuntimeException("Unable to set project to '${projectName}'")
         }
-        throw RuntimeException("Unable to set project to '${projectName}'")
     }
 
 }
