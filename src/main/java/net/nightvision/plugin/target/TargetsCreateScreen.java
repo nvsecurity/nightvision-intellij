@@ -15,6 +15,8 @@ import net.nightvision.plugin.services.TargetService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -26,12 +28,12 @@ public class TargetsCreateScreen extends Screen {
     private JTextField apiTargetUrlTextField;
     private JButton cancelApiTargetButton;
     private JButton createApiTargetButton;
-    private JLabel errorMessageApiTarget;
+    private JBLabel errorMessageApiTarget;
     private JTabbedPane apiTargetSpecTypeTabbedPane;
     private JTextField apiTargetSpecUrlTextField;
     private JButton uploadButton;
     private JLabel specFileName;
-    private JLabel errorMessageWebTarget;
+    private JBLabel errorMessageWebTarget;
     private JButton createWebTargetButton;
     private JButton cancelWebTargetButton;
     private JTextField webTargetNameTextField;
@@ -51,6 +53,7 @@ public class TargetsCreateScreen extends Screen {
 
         targetsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessageApiTarget, errorMessageWebTarget);
         errorMessageApiTarget.setVisible(false);
         errorMessageWebTarget.setVisible(false);
         specFileName.setVisible(false);

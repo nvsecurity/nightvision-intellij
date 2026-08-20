@@ -14,6 +14,8 @@ import net.nightvision.plugin.services.ProjectService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,7 +23,7 @@ public class LoginScreen extends Screen {
     private JButton loginButton;
     private JPanel loginPanel;
     private JButton updateCLIButton;
-    private JLabel errorMessageLabel;
+    private JBLabel errorMessageLabel;
 
     public JPanel getLoginPanel() {
         return loginPanel;
@@ -59,6 +61,7 @@ public class LoginScreen extends Screen {
         addButtonPadding(loginButton, 6);
         loginPanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessageLabel);
         errorMessageLabel.setVisible(false);
         updateCLIButton.setVisible(false);
 

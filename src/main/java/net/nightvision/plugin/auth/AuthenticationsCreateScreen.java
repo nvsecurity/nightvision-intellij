@@ -13,6 +13,8 @@ import net.nightvision.plugin.services.AuthenticationService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -26,7 +28,7 @@ public class AuthenticationsCreateScreen extends Screen {
     private JLabel helpMessageLabel;
     private JButton cancelButton;
     private JButton createButton;
-    private JLabel errorMessage;
+    private JBLabel errorMessage;
 
     public JPanel getAuthenticationsCreatePanel() {
         return authenticationsCreatePanel;
@@ -37,6 +39,7 @@ public class AuthenticationsCreateScreen extends Screen {
 
         authenticationsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessage);
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {
             mainWindowFactory.openAuthenticationsPage();

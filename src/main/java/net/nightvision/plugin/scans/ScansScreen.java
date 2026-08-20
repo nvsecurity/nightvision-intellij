@@ -12,6 +12,8 @@ import net.nightvision.plugin.services.ScanService;
 import net.nightvision.plugin.utils.IconUtils;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -187,9 +189,10 @@ public class ScansScreen extends Screen {
 
     private void showLoadError() {
         loadingPanelParent.removeAll();
-        JLabel error = new JLabel(
+        JBLabel error = new JBLabel(
             "Could not load scans. Check your NightVision login and connection, then try again."
         );
+        makeSelectable(error);
         error.setForeground(JBColor.RED);
         loadingPanelParent.add(error);
         loadingPanelParent.revalidate();

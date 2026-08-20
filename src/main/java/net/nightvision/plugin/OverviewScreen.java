@@ -1,5 +1,7 @@
 package net.nightvision.plugin;
 
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 
 import com.intellij.execution.process.ProcessNotCreatedException;
@@ -31,8 +33,8 @@ public class OverviewScreen extends Screen {
     private JButton authenticationsButton;
     private JButton projectsButton;
     private JButton updateCLIButton;
-    private JLabel updateMessageLabel;
-    private JLabel errorMessageLabel;
+    private JBLabel updateMessageLabel;
+    private JBLabel errorMessageLabel;
 
     public JPanel getOverviewPanel() {
         return overviewPanel;
@@ -70,6 +72,7 @@ public class OverviewScreen extends Screen {
         overviewPanel.setBorder(JBUI.Borders.empty(8));
 
         updateCLIButton.setVisible(false);
+        makeSelectable(updateMessageLabel, errorMessageLabel);
         updateMessageLabel.setForeground(JBColor.RED);
         updateMessageLabel.setVisible(false);
         errorMessageLabel.setVisible(false);

@@ -14,6 +14,7 @@ import net.nightvision.plugin.services.ScanService;
 import net.nightvision.plugin.services.TargetService;
 
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 
@@ -32,7 +33,7 @@ public class ScansCreateScreen extends Screen {
     private JComboBox authenticationComboBox;
     private JButton startScanButton;
     private JLabel targetLabel;
-    private JLabel scanStatusLabel;
+    private JBLabel scanStatusLabel;
     private JPanel scansCreatePanel;
 
     private String targetType;
@@ -47,6 +48,7 @@ public class ScansCreateScreen extends Screen {
 
         scansCreatePanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(scanStatusLabel);
         scanStatusLabel.setVisible(false);
 
         targetLabel.setText("Target (" + (targetType.equalsIgnoreCase("URL") ? "WEB" : "API") + ")");

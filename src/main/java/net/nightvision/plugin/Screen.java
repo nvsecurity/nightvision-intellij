@@ -1,6 +1,7 @@
 package net.nightvision.plugin;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
@@ -42,23 +43,43 @@ public abstract class Screen {
      * first line, which is rarely the line carrying the reason (NV-4827).
      */
     protected static String asWrappedHtml(String text) {
-        return wrapHtml(escapeHtml(text));
+        String[] lines = text.split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            lines[i] = escapeHtml(lines[i]);
+        }
+        return wrapHtml(lines);
     }
 
     // Text the caller does not control, made safe to drop into a label's HTML.
+    // Line breaks are not this method's business: wrapHtml gives each line its
+    // own element, so callers split first and escape each line.
     private static String escapeHtml(String text) {
         return text
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\n", "<br>");
+                .replace(">", "&gt;");
     }
 
-    // Caps the label at a readable width so long text wraps instead of
-    // stretching the tool window.
-    private static String wrapHtml(String bodyHtml) {
+    /**
+     * Assembles one label's worth of HTML, a block element per line, capped at
+     * a readable width so long text wraps instead of stretching the tool
+     * window.
+     *
+     * The lines are blocks rather than <br> separators because these labels are
+     * selectable (see makeSelectable) and the two copy differently: Swing turns
+     * a <br> into a space, so a three-line CLI failure pasted into a support
+     * ticket would arrive as one run-on line, while a block element copies as a
+     * real newline.
+     */
+    private static String wrapHtml(String... lineHtml) {
+        StringBuilder body = new StringBuilder();
+        for (String line : lineHtml) {
+            // An empty div collapses to nothing, so a blank line keeps a <br>
+            // to hold its height.
+            body.append("<div>").append(line.isEmpty() ? "<br>" : line).append("</div>");
+        }
         return "<html><body style='width: " + JBUI.scale(MESSAGE_WRAP_WIDTH) + "px'>"
-                + bodyHtml + "</body></html>";
+                + body + "</body></html>";
     }
 
     /**
@@ -95,16 +116,34 @@ public abstract class Screen {
      * find out; an out-of-date CLI is worth saying on the screen (NV-4873).
      */
     protected static String cliUpdateMessage(String version, String resolvedPath, String required) {
-        StringBuilder html = new StringBuilder();
-        html.append("<b>You have version ")
-                .append(escapeHtml(version.isBlank() ? "(unknown)" : version))
-                .append(" of the NightVision CLI, but the plugin requires version ")
-                .append(escapeHtml(required))
-                .append(" to be fully operational.</b>");
-        if (resolvedPath != null && !resolvedPath.isBlank()) {
-            html.append("<br>Using ").append(escapeHtml(resolvedPath));
+        String mismatch = "<b>You have version "
+                + escapeHtml(version.isBlank() ? "(unknown)" : version)
+                + " of the NightVision CLI, but the plugin requires version "
+                + escapeHtml(required)
+                + " to be fully operational.</b>";
+        if (resolvedPath == null || resolvedPath.isBlank()) {
+            return wrapHtml(mismatch);
         }
-        return wrapHtml(html.toString());
+        return wrapHtml(mismatch, "Using " + escapeHtml(resolvedPath));
+    }
+
+    /**
+     * Lets the user select and copy a message label's text. Swing draws a
+     * JLabel as an image with no caret and no selection, so a CLI failure shown
+     * in one can only be screenshotted or retyped, which is the wrong thing to
+     * ask of someone reporting a problem to support. setCopyable swaps in a
+     * text component that renders the same HTML and allows selection.
+     */
+    protected static void makeSelectable(JBLabel... labels) {
+        for (JBLabel label : labels) {
+            // Ordered: setCopyable builds the editor pane's stylesheet once and
+            // reads this flag while doing it, and the flag's setter does not
+            // restyle. Left at its default the rule carries white-space:nowrap
+            // on body, the element asWrappedHtml caps the width of, so a long
+            // CLI line would run off the side of the tool window.
+            label.setAllowAutoWrapping(true);
+            label.setCopyable(true);
+        }
     }
 
     // pad is scaled, so the padding tracks the IDE's display scaling the way the

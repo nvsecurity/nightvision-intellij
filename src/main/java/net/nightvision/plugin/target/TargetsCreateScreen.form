@@ -131,7 +131,7 @@
                           </component>
                         </children>
                       </grid>
-                      <component id="cf510" class="javax.swing.JLabel" binding="errorMessageWebTarget">
+                      <component id="cf510" class="com.intellij.ui.components.JBLabel" binding="errorMessageWebTarget">
                         <constraints>
                           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -215,7 +215,7 @@
                           </component>
                         </children>
                       </grid>
-                      <component id="dbd59" class="javax.swing.JLabel" binding="errorMessageApiTarget">
+                      <component id="dbd59" class="com.intellij.ui.components.JBLabel" binding="errorMessageApiTarget">
                         <constraints>
                           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
