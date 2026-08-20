@@ -13,6 +13,7 @@
 - The CLI update prompt explains itself on the Overview screen, naming the version installed, the version needed and the binary the plugin resolved
 - The minimum CLI version is 0.15.0, the oldest able to scan a target that is not reachable from the internet
 - Scans without an authentication no longer pass the CLI an empty `--auth` value
+- Authentication can be left unset on a scan even when the project has authentications; it now defaults to none rather than to the first in the list
 - Switching project no longer freezes the IDE or reports an "IDE error": the CLI runs in the background and the dropdown is disabled while it does
 - Selecting the project that is already current is no longer treated as a failed switch
 - Error messages can be selected and copied, so a CLI failure can be pasted into a support ticket instead of retyped from a screenshot

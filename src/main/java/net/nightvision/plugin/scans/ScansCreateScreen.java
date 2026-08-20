@@ -180,11 +180,14 @@ public class ScansCreateScreen extends Screen {
         authenticationComboBox.removeAllItems();
         List<AuthInfo> authInfos = AuthenticationService.INSTANCE.getAuthInfos();
         List<String> authNames = new ArrayList<>();
+        // First and selected by default, whatever the project holds. The field
+        // is optional, so "none" has to be reachable; offering it only when
+        // there was nothing else to choose meant every scan in a project with
+        // any authentication silently carried the first one in the list. The VS
+        // Code extension renders this same "-" entry on any optional dropdown.
+        authNames.add("");
         for (AuthInfo info : authInfos) {
             authNames.add(info.getName());
-        }
-        if (authNames.isEmpty()) {
-            authNames.add("");
         }
         authNames.forEach(name -> authenticationComboBox.addItem(name));
         authenticationComboBox.setSelectedIndex(0);
