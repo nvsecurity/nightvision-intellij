@@ -9,6 +9,7 @@
 - The create-scan page stays put until the scan has started, so a failure is visible rather than reported on a screen you have already left
 - The create-scan page says "Starting scan, please wait..." while the CLI starts the scan, which can take up to two minutes
 - Project, target and authentication creation likewise report the CLI's reason
+- A command that fails with an error code reports it in the same words as one that fails silently, without an exit code the user cannot act on
 - The CLI update prompt explains itself on the Overview screen, naming the version installed, the version needed and the binary the plugin resolved
 - The minimum CLI version is 0.15.0, the oldest able to scan a target that is not reachable from the internet
 - Scans without an authentication no longer pass the CLI an empty `--auth` value

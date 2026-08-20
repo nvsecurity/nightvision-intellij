@@ -144,13 +144,19 @@ object CommandRunnerService {
         } else {
             val detail = failureDetail(output.stdout, output.stderr)
             LOG.warn("Command exited with ${output.exitCode}: ${command}. Detail: ${detail}")
+            // Worded for the person who clicked something, not for whoever
+            // reads the log: "the command" names nothing they did, and an exit
+            // code tells them nothing they can act on. Both are already in the
+            // LOG.warn above, which is where they are useful. This is also the
+            // wording missingRecordMessage uses for the failures that exit 0,
+            // so the two shapes of the same failure now read alike (NV-4827).
             if (output.isTimeout) {
-                throw RuntimeException("The command timed out")
+                throw RuntimeException("The NightVision CLI did not respond in time.")
             } else if (detail.isEmpty()) {
-                throw RuntimeException("The command failed (exit=${output.exitCode}) without reporting a reason.")
+                throw RuntimeException("The NightVision CLI failed without reporting a reason.")
             } else {
                 throw RuntimeException(
-                    "The command failed (exit=${output.exitCode}):\n${detail}"
+                    "The NightVision CLI reported an error:\n${detail}"
                 )
             }
         }
