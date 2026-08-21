@@ -14,6 +14,7 @@
 - Scans without an authentication no longer pass the CLI an empty `--auth` value
 - Error messages can be selected and copied, so a CLI failure can be pasted into a support ticket instead of retyped from a screenshot
 - Scan list vulnerability counts are color-coded by severity, and name the severity on hover
+- "Open in browser" links open the record they name instead of the NightVision home page
 
 ## [2.2.1]
 
