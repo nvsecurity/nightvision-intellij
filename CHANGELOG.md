@@ -13,6 +13,7 @@
 - The minimum CLI version is 0.15.0, the oldest able to scan a target that is not reachable from the internet
 - Scans without an authentication no longer pass the CLI an empty `--auth` value
 - Error messages can be selected and copied, so a CLI failure can be pasted into a support ticket instead of retyped from a screenshot
+- Scan list vulnerability counts are color-coded by severity, and name the severity on hover
 
 ## [2.2.1]
 

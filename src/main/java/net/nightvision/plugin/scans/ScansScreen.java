@@ -26,6 +26,70 @@ import static net.nightvision.plugin.utils.TableUtils.addHoverEffects;
 public class ScansScreen extends Screen {
     private static final int PAGE_SIZE = 25;
 
+    /**
+     * Severity of each count in the Vulnerabilities column, in the order
+     * ScansTableModel.getValueAt builds them, with the color the VS Code
+     * extension and the web app both give it. The three orderings have to
+     * agree; changing one without the others mislabels every row.
+     *
+     * Medium is the one deliberate difference. The extension and the web app
+     * use a dark gold there, which sits too close to High: simulated, the two
+     * are about 14 dE apart under deuteranopia and 5 under tritanopia, close
+     * enough that a colorblind reader cannot reliably separate them. A brighter
+     * yellow reads the same to everyone else and opens that gap to 41 and 31,
+     * because it differs from High in lightness, which is the one channel every
+     * form of color vision deficiency leaves intact.
+     */
+    private static final String[] SEVERITY_NAMES = {
+            "Critical", "High", "Medium", "Low", "Informational"
+    };
+
+    private static final JBColor[] SEVERITY_COLORS = {
+            severityColor(0xDC2626), // Critical
+            severityColor(0xEA580C), // High
+            severityColor(0xFACC15), // Medium
+            severityColor(0x16A34A), // Low
+            severityColor(0x2563EB), // Informational
+    };
+
+    // One value for both themes: these are mid-tone, and a severity has to read
+    // as the same color wherever it is shown.
+    private static JBColor severityColor(int rgb) {
+        return new JBColor(new Color(rgb), new Color(rgb));
+    }
+
+    /**
+     * A filled circle in a severity's color. Drawn rather than loaded, so a
+     * severity's color lives beside its name instead of in five near-identical
+     * icon files.
+     */
+    private record SeverityDotIcon(Color color) implements Icon {
+        private static final int SIZE = 8;
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            try {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(color);
+                g2.fillOval(x, y, getIconWidth(), getIconHeight());
+            } finally {
+                g2.dispose();
+            }
+        }
+
+        @Override
+        public int getIconWidth() {
+            return JBUI.scale(SIZE);
+        }
+
+        @Override
+        public int getIconHeight() {
+            return JBUI.scale(SIZE);
+        }
+    }
+
     private JTable scansTable;
     private JPanel scansPanel;
     private JButton backButton;
@@ -114,12 +178,25 @@ public class ScansScreen extends Screen {
                         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
                         panel.add(label);
                     } else {
-                        for (int vulnerability : val) {
-                            Icon i = IconUtils.getIcon("/icons/dot.svg", .8f);
-                            JLabel label = new JLabel(String.valueOf(vulnerability), i, JLabel.LEFT);
+                        StringBuilder severities = new StringBuilder();
+                        for (int i = 0; i < val.length; i++) {
+                            JLabel label = new JLabel(String.valueOf(val[i]),
+                                    new SeverityDotIcon(SEVERITY_COLORS[i]), JLabel.LEFT);
                             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
                             panel.add(label);
+                            if (i > 0) {
+                                severities.append(", ");
+                            }
+                            severities.append(SEVERITY_NAMES[i]).append(' ').append(val[i]);
                         }
+                        // The dot's color is the only thing telling the five
+                        // counts apart, so name them for anyone who cannot use
+                        // it. The tip goes on the panel, not the labels: a
+                        // renderer is a rubber stamp that never joins the
+                        // component hierarchy, so JTable asks the component the
+                        // renderer handed back and never reaches a child of it.
+                        // Naming all five in one tip also beats five hovers.
+                        panel.setToolTipText(severities.toString());
                     }
 
 
