@@ -17,7 +17,7 @@
 - Switching project no longer freezes the IDE or reports an "IDE error": the CLI runs in the background and the dropdown is disabled while it does
 - Selecting the project that is already current is no longer treated as a failed switch
 - Error messages can be selected and copied, so a CLI failure can be pasted into a support ticket instead of retyped from a screenshot
-- Scan list vulnerability counts are color-coded by severity, and name the severity on hover
+- Scan list vulnerability counts are color-coded by severity, and one hover names every severity with its count
 - "Open in browser" links open the record they name instead of the NightVision home page
 
 ## [2.2.1]
