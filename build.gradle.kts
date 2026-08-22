@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "net.nightvision"
-version = "2.2.1"
+version = "2.3.0"
 
 
 repositories {
@@ -39,9 +39,9 @@ intellijPlatform {
 }
 
 // CHANGELOG.md is the single source of truth for release notes. patchPluginXml
-// (below) renders the current version's section into the plugin change-notes,
-// and patchChangelog rolls the Unreleased section into a dated version section
-// at release time.
+// (below) renders the current version's section into the plugin change-notes.
+// No workflow runs patchChangelog, so the Unreleased section is renamed to the
+// new version by hand in the same commit that bumps the version here.
 changelog {
   version.set(project.version.toString())
   repositoryUrl.set("https://github.com/nvsecurity/nightvision-intellij")

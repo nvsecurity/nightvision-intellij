@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.3.0]
+
 ### Fixed
 
 - Scans no longer stop after 30 seconds: the CLI is given a deadline to start a scan, not to finish one, so a scan runs for as long as it takes
