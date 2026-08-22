@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [2.3.0]
+
+### Fixed
+
+- Scans no longer stop after 30 seconds: the CLI is given a deadline to start a scan, not to finish one, so a scan runs for as long as it takes
+- A scan that fails to start now reports the reason from the CLI instead of "Some error happened when creating your scan"
+- The create-scan page stays put until the scan has started, so a failure is visible rather than reported on a screen you have already left
+- The create-scan page says "Starting scan, please wait..." while the CLI starts the scan, which can take up to two minutes
+- Project, target and authentication creation likewise report the CLI's reason
+- A command that fails with an error code reports it in the same words as one that fails silently, without an exit code the user cannot act on
+- The CLI update prompt explains itself on the Overview screen, naming the version installed, the version needed and the binary the plugin resolved
+- The minimum CLI version is 0.15.0, the oldest able to scan a target that is not reachable from the internet
+- Scans without an authentication no longer pass the CLI an empty `--auth` value
+- Authentication can be left unset on a scan even when the project has authentications; it now defaults to none rather than to the first in the list
+- Switching project no longer freezes the IDE or reports an "IDE error": the CLI runs in the background and the dropdown is disabled while it does
+- Selecting the project that is already current is no longer treated as a failed switch
+- Error messages can be selected and copied, so a CLI failure can be pasted into a support ticket instead of retyped from a screenshot
+- Scan list vulnerability counts are color-coded by severity, and one hover names every severity with its count
+- "Open in browser" links open the record they name instead of the NightVision home page
+
 ## [2.2.1]
 
 ### Fixed

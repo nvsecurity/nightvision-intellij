@@ -15,6 +15,8 @@ import net.nightvision.plugin.services.TargetService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -26,12 +28,12 @@ public class TargetsCreateScreen extends Screen {
     private JTextField apiTargetUrlTextField;
     private JButton cancelApiTargetButton;
     private JButton createApiTargetButton;
-    private JLabel errorMessageApiTarget;
+    private JBLabel errorMessageApiTarget;
     private JTabbedPane apiTargetSpecTypeTabbedPane;
     private JTextField apiTargetSpecUrlTextField;
     private JButton uploadButton;
     private JLabel specFileName;
-    private JLabel errorMessageWebTarget;
+    private JBLabel errorMessageWebTarget;
     private JButton createWebTargetButton;
     private JButton cancelWebTargetButton;
     private JTextField webTargetNameTextField;
@@ -51,6 +53,7 @@ public class TargetsCreateScreen extends Screen {
 
         targetsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessageApiTarget, errorMessageWebTarget);
         errorMessageApiTarget.setVisible(false);
         errorMessageWebTarget.setVisible(false);
         specFileName.setVisible(false);
@@ -95,21 +98,33 @@ public class TargetsCreateScreen extends Screen {
                         TargetService.INSTANCE.createWebTarget(targetName, targetURL);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openTargetsPage();
                         });
                     } catch (CommandNotFoundException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openInstallCLIPage();
                         });
                         return;
                     } catch (NotLoggedException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openLoginPage();
                         });
                         return;
                     } catch (Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessageWebTarget.setText(exception.getMessage());
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
+                            errorMessageWebTarget.setText(asWrappedError(exception));
                             errorMessageWebTarget.setVisible(true);
                         });
                     } finally {
@@ -141,11 +156,17 @@ public class TargetsCreateScreen extends Screen {
                         TargetService.INSTANCE.createApiTarget(targetName, targetURL, swaggerPath, isSwaggerURL);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openTargetsPage();
                         });
                     } catch(Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessageApiTarget.setText(exception.getMessage());
+                            if (!isMounted(targetsCreatePanel)) {
+                                return;
+                            }
+                            errorMessageApiTarget.setText(asWrappedError(exception));
                             errorMessageApiTarget.setVisible(true);
                         });
                     } finally {

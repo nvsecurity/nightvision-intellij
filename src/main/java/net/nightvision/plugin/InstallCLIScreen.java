@@ -1,5 +1,7 @@
 package net.nightvision.plugin;
 
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.scans.ScansScreen;
@@ -16,7 +18,7 @@ import java.util.List;
 public class InstallCLIScreen extends Screen {
     private JButton installCLIButton;
     private JPanel installCLIPanel;
-    private JLabel errorMessageLabel;
+    private JBLabel errorMessageLabel;
 
     public JPanel getLoginPanel() {
         return installCLIPanel;
@@ -27,6 +29,7 @@ public class InstallCLIScreen extends Screen {
 
         installCLIPanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessageLabel);
         errorMessageLabel.setVisible(false);
 
         addButtonPadding(installCLIButton, 6);

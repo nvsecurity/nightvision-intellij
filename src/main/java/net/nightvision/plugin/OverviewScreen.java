@@ -1,5 +1,7 @@
 package net.nightvision.plugin;
 
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 
 import com.intellij.execution.process.ProcessNotCreatedException;
@@ -31,7 +33,8 @@ public class OverviewScreen extends Screen {
     private JButton authenticationsButton;
     private JButton projectsButton;
     private JButton updateCLIButton;
-    private JLabel errorMessageLabel;
+    private JBLabel updateMessageLabel;
+    private JBLabel errorMessageLabel;
 
     public JPanel getOverviewPanel() {
         return overviewPanel;
@@ -46,8 +49,13 @@ public class OverviewScreen extends Screen {
 
     }
 
-    private void setupUpdateButton() {
+    private void setupUpdateButton(String cliVersion, String cliPath) {
         updateCLIButton.setVisible(true);
+        updateCLIButton.setToolTipText(
+                cliUpdateTooltip(cliVersion, cliPath, Constants.CLI_VERSION));
+        updateMessageLabel.setText(
+                cliUpdateMessage(cliVersion, cliPath, Constants.CLI_VERSION));
+        updateMessageLabel.setVisible(true);
         updateCLIButton.addActionListener(e -> {
             errorMessageLabel.setVisible(false);
             errorMessageLabel.setText("");
@@ -64,6 +72,9 @@ public class OverviewScreen extends Screen {
         overviewPanel.setBorder(JBUI.Borders.empty(8));
 
         updateCLIButton.setVisible(false);
+        makeSelectable(updateMessageLabel, errorMessageLabel);
+        updateMessageLabel.setForeground(JBColor.RED);
+        updateMessageLabel.setVisible(false);
         errorMessageLabel.setVisible(false);
 
         new Task.Backgroundable(project, "Checking CLI Version", false) {
@@ -72,12 +83,16 @@ public class OverviewScreen extends Screen {
                 try {
                     String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
                     boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+                    // Resolved here rather than on the EDT: it walks PATH and
+                    // stats each candidate.
+                    String cliPath = shouldUpdateCLI ? CommandRunnerService.INSTANCE.resolveCliPath() : null;
 
                     ApplicationManager.getApplication().invokeLater(() -> {
                         if (shouldUpdateCLI) {
-                            setupUpdateButton();
+                            setupUpdateButton(cliVersion, cliPath);
                         } else {
                             updateCLIButton.setVisible(false);
+                            updateMessageLabel.setVisible(false);
                         }
                     });
                 } catch (ProcessNotCreatedException ex) {
@@ -170,11 +185,12 @@ public class OverviewScreen extends Screen {
             try {
                 get();
                 updateCLIButton.setVisible(false);
+                updateMessageLabel.setVisible(false);
             } catch (Exception ex) {
                 errorMessageLabel.setText(ex.toString());
                 errorMessageLabel.setVisible(true);
                 updateCLIButton.setEnabled(true);
-                updateCLIButton.setText("Update CLI");
+                updateCLIButton.setText("Update NightVision CLI");
             }
         }
     }

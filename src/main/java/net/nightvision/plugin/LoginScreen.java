@@ -14,6 +14,8 @@ import net.nightvision.plugin.services.ProjectService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,7 +23,7 @@ public class LoginScreen extends Screen {
     private JButton loginButton;
     private JPanel loginPanel;
     private JButton updateCLIButton;
-    private JLabel errorMessageLabel;
+    private JBLabel errorMessageLabel;
 
     public JPanel getLoginPanel() {
         return loginPanel;
@@ -34,10 +36,13 @@ public class LoginScreen extends Screen {
                 try {
                     String cliVersion = CommandRunnerService.INSTANCE.getCLIVersion();
                     boolean shouldUpdateCLI = InstallCLIService.INSTANCE.shouldUpdateCLI(cliVersion);
+                    // Resolved here rather than on the EDT: it walks PATH and
+                    // stats each candidate.
+                    String cliPath = shouldUpdateCLI ? CommandRunnerService.INSTANCE.resolveCliPath() : null;
 
                     ApplicationManager.getApplication().invokeLater(() -> {
                         if (shouldUpdateCLI) {
-                            setupUpdateButton();
+                            setupUpdateButton(cliVersion, cliPath);
                         } else {
                             updateCLIButton.setVisible(false);
                         }
@@ -56,6 +61,7 @@ public class LoginScreen extends Screen {
         addButtonPadding(loginButton, 6);
         loginPanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessageLabel);
         errorMessageLabel.setVisible(false);
         updateCLIButton.setVisible(false);
 
@@ -127,8 +133,10 @@ public class LoginScreen extends Screen {
         }
     }
 
-    private void setupUpdateButton() {
+    private void setupUpdateButton(String cliVersion, String cliPath) {
         updateCLIButton.setVisible(true);
+        updateCLIButton.setToolTipText(
+                cliUpdateTooltip(cliVersion, cliPath, Constants.CLI_VERSION));
         updateCLIButton.addActionListener(e -> {
             errorMessageLabel.setVisible(false);
             errorMessageLabel.setText("");

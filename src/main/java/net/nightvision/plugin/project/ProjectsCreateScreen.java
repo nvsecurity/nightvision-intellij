@@ -12,6 +12,8 @@ import net.nightvision.plugin.services.ProjectService;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.util.ui.JBUI;
+import com.intellij.ui.components.JBLabel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,7 +23,7 @@ public class ProjectsCreateScreen extends Screen {
     private JButton cancelButton;
     private JButton createButton;
     private JPanel projectsCreatePanel;
-    private JLabel errorMessage;
+    private JBLabel errorMessage;
 
     public JPanel getProjectsCreatePanel() {
         return projectsCreatePanel;
@@ -32,6 +34,7 @@ public class ProjectsCreateScreen extends Screen {
 
         projectsCreatePanel.setBorder(JBUI.Borders.empty(8));
 
+        makeSelectable(errorMessage);
         errorMessage.setVisible(false);
         backButton.addActionListener(e -> {
             mainWindowFactory.openProjectsPage();
@@ -60,19 +63,31 @@ public class ProjectsCreateScreen extends Screen {
                         ProjectService.INSTANCE.createProject(projectName);
 
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openProjectsPage();
                         });
                     } catch (CommandNotFoundException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openInstallCLIPage();
                         });
                     } catch (NotLoggedException ex) {
                         ApplicationManager.getApplication().invokeLater(() -> {
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
                             mainWindowFactory.openLoginPage();
                         });
                     } catch(Exception exception) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            errorMessage.setText(exception.getMessage());
+                            if (!isMounted(projectsCreatePanel)) {
+                                return;
+                            }
+                            errorMessage.setText(asWrappedError(exception));
                             errorMessage.setVisible(true);
                         });
                     }

@@ -1,5 +1,7 @@
 package net.nightvision.plugin.project;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import net.nightvision.plugin.MainWindowFactory;
@@ -17,6 +19,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
+    private static final Logger LOG = Logger.getInstance(ProjectSelectionPanel.class);
+
     private final JLabel titleLabel;
     private final JComboBox<String> projectComboBox;
     // Callback (extra behavior) to execute when a project is selected.
@@ -65,25 +69,77 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
                 if (model.getSize() > 0 && model.getElementAt(0).isEmpty()) {
                     model.removeElementAt(0);
                 }
-                try {
-                    // Set the selected project as current.
-                    ProjectService.INSTANCE.setCurrentProjectName(selected);
-                    // Invoke the extra behavior callback if provided.
-                    if (onProjectSelected != null) {
-                        onProjectSelected.accept(selected);
-                    }
-                } catch (CommandNotFoundException ex) {
-                    mainWindowFactory.openInstallCLIPage();
-                } catch (NotLoggedException ex) {
-                    mainWindowFactory.openLoginPage();
-                } catch(Exception exception) {
-                    // TODO: handle better this exception, e.g. show message...
-                    // Exception here will happen if the project name is invalid or if some other error happened...
-                }
+                selectProject(mainWindowFactory, selected);
             }
         });
 
         add(projectComboBox, BorderLayout.CENTER);
+    }
+
+    /**
+     * Makes the selected project current, off the EDT.
+     *
+     * setCurrentProjectName runs "project set" and then "project show", and
+     * running those from the combo box's listener held the EDT for both:
+     * OSProcessHandler.waitFor asserts through checkEdtAndReadAction, so the
+     * IDE logged it at SEVERE and raised an "IDE error" the user reads as a
+     * crash, on top of freezing the UI (NV-4921).
+     *
+     * The combo is disabled for the duration. That is the only feedback the
+     * panel has room for, and it doubles as the guard against a second
+     * selection racing the first, which is why no request-ordering is needed
+     * here.
+     */
+    private void selectProject(MainWindowFactory mainWindowFactory, String selected) {
+        projectComboBox.setEnabled(false);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            Throwable failure = null;
+            try {
+                ProjectService.INSTANCE.setCurrentProjectName(selected);
+            } catch (Throwable t) {
+                failure = t;
+            }
+            Throwable outcome = failure;
+            ApplicationManager.getApplication().invokeLater(
+                    () -> finishSelection(mainWindowFactory, selected, outcome));
+        });
+    }
+
+    /**
+     * Applies the outcome on the EDT.
+     *
+     * Deliberately not guarded on whether the panel is still mounted. The test
+     * Screen.isMounted makes would be wrong here: navigation replaces a
+     * screen's whole panel, and this panel stays a child of that discarded
+     * panel, so its parent is still set. Nor is a guard wanted. A callback only
+     * writes to combo boxes that are no longer displayed, and the two failures
+     * that navigate mean the CLI is missing or the login has expired, which
+     * every screen depends on wherever the user has got to.
+     */
+    private void finishSelection(MainWindowFactory mainWindowFactory, String selected, Throwable failure) {
+        projectComboBox.setEnabled(true);
+
+        if (failure == null) {
+            // Invoke the extra behavior callback if provided.
+            if (onProjectSelected != null) {
+                onProjectSelected.accept(selected);
+            }
+            return;
+        }
+        if (failure instanceof CommandNotFoundException) {
+            mainWindowFactory.openInstallCLIPage();
+            return;
+        }
+        if (failure instanceof NotLoggedException) {
+            mainWindowFactory.openLoginPage();
+            return;
+        }
+        // Anything else, such as a project name the CLI rejects, leaves the
+        // combo showing a project that is not current. The panel has no error
+        // label to put a reason in, and is shared by five screens, so it is
+        // logged rather than swallowed outright as it was before. Reverting
+        // the combo and reporting the reason is NV-4933.
+        LOG.warn("Could not switch to project '" + selected + "'", failure);
     }
 
     public static DefaultListCellRenderer getCommonRendererForCombobox() {

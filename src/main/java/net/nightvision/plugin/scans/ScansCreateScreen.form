@@ -82,13 +82,12 @@
           <text value="Start Scan"/>
         </properties>
       </component>
-      <component id="17d74" class="javax.swing.JLabel" binding="errorMessageLabel">
+      <component id="17d74" class="com.intellij.ui.components.JBLabel" binding="scanStatusLabel">
         <constraints>
           <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <foreground color="-65536"/>
-          <text value="&lt;Error message&gt;"/>
+          <text value="&lt;Scan status&gt;"/>
         </properties>
       </component>
     </children>

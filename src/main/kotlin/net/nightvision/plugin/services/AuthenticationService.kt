@@ -50,8 +50,9 @@ object AuthenticationService {
         val t = response.output
         val id = t.trim().takeIf { Regex("Id:").containsMatchIn(it) } ?: ""
         if (id.isBlank()) {
-            // TODO: Improve error message details
-            throw RuntimeException("Some error happened when creating your authentication.")
+            throw RuntimeException(
+                CommandRunnerService.missingRecordMessage("create the authentication", response.output, response.error)
+            )
         }
     }
 }

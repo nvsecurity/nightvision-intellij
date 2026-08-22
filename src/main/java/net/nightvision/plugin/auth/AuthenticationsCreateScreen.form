@@ -206,7 +206,7 @@
                           </component>
                         </children>
                       </grid>
-                      <component id="ce711" class="javax.swing.JLabel" binding="errorMessage">
+                      <component id="ce711" class="com.intellij.ui.components.JBLabel" binding="errorMessage">
                         <constraints>
                           <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
