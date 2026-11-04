@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- "Open in browser" links follow the domain and environment of the configured API host, so an IDE pointed at test or dev opens that environment's app
+
 ## [2.3.0]
 
 ### Fixed
