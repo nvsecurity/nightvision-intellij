@@ -8,10 +8,15 @@ import java.nio.file.Paths
  * Resolves the NightVision API URL using the same precedence as the CLI:
  * 1. NIGHTVISION_API_URL environment variable
  * 2. api-url from ~/.nightvision/nightvision.yml
- * 3. https://api.nightvision.net (default)
+ * 3. https://api.nightviz.ai (default)
+ *
+ * The plugin calls the API itself with this URL and never hands it to the
+ * CLI. A CLI released before NV-6111 defaults to api.nightvision.net
+ * instead; both hosts serve the same API, so a token the CLI creates is
+ * accepted on either.
  */
 object ApiUrlService {
-    private const val DEFAULT_API_URL = "https://api.nightvision.net"
+    private const val DEFAULT_API_URL = "https://api.nightviz.ai"
 
     // NightVision serves under nightviz.ai and keeps serving its former
     // domain, nightvision.net (NV-6111). App links stay on the domain of

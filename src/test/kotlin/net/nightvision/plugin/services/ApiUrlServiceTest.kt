@@ -25,25 +25,25 @@ class ApiUrlServiceTest {
     @Test
     fun `config file used when env var is null`() {
         val configFile = tempDir.newFile("nightvision.yml")
-        configFile.writeText("api-url: https://api.staging.nightvision.net/api/v1/")
+        configFile.writeText("api-url: https://api.test.nightviz.ai/api/v1/")
 
         val result = ApiUrlService.resolveApiUrl(
             envUrl = null,
             configPath = configFile.absolutePath
         )
-        assertEquals("https://api.staging.nightvision.net", result)
+        assertEquals("https://api.test.nightviz.ai", result)
     }
 
     @Test
     fun `config file used when env var is blank`() {
         val configFile = tempDir.newFile("nightvision.yml")
-        configFile.writeText("api-url: https://api.staging.nightvision.net/api/v1/")
+        configFile.writeText("api-url: https://api.test.nightvision.net/api/v1/")
 
         val result = ApiUrlService.resolveApiUrl(
             envUrl = "  ",
             configPath = configFile.absolutePath
         )
-        assertEquals("https://api.staging.nightvision.net", result)
+        assertEquals("https://api.test.nightvision.net", result)
     }
 
     @Test
@@ -52,7 +52,7 @@ class ApiUrlServiceTest {
             envUrl = null,
             configPath = "/nonexistent/path/nightvision.yml"
         )
-        assertEquals("https://api.nightvision.net", result)
+        assertEquals("https://api.nightviz.ai", result)
     }
 
     @Test
@@ -108,6 +108,27 @@ class ApiUrlServiceTest {
     }
 
     @Test
+    fun `config file naming the former nightvision net host is kept`() {
+        val configFile = tempDir.newFile("nightvision.yml")
+        configFile.writeText("api-url: https://api.nightvision.net/api/v1/")
+
+        val result = ApiUrlService.resolveApiUrl(
+            envUrl = null,
+            configPath = configFile.absolutePath
+        )
+        assertEquals("https://api.nightvision.net", result)
+    }
+
+    @Test
+    fun `default api url opens app links on nightviz ai`() {
+        val apiUrl = ApiUrlService.resolveApiUrl(
+            envUrl = null,
+            configPath = "/nonexistent/path/nightvision.yml"
+        )
+        assertEquals("https://app.nightviz.ai", ApiUrlService.resolveAppUrl(apiUrl))
+    }
+
+    @Test
     fun `config file without api-url falls back to default`() {
         val configFile = tempDir.newFile("nightvision.yml")
         configFile.writeText("some-other-key: some-value")
@@ -116,7 +137,7 @@ class ApiUrlServiceTest {
             envUrl = null,
             configPath = configFile.absolutePath
         )
-        assertEquals("https://api.nightvision.net", result)
+        assertEquals("https://api.nightviz.ai", result)
     }
 
     @Test
@@ -128,7 +149,7 @@ class ApiUrlServiceTest {
             envUrl = null,
             configPath = configFile.absolutePath
         )
-        assertEquals("https://api.nightvision.net", result)
+        assertEquals("https://api.nightviz.ai", result)
     }
 
     @Test
