@@ -104,6 +104,7 @@ object InstallCLIService {
 
     fun getCLIDownloadUrl(platform: String, arch: String): String {
         // TODO: Consider throwing specific exception if platform and arch are not valid
+        // Downloads are still hosted only on nightvision.net (NV-6111).
         val downloadUrl = "https://downloads.nightvision.net/binaries/latest/nightvision_latest_${platform}_${arch}.tar.gz"
         return downloadUrl
     }

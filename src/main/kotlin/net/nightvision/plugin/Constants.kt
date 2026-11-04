@@ -22,13 +22,9 @@ class Constants {
         // update. Raise this when the plugin starts relying on newer CLI
         // behaviour.
         //
-        // 0.15.0 is the oldest version observed to complete a scan of a target
-        // that is not reachable from the internet: the QUIC relay transport and
-        // its yamux fallback arrived in 0.13.0, and older CLIs fail to bring up
-        // the relay tunnel (NV-4827). This was pinned at 0.9.5 long enough for
-        // that to reach a customer of the VS Code extension, so NV-4872 tracks
-        // replacing the literal with something that stays current.
-        const val CLI_VERSION = "0.15.0"
+        // 0.26.0 supports nightviz.ai API hosts and derives app links and
+        // relay hosts for the configured environment (NV-6111).
+        const val CLI_VERSION = "0.26.0"
 
         // The trailing slash belongs to the API, not to every URL the plugin
         // builds. The API is Django, which redirects a path that arrives
