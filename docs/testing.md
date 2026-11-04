@@ -67,7 +67,8 @@ The plugin requires a valid NightVision CLI login. Run:
 # Production
 nightvision login
 
-# Staging
+# Test. Stays on nightvision.net until a CLI release derives relay and
+# app links from nightviz.ai hosts (NV-6111).
 nightvision login --api-url https://api.test.nightvision.net/api/v1/
 ```
 
