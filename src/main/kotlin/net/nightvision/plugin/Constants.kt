@@ -12,11 +12,9 @@ class Constants {
         val API_URL: String = ApiUrlService.resolveApiUrl()
         val API_V1_URL: String = "$API_URL/$API_V1_SUFFIX"
 
-        // Hardcoded while API_URL is resolved at runtime, so an IDE pointed at
-        // dev or test still opens production records here. NV-4934 covers
-        // deriving it, which needs an API-host to app-host mapping per
-        // environment rather than the single swap production allows.
-        const val APP_URL = "https://app.nightvision.net"
+        // Follows the environment and domain of API_URL, so an IDE pointed
+        // at dev or test opens that environment's app (NV-4934).
+        val APP_URL: String = ApiUrlService.resolveAppUrl(API_URL)
 
         const val CONTACT_EMAIL = "support@nightviz.ai"
 

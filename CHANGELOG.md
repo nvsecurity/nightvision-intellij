@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The default API is api.nightviz.ai; set `NIGHTVISION_API_URL` or `api-url` in `~/.nightvision/nightvision.yml` to keep using api.nightvision.net
+- "Open in browser" links follow the domain and environment of the configured API host, so an IDE pointed at test or dev opens that environment's app
+
 ## [2.3.0]
 
 ### Fixed
