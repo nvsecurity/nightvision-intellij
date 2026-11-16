@@ -2,6 +2,8 @@ package net.nightvision.plugin.scans;
 
 import com.intellij.openapi.project.Project;
 import net.nightvision.plugin.Screen;
+import net.nightvision.plugin.ResourceLoader;
+import net.nightvision.plugin.services.ProjectService;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.exceptions.PermissionDeniedException;
@@ -37,6 +39,10 @@ public class ScansCreateScreen extends Screen {
     private JPanel scansCreatePanel;
 
     private String targetType;
+    private JPanel resourceStatusPanel;
+    private ResourceLoader<ScanResources> resourceLoader;
+
+    private record ScanResources(String projectId, List<TargetInfo> targets, List<AuthInfo> authentications) {}
 
     public JPanel getScansCreatePanel() {
         return scansCreatePanel;
@@ -61,9 +67,8 @@ public class ScansCreateScreen extends Screen {
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
-            loadTargetComboBox();
-            loadAuthenticationComboBox();
-        }));
+            resourceLoader.load();
+        }, scansCreatePanel));
 
         addButtonPadding(startScanButton, 6);
         startScanButton.addActionListener(e -> {
@@ -78,8 +83,30 @@ public class ScansCreateScreen extends Screen {
         targetComboBox.setRenderer(getCommonRendererForCombobox());
         authenticationComboBox.setRenderer(getCommonRendererForCombobox());
 
-        loadTargetComboBox();
-        loadAuthenticationComboBox();
+        resourceLoader = new ResourceLoader<>(scansCreatePanel, resourceStatusPanel,
+                loading -> {
+                    startScanButton.setEnabled(false);
+                    targetComboBox.setEnabled(!loading);
+                    authenticationComboBox.setEnabled(!loading);
+                    if (loading) {
+                        targetComboBox.removeAllItems();
+                        authenticationComboBox.removeAllItems();
+                    }
+                }, () -> {
+                    String projectId = ProjectService.INSTANCE.getCurrentProjectId();
+                    return new ScanResources(projectId, TargetService.INSTANCE.getTargetInfos(targetType, projectId),
+                            AuthenticationService.INSTANCE.getAuthInfos(projectId));
+                }, resources -> {
+                    if (!resources.projectId().equals(ProjectService.INSTANCE.getCurrentProjectId())) return;
+                    for (TargetInfo target : resources.targets()) targetComboBox.addItem(target.getName());
+                    if (resources.targets().isEmpty()) targetComboBox.addItem("");
+                    authenticationComboBox.addItem("");
+                    for (AuthInfo auth : resources.authentications()) authenticationComboBox.addItem(auth.getName());
+                    targetComboBox.setSelectedIndex(0);
+                    authenticationComboBox.setSelectedIndex(0);
+                    startScanButton.setEnabled(!resources.targets().isEmpty());
+                });
+        resourceLoader.load();
     }
 
     /**
@@ -162,34 +189,4 @@ public class ScansCreateScreen extends Screen {
         }
     }
 
-    private void loadTargetComboBox() {
-        targetComboBox.removeAllItems();
-        List<TargetInfo> targetInfos = TargetService.INSTANCE.getTargetInfos(this.targetType);
-        List<String> targetNames = new ArrayList<>();
-        for (TargetInfo info : targetInfos) {
-            targetNames.add(info.getName());
-        }
-        if (targetNames.isEmpty()) {
-            targetNames.add("");
-        }
-        targetNames.forEach(name -> targetComboBox.addItem(name));
-        targetComboBox.setSelectedIndex(0);
-    }
-
-    private void loadAuthenticationComboBox() {
-        authenticationComboBox.removeAllItems();
-        List<AuthInfo> authInfos = AuthenticationService.INSTANCE.getAuthInfos();
-        List<String> authNames = new ArrayList<>();
-        // First and selected by default, whatever the project holds. The field
-        // is optional, so "none" has to be reachable; offering it only when
-        // there was nothing else to choose meant every scan in a project with
-        // any authentication silently carried the first one in the list. The VS
-        // Code extension renders this same "-" entry on any optional dropdown.
-        authNames.add("");
-        for (AuthInfo info : authInfos) {
-            authNames.add(info.getName());
-        }
-        authNames.forEach(name -> authenticationComboBox.addItem(name));
-        authenticationComboBox.setSelectedIndex(0);
-    }
 }

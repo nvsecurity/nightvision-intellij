@@ -2,7 +2,7 @@ package net.nightvision.plugin.auth;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import net.nightvision.plugin.Loading;
+import net.nightvision.plugin.ResourceLoader;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.AuthInfo;
@@ -20,7 +20,7 @@ import static net.nightvision.plugin.utils.TableUtils.addHoverEffects;
 public class AuthenticationsScreen extends Screen {
 
     private JButton backButton;
-    private JPanel loadingPanel;
+    private ResourceLoader<List<AuthInfo>> resourceLoader;
     private JPanel loadingPanelParent;
 
     public JPanel getAuthenticationsPanel() {
@@ -44,9 +44,19 @@ public class AuthenticationsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        resourceLoader = new ResourceLoader<>(authenticationsPanel, loadingPanelParent,
+                loading -> {
+                    authsTable.setVisible(!loading);
+                    if (loading && authsTable.getModel() instanceof AuthsTableModel model) {
+                        authsTable.clearSelection();
+                        model.setAuthInfos(List.of());
+                    }
+                }, () -> AuthenticationService.INSTANCE.getAuthInfos(),
+                values -> ((AuthsTableModel) authsTable.getModel()).setAuthInfos(values));
+
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             loadTable();
-        }));
+        }, authenticationsPanel));
 
         addButtonPadding(createAuthenticationButton, 6);
         createAuthenticationButton.addActionListener(e -> {
@@ -74,32 +84,7 @@ public class AuthenticationsScreen extends Screen {
     }
 
     private void loadTable() {
-        new LoadAuthInfosWorker().execute();
-
-        loadingPanel = new Loading().getLoadingPanel();
-        loadingPanelParent.add(loadingPanel);
-        authsTable.setVisible(false);
-    }
-
-    private class LoadAuthInfosWorker extends SwingWorker<List<AuthInfo>, Void> {
-        @Override
-        protected List<AuthInfo> doInBackground() throws Exception {
-            return AuthenticationService.INSTANCE.getAuthInfos();
-        }
-
-        @Override
-        protected void done() {
-            try {
-                List<AuthInfo> authInfos = get();
-                ((AuthsTableModel) authsTable.getModel()).setAuthInfos(authInfos);
-
-                loadingPanelParent.remove(loadingPanel);
-                loadingPanelParent.revalidate();
-                authsTable.setVisible(true);
-            } catch (Exception ignore) {
-                // TODO: Show error message + stop loading panel
-            }
-        }
+        resourceLoader.load();
     }
 
     static class AuthsTableModel extends AbstractTableModel {

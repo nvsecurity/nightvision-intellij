@@ -21,20 +21,8 @@ object ProjectService {
     private var currentProjectId = ""
 
     fun getProjectInfos(): List<ProjectInfo> {
-        // TODO: Cache responses
-        val token = LoginService.token
-        val request = HttpRequest.newBuilder()
-            .uri(Constants.getApiUrlFor("projects"))
-            .header("Authorization", "Token $token")
-            .build()
-
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val type = object : TypeToken<PaginatedResult<ProjectInfo>>() {}.type
-        if (response.body() == null) {
-            return listOf()
-        }
-        val responseData: PaginatedResult<ProjectInfo> = gson.fromJson(response.body(), type)
-        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
+        return PaginatedApiService.getAll(Constants.getApiUrlFor("projects"), LoginService.token,
+            ProjectInfo::class.java, httpClient, gson) { it.id }
     }
 
     fun createProject(projectName: String) {
@@ -65,7 +53,11 @@ object ProjectService {
         val cmd = ArrayList<String>(listOf(NIGHTVISION, "project", "show"))
 
         val response = CommandRunnerService.runCommandSync(*cmd.toTypedArray())
-        val t = response.output
+        updateCurrentProject(response.output)
+        return currentProjectName
+    }
+
+    internal fun updateCurrentProject(t: String) {
         val regexProjName = Regex("""(?m)^Name:\s*(.+)$""")
         val matchProjName = regexProjName.find(t)
         currentProjectName = matchProjName?.groupValues?.get(1)?.trim() ?: ""
@@ -74,7 +66,34 @@ object ProjectService {
         val matchProjId = regexProjId.find(t)
         currentProjectId = matchProjId?.groupValues?.get(1)?.trim() ?: ""
 
-        return currentProjectName
+    }
+
+    // NV-6990: a valid login must not depend on the saved project's accessibility.
+    @JvmOverloads
+    fun restoreCurrentProject(fetch: () -> Unit = { fetchCurrentProjectName() }): String? {
+        try {
+            fetch()
+            if (currentProjectId.isNotBlank() && currentProjectName.isNotBlank()) return null
+        } catch (ex: Exception) {
+            clearCurrentProject()
+            when (ex) {
+                is net.nightvision.plugin.exceptions.CommandNotFoundException,
+                is net.nightvision.plugin.exceptions.NotLoggedException,
+                is com.intellij.execution.process.ProcessNotCreatedException,
+                is com.intellij.openapi.progress.ProcessCanceledException,
+                is java.util.concurrent.CancellationException,
+                is InterruptedException -> throw ex
+            }
+            return "Your saved NightVision project could not be opened. Choose an accessible project or create one.\n" +
+                (ex.message ?: "Please retry.")
+        }
+        clearCurrentProject()
+        return "No NightVision project is selected. Choose an accessible project or create one."
+    }
+
+    private fun clearCurrentProject() {
+        currentProjectName = ""
+        currentProjectId = ""
     }
 
     fun setCurrentProjectName(projectName: String) {

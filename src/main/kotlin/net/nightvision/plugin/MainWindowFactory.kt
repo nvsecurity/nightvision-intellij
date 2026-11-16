@@ -13,6 +13,7 @@ import net.nightvision.plugin.models.AuthInfo
 import net.nightvision.plugin.models.ProjectInfo
 import net.nightvision.plugin.models.TargetInfo
 import net.nightvision.plugin.project.ProjectDetailsScreen
+import net.nightvision.plugin.project.ProjectRecoveryScreen
 import net.nightvision.plugin.project.ProjectsCreateScreen
 import net.nightvision.plugin.project.ProjectsScreen
 import net.nightvision.plugin.scans.ScanDetailsScreen
@@ -158,6 +159,14 @@ class MainWindowFactory : ToolWindowFactory {
         toolWindow?.let { window ->
             window.component.removeAll()
             window.component.add(ProjectsScreen(project).projectsPanel)
+            window.component.revalidate()
+        }
+    }
+
+    fun openProjectRecoveryPage(reason: String) {
+        toolWindow?.let { window ->
+            window.component.removeAll()
+            window.component.add(ProjectRecoveryScreen(project, reason).panel)
             window.component.revalidate()
         }
     }

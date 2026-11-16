@@ -6,6 +6,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import net.nightvision.plugin.MainWindowFactory;
 import net.nightvision.plugin.MainWindowService;
+import net.nightvision.plugin.ResourceLoader;
 import net.nightvision.plugin.exceptions.CommandNotFoundException;
 import net.nightvision.plugin.exceptions.NotLoggedException;
 import net.nightvision.plugin.models.ProjectInfo;
@@ -25,8 +26,14 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
     private final JComboBox<String> projectComboBox;
     // Callback (extra behavior) to execute when a project is selected.
     private final Consumer<String> onProjectSelected;
+    private final JPanel statusPanel = new JPanel(new BorderLayout());
+    private boolean updating;
 
     public ProjectSelectionPanel(MainWindowFactory mainWindowFactory, Consumer<String> onProjectSelected) {
+        this(mainWindowFactory, onProjectSelected, null);
+    }
+
+    public ProjectSelectionPanel(MainWindowFactory mainWindowFactory, Consumer<String> onProjectSelected, JComponent owner) {
         this.onProjectSelected = onProjectSelected;
         setLayout(new BorderLayout());
 
@@ -34,34 +41,13 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
         titleLabel.setBorder(JBUI.Borders.emptyBottom(4));
         add(titleLabel, BorderLayout.NORTH);
 
-        List<ProjectInfo> projectInfos = ProjectService.INSTANCE.getProjectInfos();
-        List<String> projectNames = new ArrayList<>();
-        for (ProjectInfo info : projectInfos) {
-            projectNames.add(info.getName());
-        }
-
-        String currentProjectName = ProjectService.INSTANCE.getCurrentProjectName();
-        boolean currentIsEmpty = (currentProjectName == null || currentProjectName.isEmpty());
-
-        if (currentIsEmpty) {
-            // If current project is empty, add an invalid option ("") that will be rendered as a hyphen.
-            projectNames.add(0, "");
-        }
-
-        // Create the combo box with the list of project names.
-        projectComboBox = new ComboBox<>(projectNames.toArray(new String[0]));
-
-        // Pre-select the current item.
-        if (currentIsEmpty) {
-            projectComboBox.setSelectedItem("");
-        } else {
-            projectComboBox.setSelectedItem(currentProjectName);
-        }
+        projectComboBox = new ComboBox<>();
 
         // Set a custom renderer so that an empty string is shown as "-" visually.
         projectComboBox.setRenderer(getCommonRendererForCombobox());
 
         projectComboBox.addActionListener(e -> {
+            if (updating) return;
             String selected = (String) projectComboBox.getSelectedItem();
             if (selected != null && !selected.isEmpty()) {
                 // If a valid project is selected, remove the empty option if present.
@@ -74,6 +60,22 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
         });
 
         add(projectComboBox, BorderLayout.CENTER);
+        add(statusPanel, BorderLayout.SOUTH);
+        new ResourceLoader<List<ProjectInfo>>(owner == null ? this : owner, statusPanel,
+                loading -> projectComboBox.setEnabled(!loading),
+                () -> ProjectService.INSTANCE.getProjectInfos(), projectInfos -> {
+                    updating = true;
+                    try {
+                        projectComboBox.removeAllItems();
+                        String current = ProjectService.INSTANCE.getCurrentProjectName();
+                        boolean currentAvailable = projectInfos.stream().anyMatch(info -> info.getName().equals(current));
+                        if (!currentAvailable) projectComboBox.addItem("");
+                        for (ProjectInfo info : projectInfos) projectComboBox.addItem(info.getName());
+                        projectComboBox.setSelectedItem(currentAvailable ? current : "");
+                    } finally {
+                        updating = false;
+                    }
+                }).load();
     }
 
     /**
@@ -91,6 +93,8 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
      * here.
      */
     private void selectProject(MainWindowFactory mainWindowFactory, String selected) {
+        statusPanel.removeAll();
+        statusPanel.revalidate();
         projectComboBox.setEnabled(false);
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             Throwable failure = null;
@@ -134,12 +138,24 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
             mainWindowFactory.openLoginPage();
             return;
         }
-        // Anything else, such as a project name the CLI rejects, leaves the
-        // combo showing a project that is not current. The panel has no error
-        // label to put a reason in, and is shared by five screens, so it is
-        // logged rather than swallowed outright as it was before. Reverting
-        // the combo and reporting the reason is NV-4933.
+        updating = true;
+        try {
+            String current = ProjectService.INSTANCE.getCurrentProjectName();
+            if (current.isBlank()) projectComboBox.insertItemAt("", 0);
+            projectComboBox.setSelectedItem(current);
+        } finally {
+            updating = false;
+        }
+        statusPanel.removeAll();
         LOG.warn("Could not switch to project '" + selected + "'", failure);
+        JTextArea error = new JTextArea(failure.getMessage() == null ? "Could not switch project." : failure.getMessage());
+        error.setEditable(false);
+        error.setLineWrap(true);
+        error.setWrapStyleWord(true);
+        error.setOpaque(false);
+        statusPanel.add(error);
+        statusPanel.revalidate();
+        statusPanel.repaint();
     }
 
     public static DefaultListCellRenderer getCommonRendererForCombobox() {

@@ -59,6 +59,13 @@ After launching with `./gradlew runIde`:
 5. **Scans** — Start a scan against a target
 6. **Authentications** — Create a Playwright authentication
 
+### Project recovery and complete resource lists
+
+- With a valid CLI login and a saved project that was deleted or is no longer shared with you, open the tool window. Verify that project recovery offers accessible projects, project creation, and continuing without a project. Choose an accessible project and verify normal navigation resumes without logging in again.
+- Repeat with no accessible projects. Verify project creation remains available and a failed project selection shows its reason while allowing another selection.
+- Use more than one API page of projects, targets, and authentications. Verify later-page entries appear in their list screens and selectors, including scan setup, and optional authentication still defaults to none.
+- Fail a later-page request or cancel loading. Verify the UI shows an error or cancellation with Retry, never offers a partial result as complete, and Retry can load successfully. Navigate away or change project during loading and verify old results do not overwrite the new screen's data.
+
 ## NightVision CLI login
 
 The plugin requires a valid NightVision CLI login. Run:

@@ -29,6 +29,27 @@ public class LoginScreen extends Screen {
         return loginPanel;
     }
 
+    private void openAfterAuthentication() {
+        String recoveryReason = ProjectService.INSTANCE.restoreCurrentProject();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (!isMounted(loginPanel)) return;
+            if (recoveryReason == null) {
+                mainWindowFactory.openOverviewPage();
+            } else {
+                mainWindowFactory.openProjectRecoveryPage(recoveryReason);
+            }
+        });
+    }
+
+    private void showLoginFailure(Throwable failure) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (!isMounted(loginPanel)) return;
+            errorMessageLabel.setText(asWrappedError(failure));
+            errorMessageLabel.setVisible(true);
+            loginButton.setEnabled(true);
+        });
+    }
+
     private void checkShouldUpdateCli() {
         new Task.Backgroundable(project, "Checking CLI Version", false) {
             @Override
@@ -71,10 +92,9 @@ public class LoginScreen extends Screen {
                 try {
                     boolean isBypass = LoginService.INSTANCE.bypassLoginStepIfAuthenticatedAlready(project);
                     if (isBypass) {
-                        ProjectService.INSTANCE.fetchCurrentProjectName();
-                        ApplicationManager.getApplication().invokeLater(() -> {
-                            mainWindowFactory.openOverviewPage();
-                        });
+                        openAfterAuthentication();
+                    } else {
+                        ApplicationManager.getApplication().invokeLater(() -> loginButton.setEnabled(true));
                     }
                     checkShouldUpdateCli();
                 } catch (CommandNotFoundException | ProcessNotCreatedException ex) {
@@ -83,26 +103,32 @@ public class LoginScreen extends Screen {
                     });
                     return;
                 } catch (NotLoggedException ex) {
-                    loginButton.setEnabled(true);
+                    ApplicationManager.getApplication().invokeLater(() -> loginButton.setEnabled(true));
+                    checkShouldUpdateCli();
+                } catch (RuntimeException ex) {
+                    showLoginFailure(ex);
                     checkShouldUpdateCli();
                 }
             }
         }.queue();
 
         loginButton.addActionListener(e -> {
+            loginButton.setEnabled(false);
+            errorMessageLabel.setVisible(false);
             new Task.Backgroundable(project, "Fetching current project name", false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     try {
                         boolean success = LoginService.INSTANCE.login(project);
                         if (success) {
-                            ProjectService.INSTANCE.fetchCurrentProjectName();
-                            ApplicationManager.getApplication().invokeLater(() -> {
-                                mainWindowFactory.openOverviewPage();
-                            });
+                            openAfterAuthentication();
+                        } else {
+                            showLoginFailure(new IllegalStateException("Login did not complete. Please retry."));
                         }
                     } catch (ProcessNotCreatedException | CommandNotFoundException ex) {
-                        mainWindowFactory.openInstallCLIPage();
+                        ApplicationManager.getApplication().invokeLater(() -> mainWindowFactory.openInstallCLIPage());
+                    } catch (RuntimeException ex) {
+                        showLoginFailure(ex);
                     }
                 }
             }.queue();

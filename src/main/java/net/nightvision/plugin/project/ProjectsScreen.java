@@ -2,7 +2,7 @@ package net.nightvision.plugin.project;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import net.nightvision.plugin.Loading;
+import net.nightvision.plugin.ResourceLoader;
 import net.nightvision.plugin.MainWindowFactory;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.utils.IconUtils;
@@ -20,7 +20,7 @@ import static net.nightvision.plugin.utils.TableUtils.addHoverEffects;
 public class ProjectsScreen extends Screen {
     private JPanel projectsPanel;
     private JButton backButton;
-    private JPanel loadingPanel;
+    private ResourceLoader<List<ProjectInfo>> resourceLoader;
     private JTable projectsTable;
     private JPanel loadingPanelParent;
     private JButton createProjectButton;
@@ -42,9 +42,19 @@ public class ProjectsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        resourceLoader = new ResourceLoader<>(projectsPanel, loadingPanelParent,
+                loading -> {
+                    projectsTable.setVisible(!loading);
+                    if (loading && projectsTable.getModel() instanceof ProjectsTableModel model) {
+                        projectsTable.clearSelection();
+                        model.setProjectInfos(List.of());
+                    }
+                }, () -> ProjectService.INSTANCE.getProjectInfos(),
+                values -> ((ProjectsTableModel) projectsTable.getModel()).setProjectInfos(values));
+
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             loadTable();
-        }));
+        }, projectsPanel));
 
         projectsTable.setModel(new ProjectsTableModel());
         addHoverEffects(projectsTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
@@ -72,32 +82,7 @@ public class ProjectsScreen extends Screen {
     }
 
     private void loadTable() {
-        new LoadProjectsWorker().execute();
-
-        loadingPanel = new Loading().getLoadingPanel();
-        loadingPanelParent.add(loadingPanel);
-        projectsTable.setVisible(false);
-    }
-
-    private class LoadProjectsWorker extends SwingWorker<List<ProjectInfo>, Void> {
-        @Override
-        protected List<ProjectInfo> doInBackground() throws Exception {
-            return ProjectService.INSTANCE.getProjectInfos();
-        }
-
-        @Override
-        protected void done() {
-            try {
-                List<ProjectInfo> projectInfos = get();
-                ((ProjectsTableModel) projectsTable.getModel()).setProjectInfos(projectInfos);
-
-                loadingPanelParent.remove(loadingPanel);
-                loadingPanelParent.revalidate();
-                projectsTable.setVisible(true);
-            } catch (Exception ignore) {
-                // TODO: Show error message + stop loading panel
-            }
-        }
+        resourceLoader.load();
     }
 
     static class ProjectsTableModel extends AbstractTableModel {

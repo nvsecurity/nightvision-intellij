@@ -2,7 +2,7 @@ package net.nightvision.plugin.target;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import net.nightvision.plugin.Loading;
+import net.nightvision.plugin.ResourceLoader;
 import net.nightvision.plugin.Screen;
 import net.nightvision.plugin.utils.IconUtils;
 import net.nightvision.plugin.models.TargetInfo;
@@ -19,7 +19,7 @@ import static net.nightvision.plugin.utils.TableUtils.addHoverEffects;
 
 public class TargetsScreen extends Screen {
     private JButton backButton;
-    private JPanel loadingPanel;
+    private ResourceLoader<List<TargetInfo>> resourceLoader;
     private JTable targetsTable;
     private JPanel loadingPanelParent;
     private JButton createTargetButton;
@@ -42,9 +42,19 @@ public class TargetsScreen extends Screen {
         backButton.setBorder(null);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        resourceLoader = new ResourceLoader<>(targetsPanel, loadingPanelParent,
+                loading -> {
+                    targetsTable.setVisible(!loading);
+                    if (loading && targetsTable.getModel() instanceof TargetsTableModel model) {
+                        targetsTable.clearSelection();
+                        model.setTargetInfos(List.of());
+                    }
+                }, () -> TargetService.INSTANCE.getTargetInfos(""),
+                values -> ((TargetsTableModel) targetsTable.getModel()).setTargetInfos(values));
+
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             loadTable();
-        }));
+        }, targetsPanel));
 
         targetsTable.setModel(new TargetsTableModel());
         addHoverEffects(targetsTable, new JBColor(new Color(220, 220, 255), new Color(60, 60, 80)));
@@ -72,32 +82,7 @@ public class TargetsScreen extends Screen {
     }
 
     private void loadTable() {
-        new LoadTargetsWorker().execute();
-
-        loadingPanel = new Loading().getLoadingPanel();
-        loadingPanelParent.add(loadingPanel);
-        targetsTable.setVisible(false);
-    }
-
-    private class LoadTargetsWorker extends SwingWorker<List<TargetInfo>, Void> {
-        @Override
-        protected List<TargetInfo> doInBackground() throws Exception {
-            return TargetService.INSTANCE.getTargetInfos("");
-        }
-
-        @Override
-        protected void done() {
-            try {
-                List<TargetInfo> targetInfos = get();
-                ((TargetsTableModel) targetsTable.getModel()).setTargetInfos(targetInfos);
-
-                loadingPanelParent.remove(loadingPanel);
-                loadingPanelParent.revalidate();
-                targetsTable.setVisible(true);
-            } catch (Exception ignore) {
-                // TODO: Show error message + stop loading panel
-            }
-        }
+        resourceLoader.load();
     }
 
     static class TargetsTableModel extends AbstractTableModel {
