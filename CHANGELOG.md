@@ -2,11 +2,17 @@
 
 ## [Unreleased]
 
+## [2.4.0]
+
 ### Changed
 
 - The minimum CLI version is 0.26.0, which supports nightviz.ai API hosts, app links and scan relays
 - The default API is api.nightviz.ai; set `NIGHTVISION_API_URL` or `api-url` in `~/.nightvision/nightvision.yml` to keep using api.nightvision.net
 - "Open in browser" links follow the domain and environment of the configured API host, so an IDE pointed at test or dev opens that environment's app
+
+### Fixed
+
+- Corrected the plugin name to NightVision in the JetBrains Marketplace
 
 ## [2.3.0]
 
