@@ -1,12 +1,13 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "2.3.20"
-  id("org.jetbrains.intellij.platform") version "2.6.0"
+  id("org.jetbrains.kotlin.jvm") version "2.4.20"
+  id("org.jetbrains.intellij.platform") version "2.19.0"
   // Single-sources the plugin change-notes from CHANGELOG.md (see the changelog
   // block and patchPluginXml below) and provides the markdownToHTML helper.
   id("org.jetbrains.changelog") version "2.5.0"
@@ -28,13 +29,17 @@ dependencies {
     intellijIdeaCommunity("2024.3.5")
     bundledPlugin("com.intellij.java")
     pluginVerifier()
+    zipSigner()
   }
   testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {
   pluginVerification {
-    ides.ides(listOf("IC-2023.3.8", "IC-2024.3.5"))
+    ides {
+      create("IC", "2023.3.8")
+      create("IC", "2024.3.5")
+    }
   }
 }
 
@@ -50,6 +55,9 @@ changelog {
 tasks.withType<KotlinJvmCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_17)
+    // Inherit IntelliJ interface defaults without generating bridges to its
+    // internal ToolWindowFactory methods.
+    jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
   }
 }
 
@@ -105,6 +113,6 @@ tasks {
     // is false whenever signing is skipped, up to date, or restored from the build
     // cache. In those cases it silently uploads the unsigned archive and still
     // reports success. Point it at the signed archive so signing cannot be lost.
-    archiveFile.set(signPlugin.flatMap { it.signedArchiveFile })
+    archiveFiles.setFrom(signPlugin.flatMap { it.signedArchiveFile })
   }
 }
