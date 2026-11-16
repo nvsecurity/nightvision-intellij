@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - JDK 17+
-- NightVision CLI installed and on your PATH (`nightvision version` should work)
+- NightVision CLI 0.26.0 or newer installed and on your PATH (`nightvision version` should work)
 - IntelliJ IDEA (any edition) for manual testing
 
 ## Building
@@ -67,8 +67,8 @@ The plugin requires a valid NightVision CLI login. Run:
 # Production
 nightvision login
 
-# Staging
-nightvision login --api-url https://api.test.nightvision.net/api/v1/
+# Test
+nightvision login --api-url https://api.test.nightviz.ai/api/v1/
 ```
 
 ## Other commands

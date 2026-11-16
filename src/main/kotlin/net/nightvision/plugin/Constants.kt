@@ -12,11 +12,9 @@ class Constants {
         val API_URL: String = ApiUrlService.resolveApiUrl()
         val API_V1_URL: String = "$API_URL/$API_V1_SUFFIX"
 
-        // Hardcoded while API_URL is resolved at runtime, so an IDE pointed at
-        // dev or test still opens production records here. NV-4934 covers
-        // deriving it, which needs an API-host to app-host mapping per
-        // environment rather than the single swap production allows.
-        const val APP_URL = "https://app.nightvision.net"
+        // Follows the environment and domain of API_URL, so an IDE pointed
+        // at dev or test opens that environment's app (NV-4934).
+        val APP_URL: String = ApiUrlService.resolveAppUrl(API_URL)
 
         const val CONTACT_EMAIL = "support@nightviz.ai"
 
@@ -24,13 +22,9 @@ class Constants {
         // update. Raise this when the plugin starts relying on newer CLI
         // behaviour.
         //
-        // 0.15.0 is the oldest version observed to complete a scan of a target
-        // that is not reachable from the internet: the QUIC relay transport and
-        // its yamux fallback arrived in 0.13.0, and older CLIs fail to bring up
-        // the relay tunnel (NV-4827). This was pinned at 0.9.5 long enough for
-        // that to reach a customer of the VS Code extension, so NV-4872 tracks
-        // replacing the literal with something that stays current.
-        const val CLI_VERSION = "0.15.0"
+        // 0.26.0 supports nightviz.ai API hosts and derives app links and
+        // relay hosts for the configured environment (NV-6111).
+        const val CLI_VERSION = "0.26.0"
 
         // The trailing slash belongs to the API, not to every URL the plugin
         // builds. The API is Django, which redirects a path that arrives

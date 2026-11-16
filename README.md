@@ -12,8 +12,8 @@ vulnerabilities in both known and unknown endpoints without leaving the IDE.
 - **Workspace management**: create and browse projects, targets, and
   authentications
 
-Requires a NightVision account and the NightVision CLI; the plugin offers to
-install the CLI for you. Documentation at
+Requires a NightVision account and the NightVision CLI 0.26.0 or newer;
+the plugin offers to install the CLI for you. Documentation at
 [docs.nightviz.ai](https://docs.nightviz.ai/).
 <!-- Plugin description end -->
 
@@ -28,7 +28,7 @@ self-contained. -->
 
 - IntelliJ IDEA 2023.3 or newer (Community or Ultimate)
 - A NightVision account
-- The NightVision CLI: the plugin offers to install it, or you can
+- The NightVision CLI 0.26.0 or newer: the plugin offers to install it, or you can
   [install it manually](https://docs.nightviz.ai/welcome/tutorials-and-guides/installing-the-cli/)
 
 The plugin is a UI over the NightVision CLI; API discovery and scan
