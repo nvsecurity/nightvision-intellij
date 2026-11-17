@@ -18,19 +18,11 @@ object AuthenticationService {
         .build()
     val gson = GsonBuilder().create()
 
-    fun getAuthInfos(): List<AuthInfo> {
-        // TODO: Cache responses
-        val token = LoginService.token
-        val request = HttpRequest.newBuilder()
-            .uri(Constants.getApiUrlFor("credentials", mapOf("project" to ProjectService.getCurrentProjectId())))
-            .header("Authorization", "Token $token")
-            .build()
-
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val type = object : TypeToken<PaginatedResult<AuthInfo>>() {}.type
-        val responseData: PaginatedResult<AuthInfo> = gson.fromJson(response.body(), type)
-        //println(responseData.results)
-        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
+    @JvmOverloads
+    fun getAuthInfos(projectId: String = ProjectService.getCurrentProjectId()): List<AuthInfo> {
+        if (projectId.isBlank()) return emptyList()
+        return PaginatedApiService.getAll(Constants.getApiUrlFor("credentials", mapOf("project" to projectId)),
+            LoginService.token, AuthInfo::class.java, httpClient, gson) { it.id }
     }
 
     fun createPlaywrightAuth(authName: String, authURL: String, description: String?) {

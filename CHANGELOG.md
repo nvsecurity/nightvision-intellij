@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.4.1]
+
+### Fixed
+
+- A saved project that was deleted or is no longer accessible now offers project selection and creation without requiring another login
+- Project, target and authentication lists and selectors now load every API page in the background, including records beyond the first page
+- Failed or cancelled resource loads show a retry action instead of leaving a loading spinner or using an incomplete list
+
 ## [2.4.0]
 
 ### Changed

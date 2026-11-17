@@ -140,7 +140,7 @@ public class ScansScreen extends Screen {
         currentProjectWrapperPanel.add(new ProjectSelectionPanel(mainWindowFactory, selectedProject -> {
             currentPage = 1;
             loadTable();
-        }));
+        }, scansPanel));
 
         scansTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override

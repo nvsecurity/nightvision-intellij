@@ -19,22 +19,12 @@ object TargetService {
         .build()
     val gson = GsonBuilder().create()
 
-    fun getTargetInfos(targetType: String = ""): List<TargetInfo> {
-        // TODO: Cache responses
-        val token = LoginService.token
-        var suffix = "targets"
-        if (targetType.isNotBlank()) {
-            suffix += "/" + targetType.lowercase()
-        }
-        val request = HttpRequest.newBuilder()
-            .uri(Constants.getApiUrlFor(suffix, mapOf("project" to ProjectService.getCurrentProjectId())))
-            .header("Authorization", "Token $token")
-            .build()
-
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val type = object : TypeToken<PaginatedResult<TargetInfo>>() {}.type
-        val responseData: PaginatedResult<TargetInfo> = gson.fromJson(response.body(), type)
-        return responseData.results ?: listOf() // TODO: Results are only for the FIRST page of pagination here - Improve
+    @JvmOverloads
+    fun getTargetInfos(targetType: String = "", projectId: String = ProjectService.getCurrentProjectId()): List<TargetInfo> {
+        if (projectId.isBlank()) return emptyList()
+        val suffix = if (targetType.isBlank()) "targets" else "targets/${targetType.lowercase()}"
+        return PaginatedApiService.getAll(Constants.getApiUrlFor(suffix, mapOf("project" to projectId)),
+            LoginService.token, TargetInfo::class.java, httpClient, gson) { it.id }
     }
 
     fun getTargetSpecificInfo(targetType: String, targetId: String): TargetInfo? {
