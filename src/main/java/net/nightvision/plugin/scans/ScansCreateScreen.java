@@ -41,6 +41,7 @@ public class ScansCreateScreen extends Screen {
     private String targetType;
     private JPanel resourceStatusPanel;
     private ResourceLoader<ScanResources> resourceLoader;
+    private ScanSubmission submission;
 
     private record ScanResources(String projectId, List<TargetInfo> targets, List<AuthInfo> authentications) {}
 
@@ -56,6 +57,7 @@ public class ScansCreateScreen extends Screen {
 
         makeSelectable(scanStatusLabel);
         scanStatusLabel.setVisible(false);
+        submission = new ScanSubmission(startScanButton);
 
         targetLabel.setText("Target (" + (targetType.equalsIgnoreCase("URL") ? "WEB" : "API") + ")");
 
@@ -72,8 +74,8 @@ public class ScansCreateScreen extends Screen {
 
         addButtonPadding(startScanButton, 6);
         startScanButton.addActionListener(e -> {
+            if (!submission.tryStart()) return;
             showStatus("Starting scan, please wait...");
-            startScanButton.setEnabled(false);
             var targetName = (String) targetComboBox.getSelectedItem();
             var authName = (String) authenticationComboBox.getSelectedItem();
             new StartScanWorker(targetName, authName).execute();
@@ -85,7 +87,7 @@ public class ScansCreateScreen extends Screen {
 
         resourceLoader = new ResourceLoader<>(scansCreatePanel, resourceStatusPanel,
                 loading -> {
-                    startScanButton.setEnabled(false);
+                    submission.setTargetsAvailable(false);
                     targetComboBox.setEnabled(!loading);
                     authenticationComboBox.setEnabled(!loading);
                     if (loading) {
@@ -104,7 +106,7 @@ public class ScansCreateScreen extends Screen {
                     for (AuthInfo auth : resources.authentications()) authenticationComboBox.addItem(auth.getName());
                     targetComboBox.setSelectedIndex(0);
                     authenticationComboBox.setSelectedIndex(0);
-                    startScanButton.setEnabled(!resources.targets().isEmpty());
+                    submission.setTargetsAvailable(!resources.targets().isEmpty());
                 });
         resourceLoader.load();
     }
@@ -141,6 +143,7 @@ public class ScansCreateScreen extends Screen {
 
         @Override
         protected void done() {
+            submission.finish();
             // startScan waits on the CLI for as long as the startup deadline
             // allows, which is long enough for the user to leave this screen.
             // Acting on a detached instance would either replace whatever they
@@ -185,7 +188,6 @@ public class ScansCreateScreen extends Screen {
             scanStatusLabel.setForeground(JBColor.RED);
             scanStatusLabel.setText(asWrappedError(t));
             scanStatusLabel.setVisible(true);
-            startScanButton.setEnabled(true);
         }
     }
 

@@ -26,7 +26,9 @@ public final class ProjectRecoveryScreen extends Screen {
         content.add(Box.createVerticalStrut(JBUI.scale(12)));
 
         ProjectSelectionPanel selection = new ProjectSelectionPanel(mainWindowFactory,
-                selected -> mainWindowFactory.openOverviewPage(), panel);
+                selected -> {
+                    if (isMounted(panel)) mainWindowFactory.openOverviewPage();
+                }, panel);
         selection.setAlignmentX(Component.LEFT_ALIGNMENT);
         content.add(selection);
         content.add(Box.createVerticalStrut(JBUI.scale(12)));

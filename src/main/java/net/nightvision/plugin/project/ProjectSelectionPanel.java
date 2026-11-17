@@ -115,10 +115,10 @@ public class ProjectSelectionPanel extends JBPanel<ProjectSelectionPanel> {
      * Deliberately not guarded on whether the panel is still mounted. The test
      * Screen.isMounted makes would be wrong here: navigation replaces a
      * screen's whole panel, and this panel stays a child of that discarded
-     * panel, so its parent is still set. Nor is a guard wanted. A callback only
-     * writes to combo boxes that are no longer displayed, and the two failures
-     * that navigate mean the CLI is missing or the login has expired, which
-     * every screen depends on wherever the user has got to.
+     * panel, so its parent is still set. Success callbacks that navigate must
+     * check their owning screen's mounted state. The two failures that navigate
+     * here mean the CLI is missing or the login has expired, which every screen
+     * depends on wherever the user has got to.
      */
     private void finishSelection(MainWindowFactory mainWindowFactory, String selected, Throwable failure) {
         projectComboBox.setEnabled(true);

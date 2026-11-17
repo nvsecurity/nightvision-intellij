@@ -63,8 +63,10 @@ After launching with `./gradlew runIde`:
 
 - With a valid CLI login and a saved project that was deleted or is no longer shared with you, open the tool window. Verify that project recovery offers accessible projects, project creation, and continuing without a project. Choose an accessible project and verify normal navigation resumes without logging in again.
 - Repeat with no accessible projects. Verify project creation remains available and a failed project selection shows its reason while allowing another selection.
+- Delay a project selection on the recovery screen, open Create project, and enter a name before selection finishes. Verify the late selection result leaves the creation form and input intact.
 - Use more than one API page of projects, targets, and authentications. Verify later-page entries appear in their list screens and selectors, including scan setup, and optional authentication still defaults to none.
 - Fail a later-page request or cancel loading. Verify the UI shows an error or cancellation with Retry, never offers a partial result as complete, and Retry can load successfully. Navigate away or change project during loading and verify old results do not overwrite the new screen's data.
+- While a scan is starting, switch projects and let the new resource list finish loading. Verify Start Scan remains disabled until the first scan worker finishes. If the scan fails before a resource load finishes or after that load fails, verify retry remains disabled until targets are available.
 
 ## NightVision CLI login
 
